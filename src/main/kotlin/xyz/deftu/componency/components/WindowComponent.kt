@@ -154,7 +154,9 @@ class WindowComponent(
             if (System.currentTimeMillis() - sysTime > 2500) sysTime = System.currentTimeMillis()
 
             // Make sure that animations are handled at the correct framerate
-            while (System.currentTimeMillis() + 1000 / trueAnimationFramerate > sysTime) {
+            val targetTime = System.currentTimeMillis() + 1000 / trueAnimationFramerate
+            val animationFrames = (targetTime - sysTime).toInt() / trueAnimationFramerate
+            repeat(animationFrames.coerceAtMost((trueAnimationFramerate / 30).coerceAtLeast(1))) {
                 handleAnimate()
                 sysTime += 1000 / trueAnimationFramerate
             }
