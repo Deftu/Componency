@@ -74,7 +74,6 @@ class BoxComponent : BaseComponent() {
         val color = getColor()
         if (color.alpha == 0) return
 
-
         renderBox(stack, getX(), getY(), getRight(), getBottom(), color)
     }
 }

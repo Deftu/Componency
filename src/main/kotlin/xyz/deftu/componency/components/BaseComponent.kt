@@ -6,14 +6,23 @@ import xyz.deftu.componency.constraints.ComponentConstraints
 import xyz.deftu.componency.constraints.PixelConstraint
 import xyz.deftu.componency.dsl.animate
 import xyz.deftu.componency.effects.Effect
+import xyz.deftu.componency.effects.OutlineEffect
+import xyz.deftu.componency.events.*
 import xyz.deftu.componency.filters.Filter
+import xyz.deftu.componency.filters.GaussianBlurFilter
 import xyz.deftu.componency.font.FontProvider
+import xyz.deftu.componency.utils.fixMousePos
+import xyz.deftu.multi.MultiKeyboard
 import xyz.deftu.multi.MultiMatrixStack
 import xyz.deftu.multi.MultiMouse
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.function.Consumer
+import java.util.function.Predicate
 
 abstract class BaseComponent {
     lateinit var parent: BaseComponent
+    val hasParent: Boolean
+        get() = ::parent.isInitialized
     private var indexInParent = -1
     internal val children = CopyOnWriteArrayList<BaseComponent>()
 
@@ -23,19 +32,21 @@ abstract class BaseComponent {
     private var hasInitialized = false
 
     private var currentlyHovered = false
-    private var lastDraggedMouseX = 0f
-    private var lastDraggedMouseY = 0f
+    private var lastDraggedMouseX = 0.0
+    private var lastDraggedMouseY = 0.0
 
     private val beforeHideAnimations = mutableListOf<ComponentAnimationConstraints.() -> Unit>()
     private val afterUnhideAnimations = mutableListOf<ComponentAnimationConstraints.() -> Unit>()
+    private val focusGainListeners = mutableListOf<() -> Unit>()
+    private val focusLostListeners = mutableListOf<() -> Unit>()
 
-    private val mouseClickListeners = mutableListOf<(x: Float, y: Float, button: Int) -> Boolean>()
-    private val mouseReleaseListeners = mutableListOf<(x: Float, y: Float, button: Int) -> Boolean>()
-    private val mouseDragListeners = mutableListOf<(x: Float, y: Float, button: Int) -> Boolean>()
-    private val mouseScrollListeners = mutableListOf<(x: Float, y: Float, scrollDelta: Double) -> Boolean>()
-    private val mouseHoverListeners = mutableListOf<(x: Float, y: Float) -> Boolean>()
-    private val mouseUnhoverListeners = mutableListOf<(x: Float, y: Float) -> Boolean>()
-    private val keyPressListeners = mutableListOf<(keyCode: Int, typedChar: Char) -> Boolean>()
+    private val mouseClickListeners = mutableListOf<ComponentMouseClickEvent.() -> Boolean>()
+    private val mouseReleaseListeners = mutableListOf<ComponentMouseReleaseEvent.() -> Boolean>()
+    private val mouseDragListeners = mutableListOf<ComponentMouseDragEvent.() -> Boolean>()
+    private val mouseScrollListeners = mutableListOf<ComponentMouseScrollEvent.() -> Boolean>()
+    private val mouseHoverListeners = mutableListOf<(x: Double, y: Double) -> Boolean>()
+    private val mouseUnhoverListeners = mutableListOf<(x: Double, y: Double) -> Boolean>()
+    private val keyPressListeners = mutableListOf<ComponentKeyPressEvent.() -> Boolean>()
 
     abstract fun render(stack: MultiMatrixStack, tickDelta: Float)
 
@@ -68,7 +79,7 @@ abstract class BaseComponent {
                         child.getRight(),
                         child.getBottom()
                     )) return@forEach
-                child.render(stack, tickDelta)
+                child.doRender(stack, tickDelta)
             }
         }
 
@@ -83,14 +94,20 @@ abstract class BaseComponent {
     }
 
     fun onWindowResize() {
+        OutlineEffect.resize()
+        GaussianBlurFilter.resize()
+
         constraints.onWindowResize()
         children.forEach { it.onWindowResize() }
     }
 
     fun isHovered(): Boolean {
-        val mouseX = MultiMouse.scaledX
-        val mouseY = MultiMouse.scaledY
-        return mouseX >= getX() && mouseX <= getRight() && mouseY >= getY() && mouseY <= getBottom()
+        val (fixedX, fixedY) = fixMousePos(MultiMouse.scaledX, MultiMouse.scaledY)
+        return isInsideBounds(fixedX, fixedY)
+    }
+
+    fun isInsideBounds(x: Double, y: Double): Boolean {
+        return x >= getX() && x <= getRight() && y >= getY() && y <= getBottom()
     }
 
     open fun isAlreadyCentered() = false
@@ -124,6 +141,31 @@ abstract class BaseComponent {
 
     fun detachChild(vararg children: BaseComponent) {
         children.forEach { detachChild(it) }
+    }
+
+    open fun findTarget(x: Double, y: Double): BaseComponent {
+        for (i in children.lastIndex downTo 0) {
+            val child = children[i]
+            if (child.isInsideBounds(x, y)) return child.findTarget(x, y)
+        }
+
+        return this
+    }
+
+    fun isChildOf(component: BaseComponent): Boolean {
+        if (!hasParent) return false
+        if (parent == component) return true
+        return parent.isChildOf(component)
+    }
+
+    fun isInHierarchy(component: BaseComponent): Boolean {
+        var current = this
+        while (current.hasParent && current !is WindowComponent) {
+            current = current.parent
+            if (current == component) return true
+        }
+
+        return false
     }
 
     // Hide API
@@ -172,24 +214,49 @@ abstract class BaseComponent {
 
     // Listener API
 
-    fun mouseClick(x: Float, y: Float, button: Int) {
+    open fun mouseClick(x: Double, y: Double, button: Int): Boolean {
         lastDraggedMouseX = x
         lastDraggedMouseY = y
 
-        mouseClickListeners.forEach { if (it(x, y, button)) return }
-        children.forEach { it.mouseClick(x, y, button) }
+        if (isHovered()) {
+            val event = ComponentMouseClickEvent(x, y, button)
+            var result = false
+            for (listener in mouseClickListeners) {
+                result = listener(event) || result
+                if (event.isCancelled) break
+            }
+
+            for (child in children) {
+                result = child.mouseClick(x, y, button) || result
+            }
+
+            return result
+        }
+
+        return false
     }
 
-    fun mouseRelease(x: Float, y: Float, button: Int) {
-        mouseReleaseListeners.forEach { if (it(x, y, button)) return }
+    open fun mouseRelease(x: Double, y: Double, button: Int): Boolean {
+        if (!isHovered()) return false
 
-        lastDraggedMouseX = 0f
-        lastDraggedMouseY = 0f
+        val event = ComponentMouseReleaseEvent(x, y, button)
+        var result = false
+        for (listener in mouseReleaseListeners) {
+            result = listener(event) || result
+            if (event.isCancelled) break
+        }
 
-        children.forEach { it.mouseRelease(x, y, button) }
+        lastDraggedMouseX = 0.0
+        lastDraggedMouseY = 0.0
+
+        for (child in children) {
+            result = child.mouseRelease(x, y, button) || result
+        }
+
+        return result
     }
 
-    fun mouseMove(x: Float, y: Float) {
+    open fun mouseUpdate(x: Double, y: Double) {
         // TODO - Check for floating components
         val hovered = isHovered()
 
@@ -199,92 +266,185 @@ abstract class BaseComponent {
             mouseUnhoverListeners.forEach { if (it(x, y)) return }
         }
 
-        children.forEach { it.mouseMove(x, y) }
+        children.forEach { it.mouseUpdate(x, y) }
     }
 
-    fun mouseScroll(x: Float, y: Float, scrollDelta: Double) {
-        if (scrollDelta == 0.0) return
+    open fun mouseDrag(x: Double, y: Double, button: Int) {
+    }
+
+    open fun mouseScroll(x: Double, y: Double, scrollDelta: Double): Boolean {
+        if (scrollDelta == 0.0) return false
+
+        val event = ComponentMouseScrollEvent(x, y, scrollDelta)
+        var result = false
+        for (listener in mouseScrollListeners) {
+            result = listener(event) || result
+            if (event.isCancelled) break
+        }
 
         for (i in children.lastIndex downTo 0) {
             val child = children[i]
             if (child.isHovered()) {
-                child.mouseScroll(x, y, scrollDelta)
-                return
+                return child.mouseScroll(x, y, scrollDelta)
             }
         }
 
-        mouseScrollListeners.forEach { if (it(x, y, scrollDelta)) return }
+        return result
     }
 
-    fun keyType(keyCode: Int, typedChar: Char) {
-        keyPressListeners.forEach { if (it(keyCode, typedChar)) return }
-        children.forEach { it.keyType(keyCode, typedChar) }
+    open fun keyPress(keyCode: Int, typedChar: Char, modifiers: MultiKeyboard.KeyboardModifiers): Boolean {
+        val event = ComponentKeyPressEvent(keyCode, typedChar, modifiers)
+        var result = false
+        for (listener in keyPressListeners) {
+            result = listener(event) || result
+            if (event.isCancelled) break
+        }
+
+        for (child in children) {
+            result = child.keyPress(keyCode, typedChar, modifiers) || result
+        }
+
+        return result
     }
 
     // Event API
 
-    fun onMouseClick(listener: (x: Float, y: Float, button: Int) -> Boolean) = apply {
+    fun onMouseClick(listener: ComponentMouseClickEvent.() -> Boolean) = apply {
         mouseClickListeners.add(listener)
     }
 
-    fun onMouseLeftClick(listener: (x: Float, y: Float) -> Boolean) = apply {
-        mouseClickListeners.add { x, y, button -> if (button == 0) listener(x, y) else true }
+    fun onMouseClick(listener: Predicate<ComponentMouseClickEvent>) = apply {
+        onMouseClick(listener::test)
     }
 
-    fun onMouseRightClick(listener: (x: Float, y: Float) -> Boolean) = apply {
-        mouseClickListeners.add { x, y, button -> if (button == 1) listener(x, y) else true }
+    fun onMouseLeftClick(listener: ComponentMouseClickEvent.() -> Boolean) = apply {
+        onMouseClick {
+            if (button == MultiMouse.LEFT) listener(this) else false
+        }
     }
 
-    fun onMouseMiddleClick(listener: (x: Float, y: Float) -> Boolean) = apply {
-        mouseClickListeners.add { x, y, button -> if (button == 2) listener(x, y) else true }
+    fun onMouseLeftClick(listener: Predicate<ComponentMouseClickEvent>) = apply {
+        onMouseLeftClick(listener::test)
     }
 
-    fun onMouseRelease(listener: (x: Float, y: Float, button: Int) -> Boolean) = apply {
+    fun onMouseRightClick(listener: ComponentMouseClickEvent.() -> Boolean) = apply {
+        onMouseClick {
+            if (button == MultiMouse.RIGHT) listener(this) else false
+        }
+    }
+
+    fun onMouseRightClick(listener: Predicate<ComponentMouseClickEvent>) = apply {
+        onMouseRightClick(listener::test)
+    }
+
+    fun onMouseMiddleClick(listener: ComponentMouseClickEvent.() -> Boolean) = apply {
+        onMouseClick {
+            if (button == MultiMouse.MIDDLE) listener(this) else false
+        }
+    }
+
+    fun onMouseMiddleClick(listener: Predicate<ComponentMouseClickEvent>) = apply {
+        onMouseMiddleClick(listener::test)
+    }
+
+    fun onMouseRelease(listener: ComponentMouseReleaseEvent.() -> Boolean) = apply {
         mouseReleaseListeners.add(listener)
     }
 
-    fun onMouseLeftRelease(listener: (x: Float, y: Float) -> Boolean) = apply {
-        mouseReleaseListeners.add { x, y, button -> if (button == 0) listener(x, y) else true }
+    fun onMouseRelease(listener: Predicate<ComponentMouseReleaseEvent>) = apply {
+        onMouseRelease(listener::test)
     }
 
-    fun onMouseRightRelease(listener: (x: Float, y: Float) -> Boolean) = apply {
-        mouseReleaseListeners.add { x, y, button -> if (button == 1) listener(x, y) else true }
+    fun onMouseLeftRelease(listener: ComponentMouseReleaseEvent.() -> Boolean) = apply {
+        onMouseRelease {
+            if (button == MultiMouse.LEFT) listener(this) else false
+        }
     }
 
-    fun onMouseMiddleRelease(listener: (x: Float, y: Float) -> Boolean) = apply {
-        mouseReleaseListeners.add { x, y, button -> if (button == 2) listener(x, y) else true }
+    fun onMouseLeftRelease(listener: Predicate<ComponentMouseReleaseEvent>) = apply {
+        onMouseLeftRelease(listener::test)
     }
 
-    fun onMouseDrag(listener: (x: Float, y: Float, button: Int) -> Boolean) = apply {
+    fun onMouseRightRelease(listener: ComponentMouseReleaseEvent.() -> Boolean) = apply {
+        onMouseRelease {
+            if (button == MultiMouse.RIGHT) listener(this) else false
+        }
+    }
+
+    fun onMouseRightRelease(listener: Predicate<ComponentMouseReleaseEvent>) = apply {
+        onMouseRightRelease(listener::test)
+    }
+
+    fun onMouseMiddleRelease(listener: ComponentMouseReleaseEvent.() -> Boolean) = apply {
+        onMouseRelease {
+            if (button == MultiMouse.MIDDLE) listener(this) else false
+        }
+    }
+
+    fun onMouseMiddleRelease(listener: Predicate<ComponentMouseReleaseEvent>) = apply {
+        onMouseMiddleRelease(listener::test)
+    }
+
+    fun onMouseDrag(listener: ComponentMouseDragEvent.() -> Boolean) = apply {
         mouseDragListeners.add(listener)
     }
 
-    fun onMouseLeftDrag(listener: (x: Float, y: Float) -> Boolean) = apply {
-        mouseDragListeners.add { x, y, button -> if (button == 0) listener(x, y) else true }
+    fun onMouseDrag(listener: Predicate<ComponentMouseDragEvent>) = apply {
+        mouseDragListeners.add(listener::test)
     }
 
-    fun onMouseRightDrag(listener: (x: Float, y: Float) -> Boolean) = apply {
-        mouseDragListeners.add { x, y, button -> if (button == 1) listener(x, y) else true }
+    fun onMouseLeftDrag(listener: ComponentMouseDragEvent.() -> Boolean) = apply {
+        onMouseDrag {
+            if (button == MultiMouse.LEFT) listener(this) else false
+        }
     }
 
-    fun onMouseMiddleDrag(listener: (x: Float, y: Float) -> Boolean) = apply {
-        mouseDragListeners.add { x, y, button -> if (button == 2) listener(x, y) else true }
+    fun onMouseLeftDrag(listener: Predicate<ComponentMouseDragEvent>) = apply {
+        onMouseLeftDrag(listener::test)
     }
 
-    fun onMouseScroll(listener: (x: Float, y: Float, scrollDelta: Double) -> Boolean) = apply {
+    fun onMouseRightDrag(listener: ComponentMouseDragEvent.() -> Boolean) = apply {
+        onMouseDrag {
+            if (button == MultiMouse.RIGHT) listener(this) else false
+        }
+    }
+
+    fun onMouseRightDrag(listener: Predicate<ComponentMouseDragEvent>) = apply {
+        onMouseRightDrag(listener::test)
+    }
+
+    fun onMouseMiddleDrag(listener: ComponentMouseDragEvent.() -> Boolean) = apply {
+        onMouseDrag {
+            if (button == MultiMouse.MIDDLE) listener(this) else false
+        }
+    }
+
+    fun onMouseMiddleDrag(listener: Predicate<ComponentMouseDragEvent>) = apply {
+        onMouseMiddleDrag(listener::test)
+    }
+
+    fun onMouseScroll(listener: ComponentMouseScrollEvent.() -> Boolean) = apply {
         mouseScrollListeners.add(listener)
     }
 
-    fun onMouseHover(listener: (x: Float, y: Float) -> Boolean) = apply {
+    fun onMouseScroll(listener: Predicate<ComponentMouseScrollEvent>) = apply {
+        onMouseScroll(listener::test)
+    }
+
+    fun onMouseHover(listener: (x: Double, y: Double) -> Boolean) = apply {
         mouseHoverListeners.add(listener)
     }
 
-    fun onMouseUnhover(listener: (x: Float, y: Float) -> Boolean) = apply {
+    fun onMouseUnhover(listener: (x: Double, y: Double) -> Boolean) = apply {
         mouseUnhoverListeners.add(listener)
     }
 
-    fun onKeyPress(listener: (keyCode: Int, typedChar: Char) -> Boolean) = apply {
+    fun onKeyPress(listener: ComponentKeyPressEvent.() -> Boolean) = apply {
         keyPressListeners.add(listener)
+    }
+
+    fun onKeyPress(listener: Predicate<ComponentKeyPressEvent>) = apply {
+        onKeyPress(listener::test)
     }
 
     // Animation API
@@ -320,6 +480,37 @@ abstract class BaseComponent {
 
     open fun removeFilter(filter: Filter) = apply {
         filters.remove(filter)
+    }
+
+    // Focus API
+
+    fun handleFocusGained() {
+        focusGainListeners.forEach { it() }
+    }
+
+    fun handleFocusLost() {
+        focusLostListeners.forEach { it() }
+    }
+
+    fun requestFocus() = WindowComponent.find(this).focus(this)
+    fun releaseFocus() = WindowComponent.find(this).unfocus()
+
+    fun isFocused() = WindowComponent.find(this).isFocused(this)
+    
+    fun onFocusGained(listener: () -> Unit) = apply {
+        focusGainListeners.add(listener)
+    }
+    
+    fun onFocusGained(listener: Runnable) = apply {
+        focusGainListeners.add(listener::run)
+    }
+    
+    fun onFocusLost(listener: () -> Unit) = apply {
+        focusLostListeners.add(listener)
+    }
+    
+    fun onFocusLost(listener: Runnable) = apply {
+        focusLostListeners.add(listener::run)
     }
 
     // Floating API

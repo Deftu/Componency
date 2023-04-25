@@ -19,7 +19,7 @@ class RoundedBoxComponent : BaseComponent() {
         @JvmStatic fun initialize() {
             if (initialized) return
 
-            shader = MultiShader.readFromResource("rounded_box", "rounded_box", BlendState.NORMAL)
+            shader = MultiShader.readFromResource("componency_rounded_box", "rounded_box", "rounded_box", BlendState.NORMAL)
             if (!shader.usable) error("Failed to load rounded box shader")
 
             radiusUniform = shader.getVecUniform("u_Radius")

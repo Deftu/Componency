@@ -26,7 +26,7 @@ pluginManagement {
         kotlin("jvm") version(kotlin)
         kotlin("plugin.serialization") version(kotlin)
 
-        id("xyz.deftu.gradle.multiversion-root") version("1.6.1")
+        id("xyz.deftu.gradle.multiversion-root") version("1.11.0")
     }
 }
 
@@ -44,7 +44,8 @@ listOf(
     "1.17.1-fabric",
     "1.18.2-fabric",
     "1.19.2-fabric",
-    "1.19.3-fabric"
+    "1.19.3-fabric",
+    "1.19.4-fabric"
 ).forEach { version ->
     include(":$version")
     project(":$version").apply {

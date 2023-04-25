@@ -2,11 +2,11 @@ package xyz.deftu.componency.components
 
 import xyz.deftu.componency.components.impl.RoundedBoxComponent
 import xyz.deftu.componency.effects.Effect
+import xyz.deftu.componency.effects.OutlineEffect
 import xyz.deftu.componency.effects.ScissorEffect
-import xyz.deftu.multi.MultiClient
-import xyz.deftu.multi.MultiMatrixStack
-import xyz.deftu.multi.MultiMouse
-import xyz.deftu.multi.MultiResolution
+import xyz.deftu.componency.filters.GaussianBlurFilter
+import xyz.deftu.componency.utils.fixMousePos
+import xyz.deftu.multi.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.math.roundToInt
 
@@ -55,13 +55,51 @@ class WindowComponent(
 
     val trueAnimationFramerate: Int
         get() = if (adaptiveFramerate) {
+            //#if MC>=11900
             val fps = MultiClient.getOptions().maxFps.value
+            //#elseif MC>=11500
+            //$$ val fps = MultiClient.getOptions().maxFps
+            //#else
+            //$$ val fps = MultiClient.getOptions().limitFramerate
+            //#endif
+
             // Add a small bit extra to make sure it doesn't slow down - This keeps the animation smooth while still adapting to the requested framerate
             (fps * 1.25).roundToInt()
         } else animationFramerate
 
+    private var lastClickedMouseButton = -1
+
+    private var requestingFocus: BaseComponent? = null
+    private var focusedComponent: BaseComponent? = null
+
     init {
         super.parent = this
+    }
+
+    fun focus(component: BaseComponent) = apply {
+        requestingFocus = component
+    }
+
+    fun unfocus() = apply {
+        focusedComponent?.handleFocusLost()
+        focusedComponent = null
+    }
+
+    fun isFocused(component: BaseComponent) = focusedComponent == component
+
+    private fun handleFocusState() {
+        if (requestingFocus == null) {
+            unfocus()
+        } else {
+            if (requestingFocus != focusedComponent) {
+                if (focusedComponent != null) focusedComponent?.handleFocusLost()
+
+                focusedComponent = requestingFocus
+                focusedComponent?.handleFocusGained()
+            }
+
+            requestingFocus = null
+        }
     }
 
     fun isVisible(
@@ -92,6 +130,16 @@ class WindowComponent(
         )
     }
 
+    override fun findTarget(x: Double, y: Double): BaseComponent {
+        for (child in floatingChildren.reversed()) {
+            if (child.isInsideBounds(x, y)) {
+                return child.findTarget(x, y)
+            }
+        }
+
+        return super.findTarget(x, y)
+    }
+
     override fun render(stack: MultiMatrixStack, tickDelta: Float) {
         val renderOperations = renderOperations.iterator()
         while (renderOperations.hasNext()) {
@@ -112,7 +160,7 @@ class WindowComponent(
             }
 
             // Call the mouse move event to make sure that the mouse is updated
-            mouseMove(MultiMouse.scaledX.toFloat(), MultiMouse.scaledY.toFloat())
+            mouseUpdate(MultiMouse.scaledX, MultiMouse.scaledY)
         } catch (t: Throwable) {
             t.printStackTrace()
         }
@@ -120,8 +168,41 @@ class WindowComponent(
 
     override fun handleInitialize() {
         addRenderOperation {
+            // Components
             RoundedBoxComponent.initialize()
+
+            // Constraints
+            // ...
+
+            // Effects
+            OutlineEffect.initialize()
+
+            // Filters
+            GaussianBlurFilter.initialize()
         }
+    }
+
+    override fun mouseClick(x: Double, y: Double, button: Int): Boolean {
+        val (fixedX, fixedY) = fixMousePos(x, y)
+        val value = super.mouseClick(fixedX, fixedY, button)
+        handleFocusState()
+        return value
+    }
+
+    override fun keyPress(keyCode: Int, typedChar: Char, modifiers: MultiKeyboard.KeyboardModifiers): Boolean {
+        // If the typed char is in a PUA (https://en.wikipedia.org/wiki/Private_Use_Areas), we don't want to propagate it down
+        val character = if (typedChar in CharCategory.PRIVATE_USE) Char.MIN_VALUE else typedChar
+        return focusedComponent?.keyPress(keyCode, character, modifiers) ?: super.keyPress(keyCode, character, modifiers)
+    }
+
+    override fun handleAnimate() {
+        if (lastClickedMouseButton != -1) {
+            val (x, y) = fixMousePos(MultiMouse.scaledX, MultiMouse.scaledY)
+            mouseDrag(x, y, lastClickedMouseButton)
+        }
+
+        handleFocusState()
+        super.handleAnimate()
     }
 
     override fun applyEffect(effect: Effect) = error("Cannot add effects to a window")
@@ -131,4 +212,6 @@ class WindowComponent(
     override fun getY() = 0f
     override fun getWidth() = MultiResolution.scaledWidth.toFloat()
     override fun getHeight() = MultiResolution.scaledHeight.toFloat()
+    override fun getRight() = getWidth()
+    override fun getBottom() = getHeight()
 }

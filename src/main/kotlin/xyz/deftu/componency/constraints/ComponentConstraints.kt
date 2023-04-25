@@ -39,7 +39,7 @@ open class ComponentConstraints(
             // TODO - Notify event listeners
             field = value
         }
-    var color: ColorConstraint = Color.WHITE.toColorConstraint()
+    var color: ColorConstraint = Color.WHITE.toConstraint()
         set(value) {
             // TODO - Notify event listeners
             field = value

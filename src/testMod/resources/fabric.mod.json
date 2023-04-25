@@ -1,9 +1,9 @@
 {
     "schemaVersion": 1,
-    "id": "${mod_id}",
-    "version": "${mod_version}",
-    "name": "${mod_name}",
-    "description": "${mod_description}",
+    "id": "test-mod",
+    "version": "1.0.0",
+    "name": "Test Mod",
+    "description": "A test mod for testing purposes.",
     "authors": [
         "Deftu"
     ],
@@ -16,7 +16,13 @@
     },
     "license": "LGPL-3.0",
     "environment": "client",
+    "entrypoints": {
+        "client": [
+            "com.test.TestMod"
+        ]
+    },
     "depends": {
-        "minecraft": "~${minor_mc_version}"
+        "minecraft": "*",
+        "fabricloader": ">=0.14.17"
     }
 }

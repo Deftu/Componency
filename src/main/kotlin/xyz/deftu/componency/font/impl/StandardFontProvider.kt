@@ -13,8 +13,14 @@ import java.awt.RenderingHints
 import java.awt.font.FontRenderContext
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
+import java.io.File
+import java.io.FileOutputStream
+import javax.imageio.ImageIO
 import kotlin.math.ceil
 import kotlin.math.sqrt
+
+private val glyphMapDebug: Boolean
+    get() = System.getProperty("componency.debug.glyphmap")?.toBoolean() ?: false
 
 private data class Glyph(
     val u: Float,
@@ -126,8 +132,18 @@ private class GlyphMap(
             glyphs[char] = glyph
         }
 
+        debug(image)
         MultiClient.getTextureManager().registerImageTexture(texture, image)
         generated = true
+    }
+
+    private fun debug(image: BufferedImage) {
+        if (!glyphMapDebug) return
+
+        val file = File("componency_glyphmap_${start.code}_${end.code} (${font.fontName}).png")
+        FileOutputStream(file).use { stream ->
+            ImageIO.write(image, "png", stream)
+        }
     }
 }
 
@@ -260,7 +276,7 @@ class StandardFontProvider(
             val alpha = newColor.alpha / 255f
 
             val buffer = MultiTessellator.getFromBuffer()
-            glyph.texture?.let { MultiRenderSystem.setShaderTexture(0, it) }
+            glyph.texture?.let { MultiRenderSystem.setTexture(0, it) }
             buffer.beginWithDefaultShader(MultiTessellator.DrawModes.QUADS, MultiTessellator.VertexFormats.POSITION_TEXTURE_COLOR)
             val u1 = glyph.u / glyph.map.width
             val v1 = glyph.v / glyph.map.height

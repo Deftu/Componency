@@ -21,4 +21,4 @@ val State<Number>.pixels
 
 fun State<Color>.toConstraint() = StaticColorConstraint(get()).bindValue(this)
 val State<Color>.constraint
-    get() = toConstraint()
+    get() = this.toConstraint()

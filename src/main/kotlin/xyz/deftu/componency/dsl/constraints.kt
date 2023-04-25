@@ -40,7 +40,7 @@ fun Number.px(
 val Number.px
     get() = px()
 
-fun Color.toColorConstraint() = StaticColorConstraint(this)
+fun Color.toConstraint() = StaticColorConstraint(this)
 
 // Util functions for defining constraints - This just makes the code look nicer.
 

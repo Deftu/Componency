@@ -1,10 +1,10 @@
 package xyz.deftu.componency.utils
 
-import net.minecraft.client.MinecraftClient
+import xyz.deftu.multi.MultiResolution
 import kotlin.math.sign
 
 val scaleFactor: Float
-    get() = MinecraftClient.getInstance().window.scaleFactor.toFloat()
+    get() = MultiResolution.scaleFactor.toFloat()
 
 fun Float.roundToScaledPixels(): Float {
     return (this * scaleFactor).let {
