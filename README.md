@@ -5,6 +5,8 @@ A simple, declarative Minecraft UI library.
 
 </div>
 
+[![BisectHosting](https://www.bisecthosting.com/partners/custom-banners/8fb6621b-811a-473b-9087-c8c42b50e74c.png)](https://bisecthosting.com/deftu)
+
 A simple library with many aspects taken from [Elementa][elementa], a
 library, aiming to make GUI creation easier and more developer-friendly
 between Minecraft versions. Anyone who is somewhat familiar with the
