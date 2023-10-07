@@ -16,7 +16,7 @@ class TestScreen : ComponencyScreen() {
 
     val box = BoxComponent().configure {
         // effects += outline(Color.BLUE, 2f)
-        // filters += gaussianBlur(5f)
+        filters += gaussianBlur(5f)
         constraints {
             x = 25.px
             y = 25.px
