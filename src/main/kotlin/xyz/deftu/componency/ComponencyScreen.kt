@@ -47,13 +47,7 @@ abstract class ComponencyScreen @JvmOverloads constructor(
 
     override fun handleMouseClick(x: Double, y: Double, button: Int): Boolean {
         val defaultValue = super.handleMouseClick(x, y, button)
-        return (defaultValue.also {
-            println("defaultValue: $defaultValue")
-        } || window.mouseClick(x, y, button).also {
-            println("window.mouseClick: $it")
-        }).also {
-            println("result: $it")
-        }
+        return defaultValue || window.mouseClick(x, y, button)
     }
 
     override fun handleMouseReleased(x: Double, y: Double, state: Int): Boolean {
