@@ -56,7 +56,7 @@ class OutlineEffect(
         if (!initialized) return
 
         framebuffer.bind(true)
-        shader.bind()
+        //shader.bind()
 
         // thicknessUniform.setValue(thickness)
         // colorUniform.setValue(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
@@ -72,24 +72,25 @@ class OutlineEffect(
         tessellator.vertex(stack, x1, y2, 0f).color(0f, 0f, 0f, 1f).next()
         tessellator.draw()
 
-        shader.unbind()
+        //shader.unbind()
     }
 
     override fun applyPostRender(component: BaseComponent, stack: MultiMatrixStack, tickDelta: Float) {
         if (!initialized) return
 
-        framebuffer.unbind()
+        framebuffer.endWrite()
 
-        framebuffer.bindTexture()
-        tessellator.beginWithDefaultShader(MultiTessellator.DrawModes.QUADS, MultiTessellator.VertexFormats.POSITION_TEXTURE)
+        framebuffer.beginRead()
+        tessellator.beginWithDefaultShader(MultiTessellator.DrawModes.QUADS, MultiTessellator.VertexFormats.POSITION_TEXTURE_COLOR)
+        val bufferStack = MultiMatrixStack()
         val x1 = component.getX()
         val y1 = component.getY()
         val x2 = component.getRight()
         val y2 = component.getBottom()
-        tessellator.vertex(stack, x1, y1, 0f).texture(0f, 0f).next()
-        tessellator.vertex(stack, x2, y1, 0f).texture(1f, 0f).next()
-        tessellator.vertex(stack, x2, y2, 0f).texture(1f, 1f).next()
-        tessellator.vertex(stack, x1, y2, 0f).texture(0f, 1f).next()
+        tessellator.vertex(bufferStack, x1, y1, 0f).texture(0f, 0f).color(255, 255, 255, 255).next()
+        tessellator.vertex(bufferStack, x2, y1, 0f).texture(1f, 0f).color(255, 255, 255, 255).next()
+        tessellator.vertex(bufferStack, x2, y2, 0f).texture(1f, 1f).color(255, 255, 255, 255).next()
+        tessellator.vertex(bufferStack, x1, y2, 0f).texture(0f, 1f).color(255, 255, 255, 255).next()
         tessellator.draw()
         framebuffer.unbindTexture()
     }
