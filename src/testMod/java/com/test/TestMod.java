@@ -5,9 +5,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.gui.screen.Screen;
-import xyz.deftu.multi.MultiClient;
-import xyz.deftu.multi.MultiScreen;
+import dev.deftu.multi.MultiClient;
+import dev.deftu.multi.MultiScreen;
 //#else
 //#if MC>=11500
 //$$ import net.minecraftforge.common.MinecraftForge;
@@ -22,9 +21,6 @@ import xyz.deftu.multi.MultiScreen;
 //$$ import net.minecraft.command.ICommandSender;
 //#endif
 //#endif
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 //#if FABRIC==1
 public class TestMod implements ClientModInitializer {
@@ -43,12 +39,12 @@ public class TestMod implements ClientModInitializer {
     public void onInitializeClient() {
         boolean openStart = System.clearProperty("componency.open") != null;
 
-        ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("componency").executes(context -> {
                 openScreen = true;
                 return 0;
             }));
-        }));
+        });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openStart) {

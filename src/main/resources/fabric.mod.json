@@ -7,10 +7,8 @@
     "authors": [
         "Deftu"
     ],
-    "contributors": [
-    ],
     "contact": {
-        "homepage": "https://deftu.xyz/",
+        "homepage": "https://deftu.dev/",
         "sources": "https://github.com/Deftu/${mod_name}",
         "issues": "https://github.com/Deftu/${mod_name}/issues"
     },

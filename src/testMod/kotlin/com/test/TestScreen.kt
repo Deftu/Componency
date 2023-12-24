@@ -1,22 +1,20 @@
 package com.test
 
-import xyz.deftu.componency.ComponencyScreen
-import xyz.deftu.componency.animations.Animations
-import xyz.deftu.componency.components.impl.*
-import xyz.deftu.componency.dsl.*
-import xyz.deftu.componency.font.impl.StandardFontProvider
-import xyz.deftu.multi.MultiMatrixStack
-import xyz.deftu.text.Text
+import dev.deftu.componency.ComponencyScreen
+import dev.deftu.componency.animations.Animations
+import dev.deftu.componency.components.impl.*
+import dev.deftu.componency.dsl.*
+import dev.deftu.componency.font.impl.StandardFontProvider
+import dev.deftu.multi.MultiKeyboard
+import dev.deftu.text.Text
+import dev.deftu.text.TextFactory
 import java.awt.Color
-import java.util.*
-import kotlin.concurrent.schedule
 
 class TestScreen : ComponencyScreen() {
+    private val textFactory = TextFactory()
     private val robotoFontProvider = StandardFontProvider("fonts/Roboto-Regular.ttf")
 
     val box = BoxComponent().configure {
-        // effects += outline(Color.BLUE, 2f)
-        filters += gaussianBlur(5f)
         constraints {
             x = 25.px
             y = 25.px
@@ -25,31 +23,31 @@ class TestScreen : ComponencyScreen() {
             color = Color.GREEN.withAlpha(140).toConstraint()
             // radius = 15.px
         }
-    }.onMouseLeftClick {
-        println("Clicked at $x, $y")
-        if (x >= width / 2) { // "width" is the screen width and "x" is the mouse x position
-            isCancelled = true // Cancel the event
+    }.addMouseLeftClickListener { event ->
+        println("Clicked at ${event.x}, ${event.y}")
+        if (event.x >= width / 2) { // "width" is the screen width and "x" is the mouse x position
+            event.cancel() // Cancel the event
         }
 
         client?.setScreen(null)
-        true
-    }.onMouseScroll {
-        println("Scrolled at $x, $y with delta $delta")
-        false
+    }.addMouseScrollListener { event ->
+        println("Scrolled at ${event.x}, ${event.y} with delta ${event.delta}")
     }.attachTo(window)
 
-    val text = TextComponent(Text.create("Hello, World!\nI am on a new line!")).configure {
+    val text = TextComponent(textFactory.create("Hello, World!\nI am on a new line!")).configure {
         constraints {
             x = 5.px
             y = 5.px
             width *= 2f
-            // fontProvider = robotoFontProvider
+            fontProvider = robotoFontProvider
         }
     }.attachTo(box)
 
     init {
-        Timer().schedule(5000) {
-            startAnimation()
+        window.addKeyPressListener { event ->
+            if (event.keyCode == MultiKeyboard.KEY_J) {
+                startAnimation()
+            }
         }
     }
 
@@ -67,19 +65,14 @@ class TestScreen : ComponencyScreen() {
             animateColor(animation, 2.5f, Color.RED.withAlpha(80).toConstraint())
 
             whenComplete {
-                println("hi")
+                println("Finished animation!")
                 text.animate {
                     animateWidth(Animations.IN_OUT_CUBIC, 2.5f, width * 1.25f)
                     whenComplete {
-                        println("hi2")
+                        println("Finished text animation!")
                     }
                 }
             }
         }
-    }
-
-    override fun handleRender(stack: MultiMatrixStack, mouseX: Int, mouseY: Int, tickDelta: Float) {
-        // super.handleBackgroundRender(stack)
-        super.handleRender(stack, mouseX, mouseY, tickDelta)
     }
 }

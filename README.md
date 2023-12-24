@@ -33,7 +33,7 @@ If you're not using my [Gradle Toolkit][gradle-toolkit], add the following code 
 
 ```gradle
 maven {
-    url = "https://maven.deftu.xyz/releases"
+    url = "https://maven.deftu.dev/releases"
 }
 ```
 </details>
@@ -43,7 +43,7 @@ maven {
 
 Kotlin
 ```kotlin
-maven(url = "https://maven.deftu.xyz/releases")
+maven(url = "https://maven.deftu.dev/releases")
 ```
 </details>
 
@@ -57,13 +57,13 @@ maven(url = "https://maven.deftu.xyz/releases")
 If you're using the Gradle Toolkit, you can use the following code to add the library as a dependency:
 ```gradle
 dependencies {
-    implementation(shade("xyz.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>"))
+    implementation(shade("dev.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>"))
 }
 ```
 For Kotlin Gradle DSL:
 ```kotlin
 dependencies {
-    implementation(shade("xyz.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>")!!)
+    implementation(shade("dev.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>")!!)
 }
 ```
 
@@ -76,12 +76,12 @@ If you're **not** using the Gradle Toolkit, you will need to find your own way t
 
 You can add the dependency to your Gradle project using the following code:
 ```gradle
-modImplementation(include("xyz.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>"))
+modImplementation(include("dev.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>"))
 ```
 
 For Kotlin Gradle DSL:
 ```gradle
-modImplementation(include("xyz.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>")!!)
+modImplementation(include("dev.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>")!!)
 ```
 
 If you don't plan on embedding the library inside of your final JAR, and want users to download it separately, simply remove the `include` configuration.
