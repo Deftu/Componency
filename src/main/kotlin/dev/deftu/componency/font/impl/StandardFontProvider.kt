@@ -5,8 +5,8 @@ import org.lwjgl.opengl.GL11
 import dev.deftu.componency.components.BaseComponent
 import dev.deftu.componency.font.FontProvider
 import dev.deftu.multi.*
-import dev.deftu.text.Text
-import dev.deftu.text.TextFormatting
+import dev.deftu.textful.Text
+import dev.deftu.textful.TextFormatting
 import java.awt.Color
 import java.awt.Font
 import java.awt.RenderingHints
@@ -62,7 +62,7 @@ private class GlyphMap(
         char: Char
     ) = glyphs[char] ?: run {
         generate()
-        glyphs[char]
+        glyphs[char] ?: throw IllegalStateException("Glyph $char not found")
     }
 
     fun has(char: Char) = glyphs.containsKey(char)
@@ -153,7 +153,7 @@ class StandardFontProvider(
     private val size: Float = FONT_SIZE
 ) : FontProvider {
     companion object {
-        private const val FONT_SIZE = 9f
+        private const val FONT_SIZE = 18f
         private val formattingCodes by lazy {
             TextFormatting.values().map(TextFormatting::code)
         }

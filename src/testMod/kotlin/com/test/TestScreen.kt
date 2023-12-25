@@ -5,14 +5,26 @@ import dev.deftu.componency.animations.Animations
 import dev.deftu.componency.components.impl.*
 import dev.deftu.componency.dsl.*
 import dev.deftu.componency.font.impl.StandardFontProvider
+import dev.deftu.multi.MultiClient
 import dev.deftu.multi.MultiKeyboard
-import dev.deftu.text.Text
-import dev.deftu.text.TextFactory
+import dev.deftu.multi.MultiMatrixStack
+import dev.deftu.stateful.SimpleState
+import dev.deftu.stateful.State
+import dev.deftu.textful.Text
+import dev.deftu.textful.impl.SimpleText
 import java.awt.Color
 
 class TestScreen : ComponencyScreen() {
-    private val textFactory = TextFactory()
     private val robotoFontProvider = StandardFontProvider("fonts/Roboto-Regular.ttf")
+
+    val framerate = SimpleState<Text>(SimpleText(MultiClient.getInstance().fpsDebugString))
+    val framerateText = TextComponent(MultiClient.getInstance().fpsDebugString).configure {
+        constraints {
+            x = 5.px
+            y = 5.px
+            fontProvider = robotoFontProvider
+        }
+    }.attachTo(window)
 
     val box = BoxComponent().configure {
         constraints {
@@ -34,7 +46,7 @@ class TestScreen : ComponencyScreen() {
         println("Scrolled at ${event.x}, ${event.y} with delta ${event.delta}")
     }.attachTo(window)
 
-    val text = TextComponent(textFactory.create("Hello, World!\nI am on a new line!")).configure {
+    val text = TextComponent(SimpleText("Hello, World!\nI am on a new line!")).configure {
         constraints {
             x = 5.px
             y = 5.px
@@ -44,11 +56,17 @@ class TestScreen : ComponencyScreen() {
     }.attachTo(box)
 
     init {
+        framerateText.bindValue(framerate)
         window.addKeyPressListener { event ->
             if (event.keyCode == MultiKeyboard.KEY_J) {
                 startAnimation()
             }
         }
+    }
+
+    override fun handleRender(stack: MultiMatrixStack, mouseX: Int, mouseY: Int, tickDelta: Float) {
+        framerate.set(SimpleText(MultiClient.getInstance().fpsDebugString))
+        super.handleRender(stack, mouseX, mouseY, tickDelta)
     }
 
     private fun startAnimation() {

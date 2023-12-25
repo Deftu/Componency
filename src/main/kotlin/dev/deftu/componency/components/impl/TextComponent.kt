@@ -3,10 +3,10 @@ package dev.deftu.componency.components.impl
 import dev.deftu.componency.components.BaseComponent
 import dev.deftu.componency.dsl.px
 import dev.deftu.multi.MultiMatrixStack
-import dev.deftu.state.SimpleState
-import dev.deftu.state.State
-import dev.deftu.text.Text
-import dev.deftu.text.TextFactory
+import dev.deftu.stateful.SimpleState
+import dev.deftu.stateful.State
+import dev.deftu.textful.Text
+import dev.deftu.textful.impl.SimpleText
 
 open class TextComponent constructor(
     valueState: State<Text>,
@@ -27,11 +27,11 @@ open class TextComponent constructor(
     constructor(
         value: String,
         shadowState: State<Boolean> = SimpleState(true)
-    ) : this(TextFactory.INSTANCE.create(value), shadowState)
+    ) : this(SimpleText(value), shadowState)
     constructor(
         value: String,
         shadow: Boolean = true
-    ) : this(TextFactory.INSTANCE.create(value), shadow)
+    ) : this(SimpleText(value), shadow)
     constructor(
         value: Text
     ) : this(value, true)

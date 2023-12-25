@@ -1,8 +1,8 @@
 package dev.deftu.componency.constraints
 
 import dev.deftu.componency.components.BaseComponent
-import dev.deftu.state.SimpleState
-import dev.deftu.state.State
+import dev.deftu.stateful.SimpleState
+import dev.deftu.stateful.State
 
 class SiblingConstraint(
     padding: State<Float> = SimpleState(0f),

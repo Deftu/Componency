@@ -2,8 +2,8 @@ package dev.deftu.componency.dsl
 
 import dev.deftu.componency.components.BaseComponent
 import dev.deftu.componency.constraints.*
-import dev.deftu.state.SimpleState
-import dev.deftu.state.State
+import dev.deftu.stateful.SimpleState
+import dev.deftu.stateful.State
 import java.awt.Color
 
 infix fun <T, U : Constraint<T>> U.attachTo(component: BaseComponent) = apply { attach(component) }

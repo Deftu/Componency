@@ -11,9 +11,9 @@ import dev.deftu.componency.font.FontProvider
 import dev.deftu.componency.utils.roundToScaledPixels
 import dev.deftu.multi.MultiClient
 import dev.deftu.multi.MultiMatrixStack
-import dev.deftu.text.Text
-import dev.deftu.text.TextFactory
-import dev.deftu.text.utils.toVanilla
+import dev.deftu.textful.Text
+import dev.deftu.textful.impl.SimpleText
+import dev.deftu.textful.toVanilla
 import java.awt.Color
 
 object VanillaFontProvider : FontProvider {
@@ -65,7 +65,7 @@ object VanillaFontProvider : FontProvider {
 
         var currentY = scaledY
         for (line in lines) {
-            draw(stack, TextFactory.INSTANCE.create(line), scaledX, currentY, color, shadow)
+            draw(stack, SimpleText(line), scaledX, currentY, color, shadow)
             currentY += getLineHeight(shadow)
         }
 

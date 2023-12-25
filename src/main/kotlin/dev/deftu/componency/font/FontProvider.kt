@@ -2,7 +2,7 @@ package dev.deftu.componency.font
 
 import dev.deftu.componency.constraints.Constraint
 import dev.deftu.multi.MultiMatrixStack
-import dev.deftu.text.Text
+import dev.deftu.textful.Text
 import java.awt.Color
 
 interface FontProvider : Constraint<FontProvider> {

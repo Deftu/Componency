@@ -2,7 +2,7 @@ package dev.deftu.componency.dsl
 
 import dev.deftu.componency.constraints.PixelConstraint
 import dev.deftu.componency.constraints.StaticColorConstraint
-import dev.deftu.state.State
+import dev.deftu.stateful.State
 import java.awt.Color
 
 fun State<Float>.pixels(
