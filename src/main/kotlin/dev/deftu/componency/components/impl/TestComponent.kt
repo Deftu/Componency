@@ -3,6 +3,7 @@ package dev.deftu.componency.components.impl
 import dev.deftu.componency.components.Component
 import dev.deftu.omnicore.client.OmniClient
 import dev.deftu.omnicore.client.render.OmniMatrixStack
+import dev.deftu.omnicore.client.render.OmniRenderState
 import dev.deftu.omnicore.client.render.OmniTessellator
 import dev.deftu.stateful.SimpleState
 import dev.deftu.stateful.State
@@ -34,6 +35,9 @@ public class TestComponent : Component() {
     }
 
     private fun drawSquare(stack: OmniMatrixStack, x: Float, y: Float, width: Float, height: Float, color: Color) {
+        OmniRenderState.enableBlend()
+        OmniRenderState.blendFuncSeparate(OmniRenderState.SrcFactor.SRC_ALPHA, OmniRenderState.DstFactor.ONE_MINUS_SRC_ALPHA, OmniRenderState.SrcFactor.ONE, OmniRenderState.DstFactor.ZERO)
+
         val tessellator = OmniTessellator.getFromBuffer()
         tessellator.beginWithDefaultShader(OmniTessellator.DrawModes.QUADS, OmniTessellator.VertexFormats.POSITION_COLOR)
         tessellator.vertex(stack, x, y, 0f)
@@ -49,6 +53,8 @@ public class TestComponent : Component() {
             .color(color)
             .next()
         tessellator.draw()
+
+        OmniRenderState.disableBlend()
     }
 
     private fun Color.withAlpha(alpha: Int): Color {
