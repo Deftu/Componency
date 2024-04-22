@@ -14,34 +14,13 @@ plugins {
 
 toolkitLoomApi.setupTestClient()
 toolkitLoomHelper.disableRunConfigs(GameSide.SERVER)
+kotlin.explicitApi()
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("dev.deftu:stateful:0.1.0")
-    modImplementation("dev.deftu:textful-${mcData.versionStr}-${mcData.loader.name}:0.1.1")
-    modImplementation("dev.deftu:multicraft-${mcData.versionStr}-${mcData.loader.name}:0.1.1")
-
-    for (module in listOf(
-        "nanovg",
-        "tinyfd"
-    )) {
-        val dep = "org.lwjgl:lwjgl-$module:3.3.1"
-        implementation(dep) {
-            isTransitive = false
-        }
-
-        for (natives in listOf(
-            "windows",
-            "windows-arm64",
-            "linux",
-            "macos",
-            "macos-arm64"
-        )) {
-            implementation("$dep:natives-$natives") {
-                isTransitive = false
-            }
-        }
-    }
+    modImplementation("dev.deftu:textile-${mcData.versionStr}-${mcData.loader.name}:0.1.0")
+    modImplementation("dev.deftu:omnicore-${mcData.versionStr}-${mcData.loader.name}:0.1.0")
 
     // We need FAPI for testing purposes
     if (mcData.isFabric) {

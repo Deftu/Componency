@@ -14,6 +14,9 @@ import net.fabricmc.api.ClientModInitializer
 //#endif
 //#endif
 
+import dev.deftu.omnicore.client.OmniClient
+import dev.deftu.omnicore.client.OmniScreen
+
 //#if FABRIC
 class TestMod : ClientModInitializer {
 //#else
@@ -24,6 +27,8 @@ class TestMod : ClientModInitializer {
 //#endif
 //$$ class TestMod {
 //#endif
+    private var openScreen = false
+
     //#if FORGE && MC >= 1.15.2
     //$$ init {
     //$$     FMLJavaModLoadingContext.get().modEventBus.register(this)
@@ -42,6 +47,26 @@ class TestMod : ClientModInitializer {
         //#endif
         //#endif
     ) {
+        //#if FABRIC && MC >= 1.19.3
+        net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback.EVENT.register { dispatcher, registryAccess ->
+            dispatcher.register(net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal("componency").executes { ctx ->
+                openScreen = true
+                1
+            })
+        }
+
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.START_CLIENT_TICK.register {
+            handleTick()
+        }
+        //#endif
     }
 
+    private fun handleTick() {
+        if (openScreen) {
+            openScreen = false
+            OmniClient.execute {
+                OmniScreen.openScreen(TestScreen())
+            }
+        }
+    }
 }
