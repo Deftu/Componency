@@ -1,38 +1,40 @@
-<div align="center">
-
 # Componency
-A simple, declarative Minecraft UI library.
+A simple, [declarative][declarative_programming] UI library built from the ground up for use in any environment.
 
-</div>
+[![wakatime](https://wakatime.com/badge/user/25be8ed5-7461-4fcf-93f7-0d88a7692cca/project/3863d6a3-adb4-4e89-8fae-81c9e8af6809.svg?style=for-the-badge)](https://wakatime.com/badge/user/25be8ed5-7461-4fcf-93f7-0d88a7692cca/project/3863d6a3-adb4-4e89-8fae-81c9e8af6809)
 
-[![BisectHosting](https://www.bisecthosting.com/partners/custom-banners/8fb6621b-811a-473b-9087-c8c42b50e74c.png)](https://bisecthosting.com/deftu)
+---
 
-A simple library with many aspects taken from [Elementa][elementa], a
-library, aiming to make GUI creation easier and more developer-friendly
-between Minecraft versions. Anyone who is somewhat familiar with the
-browser DOM should already have somewhat of an understanding of Componency's
-inner workings.
+## Inspiration
 
-As taken from Elementa,
-> The library is based around the idea of being [declarative][declarative_programming].
-This is a shift from how one would normally do graphics programming in Minecraft, or most other coding in general.
-In Elementa, you do not have to write code to calculate _how_ to place a component at a certain point on the screen,
-instead you simply have to describe _what_ you want.
+Componency is roughly based on 3 other things:
+- [Elementa][elementa]'s design
+- [Figma][figma]'s naming conventions
+- [Ktor][ktor]'s DSL design
 
-## Usage
+I used concepts taken from all 3 of these projects to create a simple, [declarative][declarative_programming] UI library that can be used in any environment.
+
+---
+
+## Disclaimer
+
+This library is primarily designed for Kotlin, though it does have some additional support for Java.
+
+All the examples from here on out will be in Kotlin, but the library can be used in Java as well.
+
+---
+
+## Set up
+
 ### Repository
-It is recommended to use my [Gradle Toolkit][gradle-toolkit] as it will handle the repositories needed to use
-the library for you.
-<details>
-    <summary>Without Gradle Toolkit</summary>
 
-If you're not using my [Gradle Toolkit][gradle-toolkit], add the following code to your `repositories` block:
 
 <details>
     <summary>Groovy (.gradle)</summary>
 
 ```gradle
 maven {
+    name = "Deftu Releases"
     url = "https://maven.deftu.dev/releases"
 }
 ```
@@ -41,78 +43,159 @@ maven {
 <details>
     <summary>Kotlin (.gradle.kts)</summary>
 
-Kotlin
 ```kotlin
-maven(url = "https://maven.deftu.dev/releases")
+maven(url = "https://maven.deftu.dev/releases") {
+    name = "Deftu Releases"
+}
 ```
-</details>
-
 </details>
 
 ### Dependency
 
-<details>
-    <summary>Forge</summary>
+![Repository badge](https://maven.deftu.dev/api/badge/latest/releases/dev/deftu/componency?color=C33F3F&name=Componency)
 
-If you're using the Gradle Toolkit, you can use the following code to add the library as a dependency:
+<details>
+    <summary>Groovy (.gradle)</summary>
+
 ```gradle
-dependencies {
-    implementation(shade("dev.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>"))
-}
+modImplementation "dev.deftu:omnicore-<MCVERSION>-<MODLOADER>:<VERSION>"
 ```
-For Kotlin Gradle DSL:
+
+</details>
+
+<details>
+    <summary>Kotlin (.gradle.kts)</summary>
+
+```gradle
+implementation("dev.deftu:omnicore-<MCVERSION>-<MODLOADER>:<VERSION>")
+```
+
+</details>
+
+---
+
+## Usage
+
+### Engine
+
+To use the library at all, you need to create your Componency engine. The engine is responsible for providing Componency with any data it needs and giving it the ability to interact with your rendering system of choice.
+
 ```kotlin
-dependencies {
-    implementation(shade("dev.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>")!!)
+package com.example
+
+import dev.deftu.componency.engine.Engine
+import dev.deftu.componency.engine.InputEngine
+import dev.deftu.componency.engine.RenderEngine
+import java.awt.Color
+
+class MyEngine : Engine {
+
+    override val inputEngine: InputEngine by lazy {
+        MyInputEngine()
+    }
+
+    override val renderEngine: RenderEngine by lazy {
+        MyRenderEngine()
+    }
+
+}
+
+class MyInputEngine : InputEngine {
+
+    override val mouseX: Flaot = 0f
+
+    override val mouseY: Float = 0f
+
+}
+
+class MyRenderEngine : RenderEngine {
+
+    override val viewportWidth: Int = 0
+
+    override val viewportHeight: Int = 0
+
+    override val animationFps: Int = 144 // Recommended to be no more than 300
+
+    override fun startFrame() {
+        // Start rendering frame (apply any transformations, etc.)
+    }
+
+    override fun endFrame() {
+        // End rendering frame (apply any transformations, etc.)
+    }
+
+    override fun fill(x1: Float, y1: Float, x2: Float, y2: Float, color: Color, radius: Float) {
+        // Fill a rectangle with a color and a radius
+    }
+
 }
 ```
 
-If you're **not** using the Gradle Toolkit, you will need to find your own way to implement shading/bundling the library into your JAR.
+### Your UI
 
-</details>
+Now that you have your engine set up, you can start creating your UI.
 
-<details>
-    <summary>Fabric</summary>
+```kotlin
+object Main {
+    
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val engine = MyEngine()
+        val ui = MyUI(engine)
+        
+        // Inside your render loop, you can simply call `ui.render()` to render your UI.
+        ui.render() // (This is a placeholder for your actual render loop)
+    }
+    
+}
 
-You can add the dependency to your Gradle project using the following code:
-```gradle
-modImplementation(include("dev.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>"))
-```
+class MyUI(engine: Engine) {
+    
+    // Common practice is to use a frame as your root component
+    private val frame = FrameComponent().configure {
+        // In Componency, we define properties inside their own scope when configuring.
+        // The majority of the most commonly used properties have extension variables and functions to make them easier to access.
+        properties {
+            width = 100.percent
+            height = 100.percent
+        }
+    }.makeRoot(engine) // Finally, we make the frame the root component of this UI by giving it the engine.
+    
+    private val box = RectangleComponent().configure {
+        properties {
+            x = 25.percent
+            y = 25.percent
+            width = 50.percent
+            height = 50.percent
+            color = Color.RED.asProperty
+        }
+    }.attachTo(frame) // We make the box a child of the frame.
+    
+    // From here, you can add more components to the frame or the box.
 
-For Kotlin Gradle DSL:
-```gradle
-modImplementation(include("dev.deftu:Componency-<MC_VERSION>-<MC_LOADER>:<VERSION>")!!)
-```
+    // Finally, we provide an external means of rendering our frame.
+    fun render() {
+        frame.handleRender()
+    }
 
-If you don't plan on embedding the library inside of your final JAR, and want users to download it separately, simply remove the `include` configuration.
-
-You will also need to include this inside your `fabric.mod.json` or `quilt.mod.json` file:
-```json
-"dependencies": {
-    "componency": "<VERSION>"
 }
 ```
 
-</details>
+## Further examples
 
-### Versions
-<details>
-    <summary>Versions</summary>
+For more examples, you can check out the [example](./example) directory. ([Java](./example/src/main/java/JavaExampleUI.java), [Kotlin](./example/src/main/kotlin/KotlinExampleUI.kt))
 
-| Minecraft Version | Library Version                                                                                                                           |
-|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| 1.8.9 Forge       | ![1.8.9 Forge Badge](https://maven.deftu.xyz/api/badge/latest/releases/xyz/deftu/componency-1.8.9-forge?color=C91212&name=Componency)     |
-| 1.12.2 Forge      | ![1.12.2 Forge Badge](https://maven.deftu.xyz/api/badge/latest/releases/xyz/deftu/componency-1.12.2-forge?color=C91212&name=Componency)   |
-| 1.14.4 Forge      | ![1.14.4 Forge Badge](https://maven.deftu.xyz/api/badge/latest/releases/xyz/deftu/componency-1.14.4-forge?color=C91212&name=Componency)   |
-| 1.14.4 Fabric     | ![1.14.4 Fabric Badge](https://maven.deftu.xyz/api/badge/latest/releases/xyz/deftu/componency-1.14.4-fabric?color=C91212&name=Componency) |
-| 1.16.5 Fabric     | ![1.16.5 Fabric Badge](https://maven.deftu.xyz/api/badge/latest/releases/xyz/deftu/componency-1.16.5-fabric?color=C91212&name=Componency) |
-| 1.17.1 Fabric     | ![1.17.1 Fabric Badge](https://maven.deftu.xyz/api/badge/latest/releases/xyz/deftu/componency-1.17.1-fabric?color=C91212&name=Componency) |
-| 1.18.2 Fabric     | ![1.18.2 Fabric Badge](https://maven.deftu.xyz/api/badge/latest/releases/xyz/deftu/componency-1.18.2-fabric?color=C91212&name=Componency) |
-| 1.19.2 Fabric     | ![1.19.2 Fabric Badge](https://maven.deftu.xyz/api/badge/latest/releases/xyz/deftu/componency-1.19.2-fabric?color=C91212&name=Componency) |
-| 1.19.3 Fabric     | ![1.19.3 Fabric Badge](https://maven.deftu.xyz/api/badge/latest/releases/xyz/deftu/componency-1.19.3-fabric?color=C91212&name=Componency) |
+---
 
-</details>
+[![BisectHosting](https://www.bisecthosting.com/partners/custom-banners/8fb6621b-811a-473b-9087-c8c42b50e74c.png)](https://bisecthosting.com/deftu)
+
+---
+
+**This project is licensed under [LGPL-3.0][lgpl]**\
+**&copy; 2024 Deftu**
 
 [elementa]: https://github.com/EssentialGG/Elementa
+[figma]: https://www.figma.com/
+[ktor]: https://ktor.io/
 [declarative_programming]: https://en.wikipedia.org/wiki/Declarative_programming
-[gradle-toolkit]: https://github.com/Deftu/Gradle-Toolkit
+[lgpl]: https://www.gnu.org/licenses/lgpl-3.0.en.html

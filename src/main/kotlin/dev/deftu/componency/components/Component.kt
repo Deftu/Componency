@@ -1,16 +1,96 @@
-@file:Suppress("unused", "LeakingThis", "MemberVisibilityCanBePrivate")
+@file:Suppress("unused", "LeakingThis", "MemberVisibilityCanBePrivate", "UNCHECKED_CAST")
 
 package dev.deftu.componency.components
 
-import dev.deftu.componency.components.events.ComponentParentChangeEvent
-import dev.deftu.componency.utils.ListAddEvent
-import dev.deftu.componency.utils.ListClearEvent
-import dev.deftu.componency.utils.ListRemoveEvent
-import dev.deftu.componency.utils.SubscribeableLinkedList
-import dev.deftu.omnicore.client.render.OmniMatrixStack
+import dev.deftu.componency.animations.ComponentAnimationProperties
+import dev.deftu.componency.components.events.*
+import dev.deftu.componency.effects.Effect
+import dev.deftu.componency.engine.Engine
+import dev.deftu.componency.exceptions.EnginePresentException
+import dev.deftu.componency.exceptions.InvalidHierarchyException
+import dev.deftu.componency.utils.Animateable
+import java.util.LinkedList
+import java.util.function.Consumer
 
-public abstract class Component {
-    private val parentChangeListeners = mutableListOf<(ComponentParentChangeEvent) -> Unit>()
+/**
+ * The base class for all components, housing the basic functionality for rendering, managing children, handling events, etc.
+ *
+ * @since 0.1.0
+ * @author Deftu
+ */
+public abstract class Component : Animateable {
+
+    public companion object {
+
+        @JvmStatic
+        public fun findRootOrNull(component: Component): Component? {
+            var current = component
+            while (current.hasParent) {
+                current = current.parent ?: return null
+            }
+
+            return current
+        }
+
+        @JvmStatic
+        public fun findRoot(component: Component): Component {
+            return findRootOrNull(component) ?: throw IllegalStateException("Component has no root")
+        }
+
+        @JvmStatic
+        public fun <T : Component> configure(component: T, block: Consumer<ComponentConfiguration>): T {
+            block.accept(component.config)
+            return component
+        }
+
+        @JvmStatic
+        public fun <T : ComponentProperties> properties(properties: T, block: Consumer<T>): T {
+            block.accept(properties)
+            return properties
+        }
+
+        @JvmStatic
+        public fun <T : ComponentEffects> effects(effects: T, block: Consumer<T>): T {
+            block.accept(effects)
+            return effects
+        }
+
+    }
+
+    public var engine: Engine? = null
+        private set
+    public var parent: Component? = null
+        private set
+
+    public val hasParent: Boolean
+        get() = parent != null
+
+    public val config: ComponentConfiguration = ComponentConfiguration(this)
+
+    public val events: ComponentEvents = ComponentEvents()
+
+    public val width: Float
+        get() = config.properties.width.getWidth(this)
+
+    public val height: Float
+        get() = config.properties.height.getHeight(this)
+
+    public val top: Float
+        get() = config.properties.y.getY(this)
+
+    public val left: Float
+        get() = config.properties.x.getX(this)
+
+    public val right: Float
+        get() = left + width
+
+    public val bottom: Float
+        get() = top + height
+
+    private var isRoot = false
+    private var systemTime = -1L
+
+    private val children = LinkedList<Component>()
 
     private var currentlyHovered = false
     private var lastHoveredMouseX = 0.0
@@ -18,211 +98,381 @@ public abstract class Component {
 
     private var internalIndex = -1
     private var initialized = false
-    public var parent: Component? = null
-        private set(value) {
-            if (field == value) return
-            val oldParent = field
-            field = value
-            parentChangeListeners.forEach { it(ComponentParentChangeEvent(oldParent, value)) }
-        }
-    public val hasParent: Boolean
-        get() = parent != null
-    private val children = SubscribeableLinkedList<Component>()
-
-    private var hidden = false
-    internal var shouldRedraw = true
-        set(value) {
-            if (value) parent?.shouldRedraw = true
-            field = value
-        }
-    private var requestedRedraw = false
-        set(value) {
-            if (value) parent?.requestedRedraw = true
-            field = value
-        }
-
-    init {
-        children.subscribe { event ->
-            when (event) {
-                is ListAddEvent -> {
-                    event.element.value.parent = this
-                    event.element.value.internalIndex = event.element.index
-                }
-
-                is ListRemoveEvent -> {
-                    event.element.value.parent = null
-                    event.element.value.internalIndex = -1
-                }
-
-                is ListClearEvent -> {
-                    event.elements.forEach { it.parent = null }
-                }
-            }
-        }
-    }
 
     // Abstractions
 
-    public open fun preRender(
-        stack: OmniMatrixStack,
-        tickDelta: Float
-    ) {
-    }
+    public open val isAlreadyCentered: Boolean = false
 
-    public open fun renderChildren(
-        stack: OmniMatrixStack,
-        tickDelta: Float
-    ) {
-        children.linkedEach { child -> renderChild(child, stack, tickDelta) }
-    }
-
-    public open fun renderChild(
-        child: Component,
-        stack: OmniMatrixStack,
-        tickDelta: Float
-    ) {
-        child.handleRender(stack, tickDelta)
-    }
-
-    public open fun postRender(
-        stack: OmniMatrixStack,
-        tickDelta: Float
-    ) {
-    }
-
+    /**
+     * Called on the first render frame.
+     *
+     * @since 0.1.0
+     * @author Deftu
+     */
     public open fun initialize() {
+    }
+
+    /**
+     * Renders before anything else, including effects, called before [render].
+     *
+     * @see render
+     * @see renderChildren
+     * @see postRender
+     * @since 0.1.0
+     * @author Deftu
+     */
+    public open fun preRender() {
+    }
+
+    /**
+     * Renders the component itself, called after [preRender] and before [renderChildren].
+     *
+     * @see preRender
+     * @see renderChildren
+     * @see postRender
+     * @since 0.1.0
+     * @author Deftu
+     */
+    public open fun render() {
+    }
+
+    /**
+     * Renders the children of this component, called after [render] and before [postRender].
+     *
+     * @see preRender
+     * @see render
+     * @see renderChildren
+     * @see postRender
+     * @since 0.1.0
+     * @author Deftu
+     */
+    public open fun renderChildren() {
+        children.forEach { child -> renderChild(child) }
+    }
+
+    /**
+     * Renders a child component.
+     *
+     * @see preRender
+     * @see render
+     * @see renderChildren
+     * @see postRender
+     * @since 0.1.0
+     * @author Deftu
+     */
+    public open fun renderChild(
+        child: Component
+    ) {
+        child.handleRender()
+    }
+
+    /**
+     * Renders after everything else, called after [renderChildren].
+     *
+     * @see preRender
+     * @see render
+     * @see renderChildren
+     * @since 0.1.0
+     * @author Deftu
+     */
+    public open fun postRender() {
+    }
+
+    /**
+     * Handles an animation frame.
+     *
+     * @since 0.1.0
+     * @author Deftu
+     */
+    public override fun frame() {
+        this.config.frame()
+        this.children.forEach(Animateable::frame)
     }
 
     // Implementation
 
-    /**
-     * Forces this component to be redrawn on the next frame.
-     */
-    public fun requestRedraw() {
-        requestedRedraw = true
+    private fun renderRoot() {
+        val window = engine!!
+        window.renderEngine.startFrame()
+
+        if (systemTime == -1L) {
+            systemTime = System.currentTimeMillis()
+        }
+
+        try {
+            val animationFps = window.renderEngine.animationFps
+            val currentTime = System.currentTimeMillis()
+
+            // Our window is behind - We're going to have to skip a few frames to catch up
+            if (currentTime - systemTime > 2_500) {
+                systemTime = System.currentTimeMillis()
+            }
+
+            val targetTime = currentTime + 1_000 / animationFps
+            val frameCount = (targetTime - systemTime).toInt() / animationFps
+            repeat(frameCount.coerceAtMost((animationFps / 30).coerceAtLeast(1))) {
+                frame()
+                systemTime += 1_000 / animationFps
+            }
+        } catch (t: Throwable) {
+            t.printStackTrace()
+        }
+
+        window.renderEngine.endFrame()
     }
+
+    public fun makeRoot(engine: Engine): Component = apply {
+        if (this.engine != null) {
+            throw EnginePresentException("Root component already has a window assigned to it")
+        }
+
+        if (hasParent) {
+            throw InvalidHierarchyException("Root component cannot have a parent")
+        }
+
+        this.isRoot = true
+        this.engine = engine
+    }
+
+    public fun <T : Component> attachedTo(parent: Component): T = apply {
+        parent.addChild(this)
+    } as T
 
     /**
      * Adds a child to this component.
      *
-     * If:
-     * - The child already has a parent, it will be removed from that parent.
-     * - The window containing this component supports frame pausing, the component will be redrawn immediately.
-     *
      * @param child The child to add
+     *
+     * @since 0.1.0
+     * @author Deftu
      */
     public fun addChild(child: Component) {
-        children.add(child)
-        shouldRedraw = true
+        child.parent?.removeChild(child)
+        this.children.add(child)
+        child.parent = this
+        child.engine = this.engine
     }
 
     /**
      * Adds a child to this component at the specified index.
      *
-     * If:
-     * - The child already has a parent, it will be removed from that parent.
-     * - The window containing this component supports frame pausing, the component will be redrawn immediately.
-     * - The index is out of bounds, the child will be added to the end of the list.
-     * - There is already a child at the specified index, it will be pushed back.
-     *
      * @param index The index to add the child at
      * @param child The child to add
+     * @throws IndexOutOfBoundsException If the index is less than 0 or greater than the size of the children list
+     *
+     * @since 0.1.0
+     * @author Deftu
      */
     public fun addChild(index: Int, child: Component) {
-        val actualIndex = if (index < 0 || index >= children.size) children.size else index
-        children.add(actualIndex, child)
-        shouldRedraw = true
+        if (index < 0 || index > this.children.size) {
+            throw IndexOutOfBoundsException("Index $index is out of bounds for children list of size ${children.size}")
+        }
+
+        child.parent?.removeChild(child)
+        this.children.add(index, child)
+        child.parent = this
+        child.engine = this.engine
     }
 
     /**
      * Replaces a child at the specified index with the specified child.
      *
-     * If:
-     * - The child already has a parent, it will be removed from that parent.
-     * - The window containing this component supports frame pausing, the component will be redrawn immediately.
-     *
      * @param index The index to replace the child at
      * @param child The child to replace the old child with
+     * @throws IndexOutOfBoundsException If the index is less than 0 or greater than the size of the children list
+     *
+     * @since 0.1.0
+     * @author Deftu
      */
     public fun replaceChild(index: Int, child: Component) {
-        children[index] = child
-        shouldRedraw = true
+        if (index < 0 || index >= this.children.size) {
+            throw IndexOutOfBoundsException("Index $index is out of bounds for children list of size ${this.children.size}")
+        }
+
+        this.children[index].parent = null
+        this.children[index] = child
+        child.parent = this
+        child.engine = this.engine
     }
 
     /**
      * Removes a child from this component.
      *
-     * If:
-     * - The window containing this component supports frame pausing, the component will be redrawn immediately.
-     *
      * @param child The child to remove
+     *
+     * @since 0.1.0
+     * @author Deftu
      */
     public fun removeChild(child: Component) {
-        children.remove(child)
-        shouldRedraw = true
+        this.children.remove(child)
+        child.parent = null
     }
 
     /**
      * Removes a child from this component at the specified index.
      *
-     * If:
-     * - The window containing this component supports frame pausing, the component will be redrawn immediately.
-     * - The index is out of bounds, an exception will be thrown.
-     *
      * @param index The index to remove the child at
+     * @throws IndexOutOfBoundsException If the index is less than 0 or greater than the size of the children list
+     *
+     * @since 0.1.0
+     * @author Deftu
      */
     public fun removeChild(index: Int) {
-        children[index].parent = null
-        children.removeAt(index)
-        shouldRedraw = true
+        if (index < 0 || index >= this.children.size) {
+            throw IndexOutOfBoundsException("Index $index is out of bounds for children list of size ${this.children.size}")
+        }
+
+        this.children[index].parent = null
+        this.children.removeAt(index)
     }
 
+    /**
+     * Removes all children from this component.
+     *
+     * @since 0.1.0
+     * @author Deftu
+     */
     public fun clearChildren() {
-        children.forEach { it.parent = null }
-        children.clear()
-        shouldRedraw = true
+        this.children.forEach { it.parent = null }
+        this.children.clear()
     }
 
+    /**
+     * Adds multiple children to this component.
+     *
+     * @param children The children to add
+     *
+     * @see addChild
+     * @since 0.1.0
+     * @author Deftu
+     */
     public fun addChildren(vararg children: Component) {
         children.forEach(::addChild)
     }
 
+    /**
+     * Removes multiple children from this component.
+     *
+     * @param children The children to remove
+     *
+     * @see removeChild
+     * @since 0.1.0
+     * @author Deftu
+     */
     public fun removeChildren(vararg children: Component) {
         children.forEach(::removeChild)
     }
 
+    /**
+     * Removes children from this component at the given indices.
+     *
+     * @param indices The indices to remove children at
+     * @throws IndexOutOfBoundsException If any of the indices are less than 0 or greater than the size of the children list
+     *
+     * @see removeChild
+     * @since 0.1.0
+     * @author Deftu
+     */
     public fun removeChildren(vararg indices: Int) {
         indices.forEach(::removeChild)
     }
 
+    /**
+     * Removes children from this component that match the given predicate.
+     *
+     * @param predicate The predicate to match children against
+     *
+     * @see removeChild
+     * @since 0.1.0
+     * @author Deftu
+     */
     public fun removeChildrenIf(predicate: (Component) -> Boolean) {
         children.filter(predicate).forEach(::removeChild)
     }
 
-    public fun handleRender(
-        stack: OmniMatrixStack,
-        tickDelta: Float
-    ) {
-        if (hidden) return
+    public fun getChildAt(index: Int): Component {
+        return children[index]
+    }
+
+    public fun indexOfChild(child: Component): Int {
+        return children.indexOf(child)
+    }
+
+    public fun addEffect(effect: Effect) {
+        config.effects.add(effect)
+    }
+
+    public fun removeEffect(effect: Effect) {
+        config.effects.remove(effect)
+    }
+
+    public fun <T : Component> onMouseClick(listener: Consumer<MouseClickEvent>): T = apply {
+        events.mouseClickListeners.add(listener::accept)
+    } as T
+
+    public fun <T : Component> onMouseRelease(listener: Consumer<MouseReleaseEvent>): T = apply {
+        events.mouseReleaseListeners.add(listener::accept)
+    } as T
+
+    public fun <T : Component> onMouseDrag(listener: Consumer<MouseDragEvent>): T = apply {
+        events.mouseDragListeners.add(listener::accept)
+    } as T
+
+    public fun <T : Component> onMouseScroll(listener: Consumer<MouseScrollEvent>): T = apply {
+        events.mouseScrollListeners.add(listener::accept)
+    } as T
+
+    public fun <T : Component> onMouseHover(listener: Consumer<MouseHoverEvent>): T = apply {
+        events.mouseHoverListeners.add(listener::accept)
+    } as T
+
+    public fun <T : Component> onMouseUnhover(listener: Consumer<MouseHoverEvent>): T = apply {
+        events.mouseUnhoverListeners.add(listener::accept)
+    } as T
+
+    public fun <T : Component> onKeyPress(listener: Consumer<KeyPressEvent>): T = apply {
+        events.keyPressListeners.add(listener::accept)
+    } as T
+
+    public fun beginAnimation(): ComponentAnimationProperties {
+        return config.beginAnimation()
+    }
+
+    /**
+     * Calls all render-relating operations in their correct order to render the component.
+     *
+     * @see initialize
+     * @see preRender
+     * @see render
+     * @see renderChildren
+     * @see postRender
+     * @since 0.1.0
+     * @author Deftu
+     */
+    public fun handleRender() {
+        if (config.hidden) {
+            // We can skip our render operation altogether if we're hidden
+            // This saves us some performance
+            return
+        }
+
         if (!initialized) {
+            // Initialize the component on the first possible frame to ensure that it has time to set up
             initialize()
             initialized = true
         }
 
-        if (requestedRedraw) {
-            shouldRedraw = true
-            requestedRedraw = false
+        // Begin our render operations!
+        preRender()
+        if (isRoot) {
+            renderRoot()
         }
 
-        preRender(stack, tickDelta)
-        renderChildren(stack, tickDelta)
-        postRender(stack, tickDelta)
+        config.effects.preRender()
+        render()
+        renderChildren()
+        postRender()
+        config.effects.postRender()
     }
 
-    public fun onParentChange(callback: (ComponentParentChangeEvent) -> Unit): () -> Unit {
-        parentChangeListeners.add(callback)
-        return {
-            parentChangeListeners.remove(callback)
-        }
-    }
 }
