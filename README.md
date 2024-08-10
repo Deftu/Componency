@@ -58,7 +58,7 @@ maven(url = "https://maven.deftu.dev/releases") {
     <summary>Groovy (.gradle)</summary>
 
 ```gradle
-modImplementation "dev.deftu:omnicore-<MCVERSION>-<MODLOADER>:<VERSION>"
+modImplementation "dev.deftu:componency:<VERSION>"
 ```
 
 </details>
@@ -67,7 +67,7 @@ modImplementation "dev.deftu:omnicore-<MCVERSION>-<MODLOADER>:<VERSION>"
     <summary>Kotlin (.gradle.kts)</summary>
 
 ```gradle
-implementation("dev.deftu:omnicore-<MCVERSION>-<MODLOADER>:<VERSION>")
+implementation("dev.deftu:componency:<VERSION>")
 ```
 
 </details>
