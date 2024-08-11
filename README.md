@@ -102,7 +102,7 @@ class MyEngine : Engine {
 
 class MyInputEngine : InputEngine {
 
-    override val mouseX: Flaot = 0f
+    override val mouseX: Float = 0f
 
     override val mouseY: Float = 0f
 
