@@ -74,7 +74,7 @@ public class JavaExampleUI {
     // You'll want to wrap all of your frame's IO in exposed functions like this
 
     public void render() {
-        frame.render();
+        frame.handleRender();
     }
 
     // If our component is going too complex (requiring a lot of configuration), we can split it into a separate class.

@@ -183,7 +183,7 @@ class MyUI(engine: Engine) {
 
 ## Further examples
 
-For more examples, you can check out the [example](./example) directory. ([Java](./example/src/main/java/JavaExampleUI.java), [Kotlin](./example/src/main/kotlin/KotlinExampleUI.kt))
+For more examples, you can check out the [basic examples](./example-basic) directory. ([Java](./example-basic/src/main/java/JavaExampleUI.java), [Kotlin](./example-basic/src/main/kotlin/KotlinExampleUI.kt))
 
 ---
 

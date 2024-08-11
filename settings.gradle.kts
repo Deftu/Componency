@@ -30,4 +30,4 @@ val projectName: String = extra["project.name"]?.toString()
     ?: throw MissingPropertyException("project.name has not been set.")
 rootProject.name = projectName
 
-include(":example")
+include(":example-basic")

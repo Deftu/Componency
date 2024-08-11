@@ -73,7 +73,7 @@ class KotlinExampleUI(engine: Engine) {
     // You'll want to wrap all of your frame's IO in exposed functions like this
 
     fun render() {
-        frame.render()
+        frame.handleRender()
     }
 
 }
