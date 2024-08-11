@@ -3,6 +3,7 @@ package dev.deftu.componency.components
 import dev.deftu.componency.dsl.asProperty
 import dev.deftu.componency.dsl.degrees
 import dev.deftu.componency.dsl.px
+import dev.deftu.componency.font.Font
 import dev.deftu.componency.properties.*
 import dev.deftu.componency.utils.Animateable
 import java.awt.Color
@@ -23,6 +24,8 @@ public open class ComponentProperties(public val component: Component) : Animate
 
     public var angle: AngleProperty = 0.degrees
 
+    public var font: Font? = null
+
     override fun frame() {
         x.frame()
         y.frame()
@@ -41,6 +44,7 @@ public open class ComponentProperties(public val component: Component) : Animate
         fill = properties.fill
         radius = properties.radius
         angle = properties.angle
+        font = properties.font
     }
 
 }
