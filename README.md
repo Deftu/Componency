@@ -34,8 +34,8 @@ All the examples from here on out will be in Kotlin, but the library can be used
 
 ```gradle
 maven {
-    name = "Deftu Releases"
-    url = "https://maven.deftu.dev/releases"
+    name = "Deftu Snapshots"
+    url = "https://maven.deftu.dev/snapshots"
 }
 ```
 </details>
@@ -44,8 +44,8 @@ maven {
     <summary>Kotlin (.gradle.kts)</summary>
 
 ```kotlin
-maven(url = "https://maven.deftu.dev/releases") {
-    name = "Deftu Releases"
+maven(url = "https://maven.deftu.dev/snapshots") {
+    name = "Deftu Snapshots"
 }
 ```
 </details>
