@@ -31,3 +31,4 @@ val projectName: String = extra["project.name"]?.toString()
 rootProject.name = projectName
 
 include(":example-basic")
+include(":example-lwjgl3")

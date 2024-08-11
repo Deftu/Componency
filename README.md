@@ -185,6 +185,8 @@ class MyUI(engine: Engine) {
 
 For more examples, you can check out the [basic examples](./example-basic) directory. ([Java](./example-basic/src/main/java/JavaExampleUI.java), [Kotlin](./example-basic/src/main/kotlin/KotlinExampleUI.kt))
 
+Or, if you'd like to implement for LWJGL3, you can check out the [LWJGL3 example](./example-lwjgl3) directory.
+
 ---
 
 [![BisectHosting](https://www.bisecthosting.com/partners/custom-banners/8fb6621b-811a-473b-9087-c8c42b50e74c.png)](https://bisecthosting.com/deftu)
