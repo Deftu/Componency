@@ -13,7 +13,6 @@ public class RectangleComponent : Component() {
         val topRightRadius = config.properties.topRightRadius.getRadius(this)
         val bottomRightRadius = config.properties.bottomRightRadius.getRadius(this)
         val bottomLeftRadius = config.properties.bottomLeftRadius.getRadius(this)
-
         engine.renderEngine.fill(
             x1 = left,
             y1 = top,
@@ -25,6 +24,26 @@ public class RectangleComponent : Component() {
             bottomRightRadius = bottomRightRadius,
             bottomLeftRadius = bottomLeftRadius
         )
+
+        val stroke = config.properties.stroke.getStroke(this)
+        if (!stroke.isNone) {
+            val strokeColor = stroke.color
+            val strokeWidth = stroke.width.getWidth(this)
+            val strokeSides = stroke.sides
+            engine.renderEngine.stroke(
+                x1 = left,
+                y1 = top,
+                x2 = right,
+                y2 = bottom,
+                color = strokeColor,
+                strokeWidth = strokeWidth,
+                strokeSides = strokeSides,
+                topLeftRadius = topLeftRadius,
+                topRightRadius = topRightRadius,
+                bottomRightRadius = bottomRightRadius,
+                bottomLeftRadius = bottomLeftRadius
+            )
+        }
     }
 
 }

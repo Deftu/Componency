@@ -12,6 +12,9 @@ public abstract class Color(
     public companion object {
 
         @JvmField
+        public val TRANSPARENT: Color = rgba(red = 0, green = 0, blue = 0, alpha = 0)
+
+        @JvmField
         public val WHITE: Color = rgb(red = 255, green = 255, blue = 255)
 
         @JvmField

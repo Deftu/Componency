@@ -6,6 +6,7 @@ import dev.deftu.componency.dsl.degrees
 import dev.deftu.componency.dsl.px
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.properties.*
+import dev.deftu.componency.styling.Stroke
 import dev.deftu.componency.utils.Animateable
 
 public open class ComponentProperties(public val component: Component) : Animateable {
@@ -19,6 +20,8 @@ public open class ComponentProperties(public val component: Component) : Animate
     public var height: HeightProperty = 0.px
 
     public var fill: ColorProperty = Color.WHITE.asProperty
+
+    public var stroke: StrokeProperty = Stroke.NONE.asProperty
 
     public var topLeftRadius: RadialProperty = 0.px
 

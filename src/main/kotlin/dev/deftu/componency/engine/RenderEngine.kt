@@ -3,6 +3,7 @@ package dev.deftu.componency.engine
 import dev.deftu.componency.color.Color
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.image.Image
+import dev.deftu.componency.styling.StrokeSide
 import dev.deftu.textile.TextHolder
 import kotlin.math.abs
 import kotlin.math.round
@@ -35,6 +36,8 @@ public interface RenderEngine {
     public fun startFrame()
 
     public fun endFrame()
+
+    public fun stroke(x1: Float, y1: Float, x2: Float, y2: Float, color: Color, strokeWidth: Float, strokeSides: Set<StrokeSide>, topLeftRadius: Float, topRightRadius: Float, bottomRightRadius: Float, bottomLeftRadius: Float)
 
     public fun fill(x1: Float, y1: Float, x2: Float, y2: Float, color: Color, topLeftRadius: Float, topRightRadius: Float, bottomRightRadius: Float, bottomLeftRadius: Float)
 

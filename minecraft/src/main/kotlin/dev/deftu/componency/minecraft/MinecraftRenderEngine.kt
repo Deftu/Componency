@@ -9,6 +9,7 @@ import dev.deftu.componency.image.Image
 import dev.deftu.componency.image.ImageType
 import dev.deftu.componency.minecraft.nvg.NSvgContext
 import dev.deftu.componency.minecraft.nvg.NvgContext
+import dev.deftu.componency.styling.StrokeSide
 import dev.deftu.omnicore.client.render.OmniRenderState
 import dev.deftu.omnicore.client.render.OmniResolution
 import dev.deftu.omnicore.client.render.OmniTextureManager
@@ -125,6 +126,35 @@ public object MinecraftRenderEngine : RenderEngine {
         activeTexture?.let(OmniTextureManager::setActiveTexture)
 
         isDrawing = false
+    }
+
+    override fun stroke(
+        x1: Float,
+        y1: Float,
+        x2: Float,
+        y2: Float,
+        color: Color,
+        strokeWidth: Float,
+        strokeSides: Set<StrokeSide>,
+        topLeftRadius: Float,
+        topRightRadius: Float,
+        bottomRightRadius: Float,
+        bottomLeftRadius: Float
+    ) {
+        if (color.isTransparent || strokeWidth == 0f) {
+            return
+        }
+
+        val width = x2 - x1
+        val height = y2 - y1
+
+        NanoVG.nvgBeginPath(context.handle)
+        NanoVG.nvgRoundedRectVarying(context.handle, x1, y1, width, height, topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius)
+        NanoVG.nvgStrokeWidth(context.handle, strokeWidth)
+        NanoVG.nvgLineJoin(context.handle, NanoVG.NVG_ROUND)
+        NanoVG.nvgLineCap(context.handle, NanoVG.NVG_ROUND)
+        populateStrokeColor(color, x1, y1, width, height)
+        NanoVG.nvgStroke(context.handle)
     }
 
     override fun fill(
@@ -398,6 +428,14 @@ public object MinecraftRenderEngine : RenderEngine {
             NanoVG.nvgFillPaint(context.handle, nvgPaint)
         } else {
             NanoVG.nvgFillColor(context.handle, nvgColor)
+        }
+    }
+
+    private fun populateStrokeColor(color: Color, x: Float, y: Float, width: Float, height: Float) {
+        if (populateColor(color, x, y, width, height)) {
+            NanoVG.nvgStrokePaint(context.handle, nvgPaint)
+        } else {
+            NanoVG.nvgStrokeColor(context.handle, nvgColor)
         }
     }
 
