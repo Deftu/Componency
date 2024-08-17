@@ -189,6 +189,16 @@ Or, if you'd like to implement for LWJGL3, you can check out the [LWJGL3 example
 
 ---
 
+## Credits
+
+- [nea89o](https://github.com/nea89o) / [HypixelDev](https://github.com/HypixelDev)
+  - Dependency management tweaker for Forge 1.8.9 & 1.12.2. ([ForgeModAPI](https://github.com/HypixelDev/ForgeModAPI) - nea89o)
+- [nextdayy](https://github.com/nextdayy) / [xtrm](https://github.com/xtrm-en) / [Polyfrost](https://github.com/Polyfrost)
+  - Inspiration for the way the engine is set up. ([polyui-jvm](https://github.com/Polyfrost/polyui-jvm) - nextdayy)
+  - LWJGL 3 bootstrapper for legacy Minecraft versions. ([lwjgl3-bootstrap](https://github.com/Polyfrost/lwjgl3-bootstrap/) - xtrm)
+
+---
+
 [![BisectHosting](https://www.bisecthosting.com/partners/custom-banners/8fb6621b-811a-473b-9087-c8c42b50e74c.png)](https://bisecthosting.com/deftu)
 
 ---
