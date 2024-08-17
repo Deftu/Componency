@@ -5,6 +5,14 @@ A simple, [declarative][declarative_programming] UI library built from the groun
 
 ---
 
+[![Discord Badge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/social/discord-singular_vector.svg)](https://s.deftu.dev/discord)
+
+[![Ko-Fi Badge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/donate/kofi-singular_vector.svg)](https://s.deftu.dev/kofi)
+[![PayPal Badge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/donate/paypal-singular_vector.svg)](https://s.deftu.dev/paypal)
+[![GH Sponsors Badge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/donate/ghsponsors-singular_vector.svg)](https://s.deftu.dev/ghs)
+
+---
+
 ## Inspiration
 
 Componency is roughly based on 3 other things:
