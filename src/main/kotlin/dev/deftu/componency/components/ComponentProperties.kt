@@ -23,6 +23,21 @@ public open class ComponentProperties(public val component: Component) : Animate
 
     public var stroke: StrokeProperty = Stroke.NONE.asProperty
 
+    public var radius: RadialProperty
+        get() {
+            if (topLeftRadius == topRightRadius && topRightRadius == bottomRightRadius && bottomRightRadius == bottomLeftRadius) {
+                return topLeftRadius
+            } else {
+                error("Radius values are mixed")
+            }
+        }
+        set(value) {
+            topLeftRadius = value
+            topRightRadius = value
+            bottomRightRadius = value
+            bottomLeftRadius = value
+        }
+
     public var topLeftRadius: RadialProperty = 0.px
 
     public var topRightRadius: RadialProperty = 0.px
