@@ -59,8 +59,28 @@ public abstract class Color(
         }
 
         @JvmStatic
+        public fun rgba(rgba: Int): Color {
+            return StaticColor(
+                red = (rgba shr 16) and 0xFF,
+                green = (rgba shr 8) and 0xFF,
+                blue = rgba and 0xFF,
+                alpha = (rgba shr 24) and 0xFF
+            )
+        }
+
+        @JvmStatic
         public fun rgb(red: Int, green: Int, blue: Int): Color {
             return StaticColor(red = red, green = green, blue = blue)
+        }
+
+        @JvmStatic
+        public fun rgb(rgb: Int): Color {
+            return rgba(
+                red = (rgb shr 16) and 0xFF,
+                green = (rgb shr 8) and 0xFF,
+                blue = rgb and 0xFF,
+                alpha = 255
+            )
         }
 
         @JvmStatic
