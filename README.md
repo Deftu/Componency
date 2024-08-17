@@ -187,6 +187,80 @@ For more examples, you can check out the [basic examples](./example-basic) direc
 
 Or, if you'd like to implement for LWJGL3, you can check out the [LWJGL3 example](./example-lwjgl3) directory.
 
+## Setting up in Minecraft
+
+Both modern and legacy Minecraft versions still require the user of the repository defined in the [Set up](#set-up) section. The version number is the same for the Minecraft artifacts as it is for the main library.
+
+### Modern Minecraft (1.16.5 and above)
+
+It's as simple as defining the dependency in your build script to use the Componency Minecraft engine in modern Minecraft versions.
+
+<details>
+    <summary>Groovy (.gradle)</summary>
+
+```gradle
+modImplementation "dev.deftu:componency-minecraft-<MINECRAFT VERSION>-<MOD LOADER>:<VERSION>"
+```
+
+</details>
+
+<details>
+    <summary>Kotlin (.gradle.kts)</summary>
+
+```gradle
+implementation("dev.deftu:componency-minecraft-<MINECRAFT VERSION>-<MOD LOADER>:<VERSION>")
+```
+
+</details>
+
+### Legacy Minecraft (1.12.2 and 1.8.9)
+
+We require additional setup for legacy Minecraft versions, as we need to use a dependency management tweaker to ensure that the latest version of Componency is loaded.
+
+Not only does it handle the version of the library, but it also forces Minecraft to use LWJGL 3 to load NanoVG and STB so that our engine can use both for rendering.
+
+Additional instructions for use alongside other tweakers can be found [inside the class file itself](./minecraft-tweaker/src/main/kotlin/dev/deftu/componency/minecraft/tweaker/ComponencyTweaker.kt).
+
+<details>
+    <summary>Groovy (.gradle)</summary>
+
+```gradle
+dependencies {
+    modImplementation "dev.deftu:componency-minecraft-<MINECRAFT VERSION>-<MOD LOADER>:<VERSION>"
+    modImplementation "dev.deftu:componency-minecraft-tweaker-<MINECRAFT VERSION>-<MOD LOADER>:<VERSION>"
+}
+
+jar {
+    manifest {
+        attributes(
+            "TweakClass": "dev.deftu.componency.minecraft.tweaker.ComponencyTweaker"
+        )
+    }
+}
+```
+
+</details>
+
+<details>
+    <summary>Kotlin (.gradle.kts)</summary>
+
+```gradle
+dependencies {
+    implementation("dev.deftu:componency-minecraft-<MINECRAFT VERSION>-<MOD LOADER>:<VERSION>")
+    implementation("dev.deftu:componency-minecraft-tweaker-<MINECRAFT VERSION>-<MOD LOADER>:<VERSION>")
+}
+
+tasks.jar {
+    manifest {
+        attributes(
+            "TweakClass" to "dev.deftu.componency.minecraft.tweaker.ComponencyTweaker"
+        )
+    }
+}
+```
+
+</details>
+
 ---
 
 ## Credits
