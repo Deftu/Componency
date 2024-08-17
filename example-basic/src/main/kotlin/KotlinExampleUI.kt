@@ -1,4 +1,5 @@
 import dev.deftu.componency.animations.Easings
+import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.components.impl.FrameComponent
 import dev.deftu.componency.components.impl.RectangleComponent
@@ -6,7 +7,6 @@ import dev.deftu.componency.dsl.*
 import dev.deftu.componency.engine.Engine
 import dev.deftu.componency.properties.VectorProperty
 import dev.deftu.componency.properties.impl.LinkedProperty
-import java.awt.Color
 
 class KotlinExampleUI(engine: Engine) {
 
@@ -18,7 +18,7 @@ class KotlinExampleUI(engine: Engine) {
         properties {
             x = 0.px // Default
             y = 0.px // Default
-            radius = 0.px // Default
+            topLeftRadius = 0.px // Default
 
             // Sizing properties, both 100% by default
             // Because this frame is the root component, it's full width and height are the size of the window
@@ -61,7 +61,7 @@ class KotlinExampleUI(engine: Engine) {
                 // Inside here, we have access to all of our properties
                 animateWidth(
                     easing = Easings.IN_OUT_CUBIC,
-                    duration = 500L.millis,
+                    duration = 500.millis,
                     newValue = 50.percent
                 )
             }

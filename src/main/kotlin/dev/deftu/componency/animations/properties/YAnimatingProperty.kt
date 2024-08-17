@@ -9,7 +9,7 @@ public class YAnimatingProperty(
     easing: Easing,
     totalFrames: Int,
     private val oldValue: YProperty,
-    private val newValue: YProperty,
+    public val newValue: YProperty,
     delayFrames: Int
 ) : AnimatingProperty<Float>(easing, totalFrames, delayFrames), YProperty {
 

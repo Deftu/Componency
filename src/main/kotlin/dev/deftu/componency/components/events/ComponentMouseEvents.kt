@@ -2,36 +2,34 @@ package dev.deftu.componency.components.events
 
 import dev.deftu.componency.components.Component
 
-public class MouseClickEvent(
-    component: Component,
+public data class MouseClickEvent(
+    override val component: Component,
     public val x: Double,
     public val y: Double,
     public val button: Int
 ) : CancellableComponentEvent(component)
 
-public class MouseReleaseEvent(
-    component: Component,
+public data class MouseReleaseEvent(
+    override val component: Component,
     public val x: Double,
     public val y: Double,
     public val button: Int
 ) : CancellableComponentEvent(component)
 
-public class MouseDragEvent(
-    component: Component,
+public data class MouseDragEvent(
+    override val component: Component,
     public val x: Double,
     public val y: Double,
     public val button: Int
 ) : CancellableComponentEvent(component)
 
-public class MouseHoverEvent(
-    component: Component,
+public data class MouseHoverEvent(
+    override val component: Component,
     public val x: Double,
     public val y: Double
 ) : ComponentEvent(component)
 
-public class MouseScrollEvent(
-    component: Component,
-    public val x: Double,
-    public val y: Double,
+public data class MouseScrollEvent(
+    override val component: Component,
     public val delta: Double
 ) : CancellableComponentEvent(component)

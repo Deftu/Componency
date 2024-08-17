@@ -1,8 +1,8 @@
 package dev.deftu.componency.utils
 
+import dev.deftu.componency.color.Color
 import dev.deftu.componency.dsl.withAlpha
 import dev.deftu.componency.dsl.withAlphaPercentage
-import java.awt.Color
 
 public object Colors {
 

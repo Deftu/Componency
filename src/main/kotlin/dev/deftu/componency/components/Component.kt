@@ -4,6 +4,7 @@ package dev.deftu.componency.components
 
 import dev.deftu.componency.animations.ComponentAnimationProperties
 import dev.deftu.componency.components.events.*
+import dev.deftu.componency.dsl.px
 import dev.deftu.componency.effects.Effect
 import dev.deftu.componency.engine.Engine
 import dev.deftu.componency.exceptions.EnginePresentException
@@ -69,11 +70,13 @@ public abstract class Component : Animateable {
 
     public val events: ComponentEvents = ComponentEvents()
 
-    public val width: Float
+    public var width: Float
         get() = config.properties.width.getWidth(this)
+        set(value) { config.properties.width = value.px }
 
-    public val height: Float
+    public var height: Float
         get() = config.properties.height.getHeight(this)
+        set(value) { config.properties.height = value.px }
 
     public val top: Float
         get() = config.properties.y.getY(this)
@@ -92,9 +95,25 @@ public abstract class Component : Animateable {
 
     private val children = LinkedList<Component>()
 
-    private var currentlyHovered = false
+    protected val mousePos: Pair<Double, Double>
+        get() {
+            val engine = engine!!
+            val halfPixel = 0.5 / engine.renderEngine.pixelRatio
+            return Pair(engine.inputEngine.mouseX + halfPixel, engine.inputEngine.mouseY + halfPixel)
+        }
+
+    // Input state
+    /// Mouse Hover
+    private var isCurrentlyHovered = false
     private var lastHoveredMouseX = 0.0
     private var lastHoveredMouseY = 0.0
+
+    /// Mouse Drag & Click
+    private var lastDraggedMouseX = 0.0
+    private var lastDraggedMouseY = 0.0
+    private var currentClickCount = 0
+    private var lastClickButton = 0
+    private var lastClickTime = 0L
 
     private var internalIndex = -1
     private var initialized = false
@@ -185,41 +204,37 @@ public abstract class Component : Animateable {
      * @author Deftu
      */
     public override fun frame() {
+        if (isRoot && lastClickButton != -1) {
+            val (x, y) = mousePos
+            handleMouseDrag(x, y)
+        }
+
         this.config.frame()
         this.children.forEach(Animateable::frame)
     }
 
+    public open fun isPointInside(x: Double, y: Double): Boolean {
+        return x >= left && x <= right && y >= top && y <= bottom
+    }
+
+    public open fun hitTest(x: Double, y: Double): Component? {
+        if (!isPointInside(x, y)) {
+            return null
+        }
+
+        for (child in children.reversed()) {
+            val hit = child.hitTest(x, y)
+            if (hit != null) {
+                return hit
+            }
+        }
+
+        return this
+    }
+
     // Implementation
 
-    private fun renderRoot() {
-        val window = engine!!
-        window.renderEngine.startFrame()
-
-        if (systemTime == -1L) {
-            systemTime = System.currentTimeMillis()
-        }
-
-        try {
-            val animationFps = window.renderEngine.animationFps
-            val currentTime = System.currentTimeMillis()
-
-            // Our window is behind - We're going to have to skip a few frames to catch up
-            if (currentTime - systemTime > 2_500) {
-                systemTime = System.currentTimeMillis()
-            }
-
-            val targetTime = currentTime + 1_000 / animationFps
-            val frameCount = (targetTime - systemTime).toInt() / animationFps
-            repeat(frameCount.coerceAtMost((animationFps / 30).coerceAtLeast(1))) {
-                frame()
-                systemTime += 1_000 / animationFps
-            }
-        } catch (t: Throwable) {
-            t.printStackTrace()
-        }
-
-        window.renderEngine.endFrame()
-    }
+    /// Hierarchy
 
     public fun makeRoot(engine: Engine): Component = apply {
         if (this.engine != null) {
@@ -406,6 +421,36 @@ public abstract class Component : Animateable {
         config.effects.remove(effect)
     }
 
+    /// Events
+
+    protected fun fireMouseClickEvent(event: MouseClickEvent) {
+        for (listener in events.mouseClickListeners) {
+            listener.invoke(event)
+
+            if (event.isCancelled) {
+                return
+            }
+        }
+
+        if (hasParent) {
+            parent!!.fireMouseClickEvent(event.copy(component = parent!!))
+        }
+    }
+
+    protected fun fireMouseScrollEvent(event: MouseScrollEvent) {
+        for (listener in events.mouseScrollListeners) {
+            listener.invoke(event)
+
+            if (event.isCancelled) {
+                return
+            }
+        }
+
+        if (hasParent) {
+            parent!!.fireMouseScrollEvent(event.copy(component = parent!!))
+        }
+    }
+
     public fun <T : Component> onMouseClick(listener: Consumer<MouseClickEvent>): T = apply {
         events.mouseClickListeners.add(listener::accept)
     } as T
@@ -456,6 +501,11 @@ public abstract class Component : Animateable {
             return
         }
 
+        // Tell our engine that we're starting a new frame
+        if (isRoot) {
+            engine!!.renderEngine.startFrame()
+        }
+
         if (!initialized) {
             // Initialize the component on the first possible frame to ensure that it has time to set up
             initialize()
@@ -464,15 +514,125 @@ public abstract class Component : Animateable {
 
         // Begin our render operations!
         preRender()
+        config.effects.preRender()
         if (isRoot) {
             renderRoot()
         }
 
-        config.effects.preRender()
         render()
         renderChildren()
         postRender()
         config.effects.postRender()
+
+        // Tell our engine that we're ending the frame
+        if (isRoot) {
+            engine!!.renderEngine.endFrame()
+        }
+
+        // Update mouse state
+        if (isRoot) {
+            val (x, y) = mousePos
+            handleMouseMove(x, y)
+        }
+    }
+
+    public fun handleMouseMove(x: Double, y: Double) {
+        val isHovered = isPointInside(x, y)
+
+        if (isHovered && !isCurrentlyHovered) {
+            for (listener in events.mouseHoverListeners) {
+                listener.invoke(MouseHoverEvent(this, x, y))
+            }
+
+            this.isCurrentlyHovered = true
+        } else if (!isHovered && isCurrentlyHovered) {
+            for (listener in events.mouseUnhoverListeners) {
+                listener.invoke(MouseHoverEvent(this, x, y))
+            }
+
+            this.isCurrentlyHovered = false
+        }
+
+        for (child in children) {
+            child.handleMouseMove(x, y)
+        }
+    }
+
+    public fun handleMouseClick(x: Double, y: Double, button: Int): Boolean {
+        val clickedChild = hitTest(x, y) ?: return false
+
+        this.lastDraggedMouseX = x
+        this.lastDraggedMouseY = y
+        this.currentClickCount = if (System.currentTimeMillis() - lastClickTime < 500) currentClickCount + 1 else 1
+        this.lastClickButton = button
+        this.lastClickTime = System.currentTimeMillis()
+
+        clickedChild.fireMouseClickEvent(MouseClickEvent(clickedChild, x, y, currentClickCount))
+        return true
+    }
+
+    public fun handleMouseRelease() {
+        for (listener in events.mouseReleaseListeners) {
+            listener.invoke(MouseReleaseEvent(this, lastDraggedMouseX, lastDraggedMouseY, lastClickButton))
+        }
+
+        lastDraggedMouseX = 0.0
+        lastDraggedMouseY = 0.0
+        lastClickButton = 0
+
+        children.forEach(Component::handleMouseRelease)
+    }
+
+    public fun handleMouseDrag(x: Double, y: Double) {
+
+    }
+
+    public fun handleMouseScroll(amount: Double) {
+        if (amount == 0.0) {
+            return
+        }
+
+        for (child in children.reversed()) {
+            if (child.isPointInside(lastHoveredMouseX, lastHoveredMouseY)) {
+                child.handleMouseScroll(amount)
+                return
+            }
+        }
+
+        fireMouseScrollEvent(MouseScrollEvent(this, amount))
+    }
+
+    public fun handleKeyPress(keyCode: Int, typedChar: Char, modifiers: KeyboardModifiers) {
+        for (listener in events.keyPressListeners) {
+            listener.invoke(KeyPressEvent(this, keyCode, typedChar, modifiers))
+        }
+    }
+
+    private fun renderRoot() {
+        val engine = engine!!
+
+        if (systemTime == -1L) {
+            systemTime = System.currentTimeMillis()
+        }
+
+        try {
+            val animationFps = engine.renderEngine.animationFps
+            val currentTime = System.currentTimeMillis()
+
+            // Our window is behind - We're going to have to skip a few frames to catch up
+            if (currentTime - systemTime > 2_500) {
+                systemTime = System.currentTimeMillis()
+            }
+
+            val targetTime = currentTime + 1_000 / animationFps
+            val frameCount = (targetTime - systemTime).toInt() / animationFps
+            repeat(frameCount.coerceAtMost((animationFps / 30).coerceAtLeast(1))) {
+                frame()
+                systemTime += 1_000 / animationFps
+            }
+        } catch (t: Throwable) {
+            t.printStackTrace()
+        }
     }
 
 }

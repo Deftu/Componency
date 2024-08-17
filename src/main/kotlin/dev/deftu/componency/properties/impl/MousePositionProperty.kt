@@ -25,7 +25,6 @@ public class MousePositionProperty(
 
     override fun calculateX(component: Component): Float {
         val mouseX = Engine.get(component).inputEngine.mouseX
-        println("Mouse X: $mouseX")
         return if (centerAlign) {
             mouseX - (component.width / 2)
         } else {
@@ -35,7 +34,6 @@ public class MousePositionProperty(
 
     override fun calculateY(component: Component): Float {
         val mouseY = Engine.get(component).inputEngine.mouseY
-        println("Mouse Y: $mouseY")
         return if (centerAlign) {
             mouseY - (component.height / 2)
         } else {

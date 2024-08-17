@@ -1,7 +1,7 @@
 package dev.deftu.componency.properties
 
+import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Component
-import java.awt.Color
 
 public interface ColorProperty : Property<Color> {
 

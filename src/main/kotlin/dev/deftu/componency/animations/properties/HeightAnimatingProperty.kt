@@ -9,7 +9,7 @@ public class HeightAnimatingProperty(
     easing: Easing,
     totalFrames: Int,
     private val oldValue: HeightProperty,
-    private val newValue: HeightProperty,
+    public val newValue: HeightProperty,
     delayFrames: Int
 ) : AnimatingProperty<Float>(easing, totalFrames, delayFrames), HeightProperty {
 

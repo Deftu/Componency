@@ -2,16 +2,16 @@ package dev.deftu.componency.animations.properties
 
 import dev.deftu.componency.animations.AnimatingProperty
 import dev.deftu.componency.animations.Easing
+import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.properties.ColorProperty
-import java.awt.Color
 import kotlin.math.roundToInt
 
 public class ColorAnimatingProperty(
     easing: Easing,
     totalFrames: Int,
     private val oldValue: ColorProperty,
-    private val newValue: ColorProperty,
+    public val newValue: ColorProperty,
     delayFrames: Int
 ) : AnimatingProperty<Color>(easing, totalFrames, delayFrames), ColorProperty {
 
@@ -33,7 +33,7 @@ public class ColorAnimatingProperty(
         val blue = startColor.blue + (endColor.blue - startColor.blue) * progress
         val alpha = startColor.alpha + (endColor.alpha - startColor.alpha) * progress
 
-        return Color(red.roundToInt(), green.roundToInt(), blue.roundToInt(), alpha.roundToInt())
+        return Color.rgba(red.roundToInt(), green.roundToInt(), blue.roundToInt(), alpha.roundToInt())
     }
 
 }

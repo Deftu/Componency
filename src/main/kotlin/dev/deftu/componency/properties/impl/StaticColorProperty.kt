@@ -1,12 +1,12 @@
 package dev.deftu.componency.properties.impl
 
+import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.properties.ColorProperty
 import dev.deftu.stateful.State
 import dev.deftu.stateful.utils.mappedMutableStateOf
 import dev.deftu.stateful.utils.mutableStateBound
 import dev.deftu.stateful.utils.stateOf
-import java.awt.Color
 
 public class StaticColorProperty(
     valueState: State<Color>

@@ -9,7 +9,7 @@ public class WidthAnimatingProperty(
     easing: Easing,
     totalFrames: Int,
     private val oldValue: WidthProperty,
-    private val newValue: WidthProperty,
+    public val newValue: WidthProperty,
     delayFrames: Int
 ) : AnimatingProperty<Float>(easing, totalFrames, delayFrames), WidthProperty {
 

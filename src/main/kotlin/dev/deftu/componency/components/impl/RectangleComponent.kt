@@ -9,7 +9,10 @@ public class RectangleComponent : Component() {
         val engine = Engine.get(this)
 
         val fill = config.properties.fill.getColor(this)
-        val radius = config.properties.radius.getRadius(this)
+        val topLeftRadius = config.properties.topLeftRadius.getRadius(this)
+        val topRightRadius = config.properties.topRightRadius.getRadius(this)
+        val bottomRightRadius = config.properties.bottomRightRadius.getRadius(this)
+        val bottomLeftRadius = config.properties.bottomLeftRadius.getRadius(this)
 
         engine.renderEngine.fill(
             x1 = left,
@@ -17,7 +20,10 @@ public class RectangleComponent : Component() {
             x2 = right,
             y2 = bottom,
             color = fill,
-            radius = radius
+            topLeftRadius = topLeftRadius,
+            topRightRadius = topRightRadius,
+            bottomRightRadius = bottomRightRadius,
+            bottomLeftRadius = bottomLeftRadius
         )
     }
 

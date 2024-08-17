@@ -20,6 +20,116 @@ public class ComponentAnimationProperties(
         listeners.add(listener::run)
     }
 
+    override fun frame() {
+        super.frame()
+
+        var isAnimating = false
+
+        val x = this.x
+        if (x is XAnimatingProperty) {
+            if (x.isFinished) {
+                this.x = x.newValue
+            } else {
+                isAnimating = true
+            }
+        }
+
+        val y = this.y
+        if (y is YAnimatingProperty) {
+            if (y.isFinished) {
+                this.y = y.newValue
+            } else {
+                isAnimating = true
+            }
+        }
+
+        val width = this.width
+        if (width is WidthAnimatingProperty) {
+            if (width.isFinished) {
+                this.width = width.newValue
+            } else {
+                isAnimating = true
+            }
+        }
+
+        val height = this.height
+        if (height is HeightAnimatingProperty) {
+            if (height.isFinished) {
+                this.height = height.newValue
+            } else {
+                isAnimating = true
+            }
+        }
+
+        val fill = this.fill
+        if (fill is ColorAnimatingProperty) {
+            if (fill.isFinished) {
+                this.fill = fill.newValue
+            } else {
+                isAnimating = true
+            }
+        }
+
+        // val stroke = this.stroke
+        // if (stroke is StrokeAnimatingProperty) {
+        //     if (stroke.isFinished) {
+        //         this.stroke = stroke.newValue
+        //     } else {
+        //         isAnimating = true
+        //     }
+        // }
+
+        val topLeftRadius = this.topLeftRadius
+        if (topLeftRadius is RadialAnimatingProperty) {
+            if (topLeftRadius.isFinished) {
+                this.topLeftRadius = topLeftRadius.newValue
+            } else {
+                isAnimating = true
+            }
+        }
+
+        val topRightRadius = this.topRightRadius
+        if (topRightRadius is RadialAnimatingProperty) {
+            if (topRightRadius.isFinished) {
+                this.topRightRadius = topRightRadius.newValue
+            } else {
+                isAnimating = true
+            }
+        }
+
+        val bottomRightRadius = this.bottomRightRadius
+        if (bottomRightRadius is RadialAnimatingProperty) {
+            if (bottomRightRadius.isFinished) {
+                this.bottomRightRadius = bottomRightRadius.newValue
+            } else {
+                isAnimating = true
+            }
+        }
+
+        val bottomLeftRadius = this.bottomLeftRadius
+        if (bottomLeftRadius is RadialAnimatingProperty) {
+            if (bottomLeftRadius.isFinished) {
+                this.bottomLeftRadius = bottomLeftRadius.newValue
+            } else {
+                isAnimating = true
+            }
+        }
+
+        val angle = this.angle
+        if (angle is AngleAnimatingProperty) {
+            if (angle.isFinished) {
+                this.angle = angle.newValue
+            } else {
+                isAnimating = true
+            }
+        }
+
+        if (!isAnimating) {
+            component.config.properties = ComponentProperties(component).copyFrom(this)
+            listeners.forEach { it() }
+        }
+    }
+
     @JvmOverloads
     public fun animateX(
         easing: Easing,
@@ -126,17 +236,68 @@ public class ComponentAnimationProperties(
     // }
 
     @JvmOverloads
-    public fun animateRadius(
+    public fun animateTopLeftRadius(
         easing: Easing,
         duration: AnimationTime,
         newValue: RadialProperty,
         delay: AnimationTime = AnimationTime.ZERO
     ): ComponentAnimationProperties = apply {
         val (totalFrames, delayFrames) = calcFrames(duration, delay)
-        radius = RadialAnimatingProperty(
+        topLeftRadius = RadialAnimatingProperty(
             easing,
             totalFrames,
-            radius,
+            topLeftRadius,
+            newValue,
+            delayFrames
+        )
+    }
+
+    @JvmOverloads
+    public fun animateTopRightRadius(
+        easing: Easing,
+        duration: AnimationTime,
+        newValue: RadialProperty,
+        delay: AnimationTime = AnimationTime.ZERO
+    ): ComponentAnimationProperties = apply {
+        val (totalFrames, delayFrames) = calcFrames(duration, delay)
+        topRightRadius = RadialAnimatingProperty(
+            easing,
+            totalFrames,
+            topRightRadius,
+            newValue,
+            delayFrames
+        )
+    }
+
+    @JvmOverloads
+    public fun animateBottomRightRadius(
+        easing: Easing,
+        duration: AnimationTime,
+        newValue: RadialProperty,
+        delay: AnimationTime = AnimationTime.ZERO
+    ): ComponentAnimationProperties = apply {
+        val (totalFrames, delayFrames) = calcFrames(duration, delay)
+        bottomRightRadius = RadialAnimatingProperty(
+            easing,
+            totalFrames,
+            bottomRightRadius,
+            newValue,
+            delayFrames
+        )
+    }
+
+    @JvmOverloads
+    public fun animateBottomLeftRadius(
+        easing: Easing,
+        duration: AnimationTime,
+        newValue: RadialProperty,
+        delay: AnimationTime = AnimationTime.ZERO
+    ): ComponentAnimationProperties = apply {
+        val (totalFrames, delayFrames) = calcFrames(duration, delay)
+        bottomLeftRadius = RadialAnimatingProperty(
+            easing,
+            totalFrames,
+            bottomLeftRadius,
             newValue,
             delayFrames
         )

@@ -15,4 +15,8 @@ public interface HeightProperty : Property<Float> {
         return this.cachedValue
     }
 
+    public fun getFontSize(component: Component): Float {
+        return getHeight(component)
+    }
+
 }

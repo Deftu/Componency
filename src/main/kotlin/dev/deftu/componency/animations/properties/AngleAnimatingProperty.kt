@@ -9,7 +9,7 @@ public class AngleAnimatingProperty(
     easing: Easing,
     totalFrames: Int,
     private val oldValue: AngleProperty,
-    private val newValue: AngleProperty,
+    public val newValue: AngleProperty,
     delayFrames: Int
 ) : AnimatingProperty<Float>(easing, totalFrames, delayFrames), AngleProperty {
 

@@ -9,7 +9,7 @@ public class RadialAnimatingProperty(
     easing: Easing,
     totalFrames: Int,
     private val oldValue: RadialProperty,
-    private val newValue: RadialProperty,
+    public val newValue: RadialProperty,
     delayFrames: Int
 ) : AnimatingProperty<Float>(easing, totalFrames, delayFrames), RadialProperty {
 

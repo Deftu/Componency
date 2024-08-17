@@ -7,7 +7,7 @@ import dev.deftu.stateful.utils.mappedMutableStateOf
 import dev.deftu.stateful.utils.mutableStateBound
 import dev.deftu.stateful.utils.stateOf
 
-public open class SiblingProperty(
+public open class SiblingBasedProperty(
     paddingState: State<Float>,
     inverseState: State<Boolean>
 ) : PositionalProperty {
@@ -25,7 +25,7 @@ public open class SiblingProperty(
 
     public constructor(padding: Float, inverse: Boolean) : this(stateOf(padding), stateOf(inverse))
 
-    public constructor(padding: Float) : this(padding, false)
+    public constructor(padding: Float = 0f) : this(padding, false)
 
     override fun calculateX(component: Component): Float {
         return if (component.hasParent) {
