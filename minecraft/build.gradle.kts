@@ -49,7 +49,7 @@ dependencies {
     // LWJGL
     api("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
     api("org.lwjgl:lwjgl-stb:$lwjglVersion")
-    api("cc.polyfrost:lwjgl3-bootstrap:0.0.11") {
+    api("dev.deftu:lwjgl3-bootstrap:0.1.0") {
         exclude(module = "lwjgl-opengl")
     }
 

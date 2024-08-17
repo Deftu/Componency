@@ -1,7 +1,7 @@
 //#if MC <= 1.12.2
 package dev.deftu.componency.minecraft
 
-import cc.polyfrost.lwjgl.bootstrap.Lwjgl3Bootstrap
+import dev.deftu.lwjgl.bootstrap.Lwjgl3Bootstrap
 import dev.deftu.omnicore.OmniCore
 import net.minecraftforge.fml.common.Mod
 
@@ -26,7 +26,7 @@ public class ComponencyMinecraftMod {
     }
 
     init {
-        Lwjgl3Bootstrap.INSTANCE.initialize(match(OmniCore.minecraftVersion), null)
+        Lwjgl3Bootstrap.initialize(match(OmniCore.minecraftVersion), arrayOf("nanovg", "stb"))
     }
 
 }
