@@ -405,6 +405,14 @@ public abstract class Component : Animateable {
         children.filter(predicate).forEach(::removeChild)
     }
 
+    public fun filteredChildren(predicate: (Component) -> Boolean): List<Component> {
+        return children.filter(predicate)
+    }
+
+    public fun getChildren(): List<Component> {
+        return children.toList()
+    }
+
     public fun getChildAt(index: Int): Component {
         return children[index]
     }
