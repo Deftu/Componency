@@ -3,7 +3,7 @@ package dev.deftu.componency.components.impl
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.engine.Engine
 
-public class RectangleComponent : Component() {
+public open class RectangleComponent : Component() {
 
     override fun render() {
         val engine = Engine.get(this)

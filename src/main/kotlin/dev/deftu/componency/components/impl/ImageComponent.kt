@@ -4,7 +4,7 @@ import dev.deftu.componency.components.Component
 import dev.deftu.componency.engine.Engine
 import dev.deftu.componency.image.Image
 
-public class ImageComponent(public val image: Image) : Component() {
+public open class ImageComponent(public val image: Image) : Component() {
 
     override fun render() {
         val engine = Engine.get(this)
