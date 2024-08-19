@@ -33,6 +33,9 @@ rootProject.name = projectName
 include(":example-basic")
 include(":example-lwjgl3")
 
+// Defign
+include(":defign") // Implementation of my design system
+
 // Minecraft implementation
 include(":minecraft")
 project(":minecraft").buildFileName = "root.gradle.kts"
