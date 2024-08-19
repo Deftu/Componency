@@ -6,7 +6,8 @@ public data class MouseClickEvent(
     override val component: Component,
     public val x: Double,
     public val y: Double,
-    public val button: Int
+    public val button: Int,
+    public val clickCount: Int
 ) : CancellableComponentEvent(component)
 
 public data class MouseReleaseEvent(

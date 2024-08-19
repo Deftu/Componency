@@ -575,7 +575,7 @@ public abstract class Component : Animateable {
         this.lastClickButton = button
         this.lastClickTime = System.currentTimeMillis()
 
-        clickedChild.fireMouseClickEvent(MouseClickEvent(clickedChild, x, y, currentClickCount))
+        clickedChild.fireMouseClickEvent(MouseClickEvent(clickedChild, x, y, button, currentClickCount))
         return true
     }
 
