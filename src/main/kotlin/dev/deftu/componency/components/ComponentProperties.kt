@@ -58,6 +58,7 @@ public open class ComponentProperties(public val component: Component) : Animate
         width.frame()
         height.frame()
         fill.frame()
+        stroke.frame()
         topLeftRadius.frame()
         topRightRadius.frame()
         bottomLeftRadius.frame()
@@ -71,6 +72,7 @@ public open class ComponentProperties(public val component: Component) : Animate
         width = properties.width
         height = properties.height
         fill = properties.fill
+        stroke = properties.stroke
         topLeftRadius = properties.topLeftRadius
         topRightRadius = properties.topRightRadius
         bottomLeftRadius = properties.bottomLeftRadius
