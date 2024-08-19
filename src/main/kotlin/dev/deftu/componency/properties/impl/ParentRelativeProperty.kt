@@ -23,7 +23,7 @@ public class ParentRelativeProperty(
 
     override fun calculateX(component: Component): Float {
         return if (component.hasParent) {
-            component.parent!!.left + calculateWidth(component)
+            component.parent!!.left + getWidth(component)
         } else {
             throw UnsupportedOperationException("Cannot calculate relative X position on root component")
         }
@@ -31,7 +31,7 @@ public class ParentRelativeProperty(
 
     override fun calculateY(component: Component): Float {
         return if (component.hasParent) {
-            component.parent!!.top + calculateHeight(component)
+            component.parent!!.top + getHeight(component)
         } else {
             throw UnsupportedOperationException("Cannot calculate relative Y position on root component")
         }
