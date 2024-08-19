@@ -1,6 +1,7 @@
 package dev.deftu.componency.properties.impl
 
 import dev.deftu.componency.components.Component
+import dev.deftu.componency.properties.PaddingProperty
 import dev.deftu.componency.properties.PositionalProperty
 import dev.deftu.stateful.State
 import dev.deftu.stateful.utils.mappedMutableStateOf
@@ -10,7 +11,7 @@ import dev.deftu.stateful.utils.stateOf
 public open class SiblingBasedProperty(
     paddingState: State<Float>,
     inverseState: State<Boolean>
-) : PositionalProperty {
+) : PositionalProperty, PaddingProperty {
 
     override var cachedValue: Float = 0f
     override var needsRecalculate: Boolean = true
@@ -61,6 +62,14 @@ public open class SiblingBasedProperty(
         } else {
             throw UnsupportedOperationException("Cannot use SiblingProperty on root component")
         }
+    }
+
+    override fun getHorizontalPadding(component: Component): Float {
+        return getPadding(component)
+    }
+
+    override fun getVerticalPadding(component: Component): Float {
+        return getPadding(component)
     }
 
     protected fun getLowestPoint(sibling: Component, parent: Component, index: Int): Float {
@@ -133,6 +142,19 @@ public open class SiblingBasedProperty(
         }
 
         return leftmostPoint
+    }
+
+    private fun getPadding(component: Component): Float {
+        return if (component.hasParent) {
+            val index = component.parent!!.indexOfChild(component)
+            if (index == 0) {
+                0f
+            } else {
+                padding
+            }
+        } else {
+            throw UnsupportedOperationException("Cannot use SiblingProperty on root component")
+        }
     }
 
 }
