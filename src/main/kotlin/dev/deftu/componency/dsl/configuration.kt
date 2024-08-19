@@ -18,12 +18,12 @@ public class ConfigurationScope<T : Component>(public val component: T) {
         get() = component.config.clipping
         set(value) { component.config.clipping = value }
 
-    public fun properties(scope: ComponentProperties.() -> Unit) {
-        component.config.properties.apply(scope)
+    public fun properties(scope: ComponentProperties.() -> Unit): ComponentProperties {
+        return component.config.properties.apply(scope)
     }
 
-    public fun effects(scope: ComponentEffects.() -> Unit) {
-        component.config.effects.apply(scope)
+    public fun effects(scope: ComponentEffects.() -> Unit): ComponentEffects {
+        return component.config.effects.apply(scope)
     }
 
 }
