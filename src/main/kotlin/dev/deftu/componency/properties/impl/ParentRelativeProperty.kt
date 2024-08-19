@@ -57,7 +57,7 @@ public class ParentRelativeProperty(
         return if (component.hasParent) {
             (component.parent!!.width * value) / 2
         } else {
-            Engine.get(component).renderEngine.viewportWidth.toFloat() / 2
+            throw UnsupportedOperationException("Cannot calculate relative radius on root component")
         }
     }
 
