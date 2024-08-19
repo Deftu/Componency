@@ -70,14 +70,14 @@ public class ComponentAnimationProperties(
             }
         }
 
-        // val stroke = this.stroke
-        // if (stroke is StrokeAnimatingProperty) {
-        //     if (stroke.isFinished) {
-        //         this.stroke = stroke.newValue
-        //     } else {
-        //         isAnimating = true
-        //     }
-        // }
+        val stroke = this.stroke
+        if (stroke is StrokeAnimatingProperty) {
+            if (stroke.isFinished) {
+                this.stroke = stroke.newValue
+            } else {
+                isAnimating = true
+            }
+        }
 
         val topLeftRadius = this.topLeftRadius
         if (topLeftRadius is RadialAnimatingProperty) {
@@ -133,11 +133,11 @@ public class ComponentAnimationProperties(
     @JvmOverloads
     public fun animateX(
         easing: Easing,
-        time: AnimationTime,
+        duration: AnimationTime,
         newValue: XProperty,
         delay: AnimationTime = AnimationTime.ZERO
     ): ComponentAnimationProperties = apply {
-        val (totalFrames, delayFrames) = calcFrames(time, delay)
+        val (totalFrames, delayFrames) = calcFrames(duration, delay)
         x = XAnimatingProperty(
             easing,
             totalFrames,
@@ -150,11 +150,11 @@ public class ComponentAnimationProperties(
     @JvmOverloads
     public fun animateY(
         easing: Easing,
-        time: AnimationTime,
+        duration: AnimationTime,
         newValue: YProperty,
         delay: AnimationTime = AnimationTime.ZERO
     ): ComponentAnimationProperties = apply {
-        val (totalFrames, delayFrames) = calcFrames(time, delay)
+        val (totalFrames, delayFrames) = calcFrames(duration, delay)
         y = YAnimatingProperty(
             easing,
             totalFrames,
@@ -217,23 +217,22 @@ public class ComponentAnimationProperties(
         )
     }
 
-    // TODO
-    // @JvmOverloads
-    // public fun animateStroke(
-    //     easing: Easing,
-    //     duration: AnimationTime,
-    //     newValue: StrokeProperty,
-    //     delay: AnimationTime = AnimationTime.ZERO
-    // ): ComponentAnimationProperties = apply {
-    //     val (totalFrames, delayFrames) = calcFrames(duration, delay)
-    //     stroke = StrokeAnimationProperty(
-    //         easing,
-    //         totalFrames,
-    //         stroke,
-    //         newValue,
-    //         delayFrames
-    //     )
-    // }
+    @JvmOverloads
+    public fun animateStroke(
+        easing: Easing,
+        duration: AnimationTime,
+        newValue: StrokeProperty,
+        delay: AnimationTime = AnimationTime.ZERO
+    ): ComponentAnimationProperties = apply {
+        val (totalFrames, delayFrames) = calcFrames(duration, delay)
+        stroke = StrokeAnimatingProperty(
+            easing,
+            totalFrames,
+            stroke,
+            newValue,
+            delayFrames
+        )
+    }
 
     @JvmOverloads
     public fun animateTopLeftRadius(
