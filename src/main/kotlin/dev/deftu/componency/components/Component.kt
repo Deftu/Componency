@@ -608,8 +608,9 @@ public abstract class Component : Animateable {
             return
         }
 
+
         for (child in children.reversed()) {
-            if (child.isPointInside(lastHoveredMouseX, lastHoveredMouseY)) {
+            if (child.isCurrentlyHovered) {
                 child.handleMouseScroll(amount)
                 return
             }
