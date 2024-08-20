@@ -219,15 +219,10 @@ public abstract class Component : Animateable {
         return x in left..right && y in top..bottom
     }
 
-    public open fun hitTest(x: Double, y: Double): Component? {
-        if (!isPointInside(x, y)) {
-            return null
-        }
-
+    public open fun hitTest(x: Double, y: Double): Component {
         for (child in children.reversed()) {
-            val hit = child.hitTest(x, y)
-            if (hit != null) {
-                return hit
+            if (child.isPointInside(x, y)) {
+                return child.hitTest(x, y)
             }
         }
 
@@ -571,8 +566,8 @@ public abstract class Component : Animateable {
         }
     }
 
-        val clickedChild = hitTest(x, y) ?: return false
     public open fun handleMouseClick(x: Double, y: Double, button: MouseButton): Boolean {
+        val clickedChild = hitTest(x, y)
 
         this.lastDraggedMouseX = x
         this.lastDraggedMouseY = y
