@@ -614,6 +614,16 @@ public abstract class Component : Animateable {
 
         clickedChild.fireMouseClickEvent(MouseClickEvent(clickedChild, x, y, button, currentClickCount))
 
+        if (isRoot) {
+            if (requestingFocus == null) {
+                unfocus()
+            } else if (requestingFocus != focusedChild) {
+                focusedChild?.unfocus()
+                focusedChild = requestingFocus
+                requestingFocus = null
+            }
+        }
+
         return true
     }
 
