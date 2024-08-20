@@ -47,4 +47,8 @@ public interface RenderEngine {
 
     public fun image(image: Image, x1: Float, y1: Float, x2: Float, y2: Float, color: Color, topLeftRadius: Float, topRightRadius: Float, bottomRightRadius: Float, bottomLeftRadius: Float)
 
+    public fun pushScissor(x1: Float, y1: Float, x2: Float, y2: Float)
+
+    public fun popScissor()
+
 }

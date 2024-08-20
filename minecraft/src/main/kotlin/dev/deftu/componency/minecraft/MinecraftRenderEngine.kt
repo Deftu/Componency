@@ -233,6 +233,16 @@ public object MinecraftRenderEngine : RenderEngine {
         NanoVG.nvgFill(context.handle)
     }
 
+    override fun pushScissor(x1: Float, y1: Float, x2: Float, y2: Float) {
+        val width = x2 - x1
+        val height = y2 - y1
+        NanoVG.nvgScissor(context.handle, x1, y1, width, height)
+    }
+
+    override fun popScissor() {
+        NanoVG.nvgResetScissor(context.handle)
+    }
+
     private fun getOrPopulateFont(font: Font): NvgFont {
         return fonts.getOrPut(font) {
             val bytes = font.data
