@@ -388,24 +388,7 @@ public abstract class Component : Animateable {
         indices.forEach(::removeChild)
     }
 
-    /**
-     * Removes children from this component that match the given predicate.
-     *
-     * @param predicate The predicate to match children against
-     *
-     * @see removeChild
-     * @since 0.1.0
-     * @author Deftu
-     */
-    public fun removeChildrenIf(predicate: (Component) -> Boolean) {
-        children.filter(predicate).forEach(::removeChild)
-    }
-
-    public fun filteredChildren(predicate: (Component) -> Boolean): List<Component> {
-        return children.filter(predicate)
-    }
-
-    public fun getChildren(): List<Component> {
+    public open fun getChildren(): List<Component> {
         return children.toList()
     }
 
