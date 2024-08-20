@@ -494,7 +494,7 @@ public abstract class Component : Animateable {
             }
         }
 
-        if (hasParent) {
+        if (event.isBubbling && hasParent && parent != this) {
             parent!!.fireMouseScrollEvent(event.copy(component = parent!!))
         }
     }
