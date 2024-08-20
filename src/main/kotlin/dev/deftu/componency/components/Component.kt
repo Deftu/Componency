@@ -586,8 +586,21 @@ public abstract class Component : Animateable {
         children.forEach(Component::handleMouseRelease)
     }
 
-    public fun handleMouseDrag(x: Double, y: Double) {
+        if (
+            lastDraggedMouseY == x ||
+            lastDraggedMouseY == y
+        ) {
+            return
+        }
 
+        this.lastDraggedMouseX = x
+        this.lastDraggedMouseY = y
+
+        for (listener in events.mouseDragListeners) {
+            listener.invoke(MouseDragEvent(this, x, y, lastClickButton))
+        }
+
+        children.forEach { child -> child.handleMouseDrag(x, y) }
     }
 
     public fun handleMouseScroll(amount: Double) {
