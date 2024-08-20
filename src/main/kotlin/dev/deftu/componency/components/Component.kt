@@ -96,6 +96,7 @@ public abstract class Component : Animateable {
     private var systemTime = -1L
 
     private val children = LinkedList<Component>()
+    private var indexInParent: Int = -1
 
     // Only interacted with in the root component
     private var requestingFocus: Component? = null
@@ -412,6 +413,35 @@ public abstract class Component : Animateable {
         config.effects.remove(effect)
     }
 
+    /// Visibility
+
+    @JvmOverloads
+    public fun show(useLastPosition: Boolean = true) {
+        if (!hasParent) {
+            return
+        }
+
+        val parent = parent!!
+        if (parent.children.contains(this)) {
+            return
+        }
+
+        if (useLastPosition && indexInParent >= 0 && indexInParent < parent.children.size) {
+            parent.addChild(indexInParent, this)
+        } else {
+            parent.addChild(this)
+        }
+    }
+
+    public fun hide() {
+        if (!hasParent) {
+            return
+        }
+
+        val parent = parent!!
+        indexInParent = parent.children.indexOf(this)
+        parent.removeChild(this)
+    }
 
     /// Focus
 
