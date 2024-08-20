@@ -549,6 +549,9 @@ public abstract class Component : Animateable {
     public fun handleMouseMove(x: Double, y: Double) {
         val isHovered = isPointInside(x, y)
 
+        this.lastHoveredMouseX = x
+        this.lastHoveredMouseY = y
+
         if (isHovered && !isCurrentlyHovered) {
             for (listener in events.mouseHoverListeners) {
                 listener.invoke(MouseHoverEvent(this, x, y))
