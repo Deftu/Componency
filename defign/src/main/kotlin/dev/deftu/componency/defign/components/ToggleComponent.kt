@@ -9,6 +9,7 @@ import dev.deftu.componency.components.impl.FrameComponent
 import dev.deftu.componency.components.impl.RectangleComponent
 import dev.deftu.componency.defign.DefignPalette
 import dev.deftu.componency.dsl.*
+import dev.deftu.componency.input.MouseButton
 import dev.deftu.componency.properties.ColorProperty
 import dev.deftu.componency.properties.XProperty
 import dev.deftu.componency.properties.impl.CenteredProperty
@@ -85,7 +86,7 @@ public open class ToggleComponent @JvmOverloads constructor(
 
     init {
         whenMouseClick {
-            if (button != 0) {
+            if (button != MouseButton.LEFT) {
                 return@whenMouseClick
             }
 

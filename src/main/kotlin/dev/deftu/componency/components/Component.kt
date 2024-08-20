@@ -112,7 +112,7 @@ public abstract class Component : Animateable {
     private var lastDraggedMouseX = 0.0
     private var lastDraggedMouseY = 0.0
     private var currentClickCount = 0
-    private var lastClickButton = 0
+    private var lastClickButton = MouseButton.UNKNOWN
     private var lastClickTime = 0L
 
     private var internalIndex = -1
@@ -204,7 +204,7 @@ public abstract class Component : Animateable {
      * @author Deftu
      */
     public override fun frame() {
-        if (isRoot && lastClickButton != -1) {
+        if (isRoot && lastClickButton != MouseButton.UNKNOWN) {
             val (x, y) = mousePos
             handleMouseDrag(x, y)
         }
@@ -214,7 +214,7 @@ public abstract class Component : Animateable {
     }
 
     public open fun isPointInside(x: Double, y: Double): Boolean {
-        return x >= left && x <= right && y >= top && y <= bottom
+        return x in left..right && y in top..bottom
     }
 
     public open fun hitTest(x: Double, y: Double): Component? {
@@ -566,8 +566,8 @@ public abstract class Component : Animateable {
         }
     }
 
-    public fun handleMouseClick(x: Double, y: Double, button: Int): Boolean {
         val clickedChild = hitTest(x, y) ?: return false
+    public open fun handleMouseClick(x: Double, y: Double, button: MouseButton): Boolean {
 
         this.lastDraggedMouseX = x
         this.lastDraggedMouseY = y
@@ -584,9 +584,9 @@ public abstract class Component : Animateable {
             listener.invoke(MouseReleaseEvent(this, lastDraggedMouseX, lastDraggedMouseY, lastClickButton))
         }
 
-        lastDraggedMouseX = 0.0
-        lastDraggedMouseY = 0.0
-        lastClickButton = 0
+        lastDraggedMouseX = -1.0
+        lastDraggedMouseY = -1.0
+        lastClickButton = MouseButton.UNKNOWN
 
         children.forEach(Component::handleMouseRelease)
     }
@@ -610,7 +610,7 @@ public abstract class Component : Animateable {
         fireMouseScrollEvent(MouseScrollEvent(this, amount))
     }
 
-    public fun handleKeyPress(keyCode: Int, typedChar: Char, modifiers: KeyboardModifiers) {
+    public open fun handleKeyPress(key: Key, modifiers: KeyboardModifiers) {
         for (listener in events.keyPressListeners) {
             listener.invoke(KeyPressEvent(this, keyCode, typedChar, modifiers))
         }
