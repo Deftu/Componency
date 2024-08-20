@@ -26,7 +26,7 @@ public abstract class ComponencyScreen : OmniScreen() {
     }
 
     override fun handleMouseClick(x: Double, y: Double, button: Int) {
-        frame.handleMouseClick(x, y, button)
+        frame.handleMouseClick(x, y, MinecraftInputEngine.getMouseButtonMapping(button))
         super.handleMouseClick(x, y, button)
     }
 
@@ -41,8 +41,13 @@ public abstract class ComponencyScreen : OmniScreen() {
     }
 
     override fun handleKeyPress(code: Int, char: Char, modifiers: OmniKeyboard.KeyboardModifiers) {
-        frame.handleKeyPress(code, char, KeyboardModifiers(modifiers.shift, modifiers.alt, modifiers.ctrl, false))
+        frame.handleKeyPress(MinecraftInputEngine.getKeyMapping(code, char), KeyboardModifiers(modifiers.shift, modifiers.alt, modifiers.ctrl, false))
         super.handleKeyPress(code, char, modifiers)
+    }
+
+    override fun handleKeyRelease(code: Int, char: Char, modifiers: Int) {
+        frame.handleKeyRelease(MinecraftInputEngine.getKeyMapping(code, char), KeyboardModifiers(modifiers and 1 != 0, modifiers and 2 != 0, modifiers and 4 != 0, false))
+        super.handleKeyRelease(code, char, modifiers)
     }
 
 }
