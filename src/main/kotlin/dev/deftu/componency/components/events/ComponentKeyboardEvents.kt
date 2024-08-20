@@ -1,6 +1,7 @@
 package dev.deftu.componency.components.events
 
 import dev.deftu.componency.components.Component
+import dev.deftu.componency.input.Key
 
 public data class KeyboardModifiers(
     public val isShift: Boolean,
@@ -11,7 +12,12 @@ public data class KeyboardModifiers(
 
 public data class KeyPressEvent(
     override val component: Component,
-    public val keyCode: Int,
-    public val typedChar: Char,
+    public val key: Key,
+    public val modifiers: KeyboardModifiers,
+) : CancellableComponentEvent(component)
+
+public data class KeyReleaseEvent(
+    override val component: Component,
+    public val key: Key,
     public val modifiers: KeyboardModifiers,
 ) : CancellableComponentEvent(component)
