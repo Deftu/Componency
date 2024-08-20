@@ -622,6 +622,14 @@ public abstract class Component : Animateable {
     public open fun handleKeyPress(key: Key, modifiers: KeyboardModifiers) {
         for (listener in events.keyPressListeners) {
             listener.invoke(KeyPressEvent(this, keyCode, typedChar, modifiers))
+
+    public open fun handleKeyRelease(key: Key, modifiers: KeyboardModifiers) {
+        for (listener in events.keyReleaseListeners) {
+            listener.invoke(KeyReleaseEvent(this, key, modifiers))
+        }
+
+        if (isRoot && focusedChild != null) {
+            focusedChild!!.handleKeyRelease(key, modifiers)
         }
     }
 
