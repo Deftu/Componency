@@ -97,6 +97,10 @@ public abstract class Component : Animateable {
 
     private val children = LinkedList<Component>()
 
+    // Only interacted with in the root component
+    private var requestingFocus: Component? = null
+    private var focusedChild: Component? = null
+
     protected val mousePos: Pair<Double, Double>
         get() {
             val engine = engine!!
@@ -406,6 +410,63 @@ public abstract class Component : Animateable {
 
     public fun removeEffect(effect: Effect) {
         config.effects.remove(effect)
+    }
+
+
+    /// Focus
+
+    /**
+     * Focuses a child component.
+     *
+     * MUST BE CALLED ON THE ROOT COMPONENT!
+     *
+     * @param component The component to focus
+     * @throws IllegalStateException If the component is not the root component
+     * @throws IllegalArgumentException If the component is not a child of this component
+     *
+     * @see requestFocus
+     *
+     * @since 0.1.0
+     * @author Deftu
+     */
+    public fun focus(component: Component) {
+        if (!isRoot) {
+            throw IllegalStateException("Only root components can focus children")
+        }
+
+        if (component.parent != this) {
+            throw IllegalArgumentException("Component is not a child of this component")
+        }
+
+        this.requestingFocus = component
+    }
+
+    /**
+     * Requests focus for this component.
+     *
+     * @see focus
+     *
+     * @since 0.1.0
+     * @author Deftu
+     */
+    public fun requestFocus() {
+        val root = findRoot(this)
+        root.focus(this)
+    }
+
+    /**
+     * Unfocuses the currently focused child.
+     *
+     * @since 0.1.0
+     * @author Deftu
+     */
+    public fun unfocus() {
+        if (isRoot) {
+            this.focusedChild = null
+        } else {
+            val root = findRoot(this)
+            root.unfocus()
+        }
     }
 
     /// Events
