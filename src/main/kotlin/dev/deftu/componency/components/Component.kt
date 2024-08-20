@@ -233,7 +233,7 @@ public abstract class Component : Animateable {
 
     /// Hierarchy
 
-    public fun makeRoot(engine: Engine): Component = apply {
+    public open fun makeRoot(engine: Engine): Component = apply {
         if (this.engine != null) {
             throw EnginePresentException("Root component already has a window assigned to it")
         }
@@ -246,7 +246,7 @@ public abstract class Component : Animateable {
         this.engine = engine
     }
 
-    public fun <T : Component> attachedTo(parent: Component): T = apply {
+    public open fun <T : Component> attachedTo(parent: Component): T = apply {
         parent.addChild(this)
     } as T
 
@@ -258,7 +258,7 @@ public abstract class Component : Animateable {
      * @since 0.1.0
      * @author Deftu
      */
-    public fun addChild(child: Component) {
+    public open fun addChild(child: Component) {
         child.parent?.removeChild(child)
         this.children.add(child)
         child.parent = this
@@ -275,7 +275,7 @@ public abstract class Component : Animateable {
      * @since 0.1.0
      * @author Deftu
      */
-    public fun addChild(index: Int, child: Component) {
+    public open fun addChild(index: Int, child: Component) {
         if (index < 0 || index > this.children.size) {
             throw IndexOutOfBoundsException("Index $index is out of bounds for children list of size ${children.size}")
         }
@@ -296,7 +296,7 @@ public abstract class Component : Animateable {
      * @since 0.1.0
      * @author Deftu
      */
-    public fun replaceChild(index: Int, child: Component) {
+    public open fun replaceChild(index: Int, child: Component) {
         if (index < 0 || index >= this.children.size) {
             throw IndexOutOfBoundsException("Index $index is out of bounds for children list of size ${this.children.size}")
         }
@@ -315,9 +315,8 @@ public abstract class Component : Animateable {
      * @since 0.1.0
      * @author Deftu
      */
-    public fun removeChild(child: Component) {
+    public open fun removeChild(child: Component) {
         this.children.remove(child)
-        child.parent = null
     }
 
     /**
@@ -329,7 +328,7 @@ public abstract class Component : Animateable {
      * @since 0.1.0
      * @author Deftu
      */
-    public fun removeChild(index: Int) {
+    public open fun removeChild(index: Int) {
         if (index < 0 || index >= this.children.size) {
             throw IndexOutOfBoundsException("Index $index is out of bounds for children list of size ${this.children.size}")
         }
@@ -344,7 +343,7 @@ public abstract class Component : Animateable {
      * @since 0.1.0
      * @author Deftu
      */
-    public fun clearChildren() {
+    public open fun clearChildren() {
         this.children.forEach { it.parent = null }
         this.children.clear()
     }
@@ -410,11 +409,11 @@ public abstract class Component : Animateable {
         return children.toList()
     }
 
-    public fun getChildAt(index: Int): Component {
+    public open fun getChildAt(index: Int): Component {
         return children[index]
     }
 
-    public fun indexOfChild(child: Component): Int {
+    public open fun indexOfChild(child: Component): Int {
         return children.indexOf(child)
     }
 
@@ -574,7 +573,7 @@ public abstract class Component : Animateable {
         return true
     }
 
-    public fun handleMouseRelease() {
+    public open fun handleMouseRelease() {
         for (listener in events.mouseReleaseListeners) {
             listener.invoke(MouseReleaseEvent(this, lastDraggedMouseX, lastDraggedMouseY, lastClickButton))
         }
@@ -586,6 +585,7 @@ public abstract class Component : Animateable {
         children.forEach(Component::handleMouseRelease)
     }
 
+    public open fun handleMouseDrag(x: Double, y: Double) {
         if (
             lastDraggedMouseY == x ||
             lastDraggedMouseY == y
@@ -603,7 +603,7 @@ public abstract class Component : Animateable {
         children.forEach { child -> child.handleMouseDrag(x, y) }
     }
 
-    public fun handleMouseScroll(amount: Double) {
+    public open fun handleMouseScroll(amount: Double) {
         if (amount == 0.0) {
             return
         }
@@ -621,7 +621,13 @@ public abstract class Component : Animateable {
 
     public open fun handleKeyPress(key: Key, modifiers: KeyboardModifiers) {
         for (listener in events.keyPressListeners) {
-            listener.invoke(KeyPressEvent(this, keyCode, typedChar, modifiers))
+            listener.invoke(KeyPressEvent(this, key, modifiers))
+        }
+
+        if (isRoot && focusedChild != null) {
+            focusedChild!!.handleKeyPress(key, modifiers)
+        }
+    }
 
     public open fun handleKeyRelease(key: Key, modifiers: KeyboardModifiers) {
         for (listener in events.keyReleaseListeners) {
