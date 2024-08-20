@@ -13,7 +13,7 @@ public class FillProperty(private val useSiblings: Boolean = true) : SizingPrope
         return if (component.hasParent) {
             val parent = component.parent!!
             if (useSiblings) {
-                parent.width - parent.filteredChildren { child -> child != component }.sumOf { child ->
+                parent.width - parent.getChildren().filter { child -> child != component }.sumOf { child ->
                     child.width.toDouble() // Kotlin gets all mad if we don't convert to something other than a Float here. The best alternative is to convert to a Double.
                 }.toFloat()
             } else {
@@ -28,7 +28,7 @@ public class FillProperty(private val useSiblings: Boolean = true) : SizingPrope
         return if (component.hasParent) {
             val parent = component.parent!!
             if (useSiblings) {
-                parent.height - parent.filteredChildren { child -> child != component }.sumOf { child ->
+                parent.height - parent.getChildren().filter { child -> child != component }.sumOf { child ->
                     child.height.toDouble() // Kotlin gets all mad if we don't convert to something other than a Float here. The best alternative is to convert to a Double.
                 }.toFloat()
             } else {
