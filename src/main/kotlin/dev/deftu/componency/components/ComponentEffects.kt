@@ -17,8 +17,24 @@ public open class ComponentEffects(public val component: Component) : Animateabl
         effects.add(effect)
     }
 
+    public operator fun plusAssign(effect: Effect) {
+        add(effect)
+    }
+
+    public operator fun Effect.unaryPlus() {
+        add(this)
+    }
+
     public fun remove(effect: Effect) {
         effects.remove(effect)
+    }
+
+    public operator fun minusAssign(effect: Effect) {
+        remove(effect)
+    }
+
+    public operator fun Effect.unaryMinus() {
+        remove(this)
     }
 
     public fun preRender() {
