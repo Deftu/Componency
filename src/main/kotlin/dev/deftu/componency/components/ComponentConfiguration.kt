@@ -7,10 +7,6 @@ public open class ComponentConfiguration(private val component: Component) : Ani
 
     public var name: String? = null
 
-    public var hidden: Boolean = false
-
-    public var clipping: Boolean = false
-
     public var properties: ComponentProperties = ComponentProperties(component)
 
     public var effects: ComponentEffects = ComponentEffects(component)

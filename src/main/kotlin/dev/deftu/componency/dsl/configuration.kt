@@ -10,14 +10,6 @@ public class ConfigurationScope<T : Component>(public val component: T) {
         get() = component.config.name
         set(value) { component.config.name = value }
 
-    public var hidden: Boolean
-        get() = component.config.hidden
-        set(value) { component.config.hidden = value }
-
-    public var clipping: Boolean
-        get() = component.config.clipping
-        set(value) { component.config.clipping = value }
-
     public fun properties(scope: ComponentProperties.() -> Unit): ComponentProperties {
         return component.config.properties.apply(scope)
     }
