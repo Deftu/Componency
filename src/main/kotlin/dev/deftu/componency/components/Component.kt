@@ -500,12 +500,6 @@ public abstract class Component : Animateable {
      * @author Deftu
      */
     public fun handleRender() {
-        if (config.hidden) {
-            // We can skip our render operation altogether if we're hidden
-            // This saves us some performance
-            return
-        }
-
         // Tell our engine that we're starting a new frame
         if (isRoot) {
             engine!!.renderEngine.startFrame()
@@ -576,6 +570,7 @@ public abstract class Component : Animateable {
         this.lastClickTime = System.currentTimeMillis()
 
         clickedChild.fireMouseClickEvent(MouseClickEvent(clickedChild, x, y, button, currentClickCount))
+
         return true
     }
 
