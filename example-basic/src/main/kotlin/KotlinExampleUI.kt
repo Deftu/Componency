@@ -3,17 +3,17 @@ import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.components.impl.FrameComponent
 import dev.deftu.componency.components.impl.RectangleComponent
+import dev.deftu.componency.components.impl.TextComponent
 import dev.deftu.componency.dsl.*
 import dev.deftu.componency.engine.Engine
 import dev.deftu.componency.properties.VectorProperty
+import dev.deftu.componency.properties.impl.CenteredProperty
 import dev.deftu.componency.properties.impl.LinkedProperty
 
 class KotlinExampleUI(engine: Engine) {
 
     private val frame = FrameComponent().configure {
         name = "window" // A name is optional. Only visible in debugging tools. Names are limited to [a-z0-9_].
-        hidden = false // Default
-        clipping = true // Default
 
         properties {
             x = 0.px // Default
@@ -90,12 +90,11 @@ class KotlinFooterComponent : Component() {
         }
     }.attachTo(this)
 
-    // TODO
-    // private val text = TextComponent("Hello, world!").configure {
-    //     properties {
-    //         x = centered()
-    //         y = centered()
-    //     }
-    // }.attachTo(background)
+    private val text = TextComponent("Hello, world!").configure {
+        properties {
+            x = CenteredProperty()
+            y = CenteredProperty()
+        }
+    }.attachTo(background)
 
 }

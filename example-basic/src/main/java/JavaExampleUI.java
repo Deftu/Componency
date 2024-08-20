@@ -1,25 +1,24 @@
 import dev.deftu.componency.animations.AnimationTime;
 import dev.deftu.componency.animations.ComponentAnimationProperties;
 import dev.deftu.componency.animations.Easings;
+import dev.deftu.componency.animations.TimeUnit;
+import dev.deftu.componency.color.Color;
 import dev.deftu.componency.components.Component;
 import dev.deftu.componency.components.ComponentProperties;
 import dev.deftu.componency.components.impl.FrameComponent;
 import dev.deftu.componency.components.impl.RectangleComponent;
+import dev.deftu.componency.components.impl.TextComponent;
 import dev.deftu.componency.engine.Engine;
+import dev.deftu.componency.properties.impl.CenteredProperty;
 import dev.deftu.componency.properties.impl.ParentRelativeProperty;
 import dev.deftu.componency.properties.impl.PixelProperty;
 import dev.deftu.componency.properties.impl.StaticColorProperty;
 import dev.deftu.componency.utils.Colors;
 
-import java.awt.*;
-import java.util.concurrent.TimeUnit;
-
 public class JavaExampleUI {
 
     private final FrameComponent frame = Component.configure(new FrameComponent(), (frame) -> {
         frame.setName("frame");  // A name is optional. Only visible in debugging tools. Names are limited to [a-z0-9_].
-        frame.setHidden(false); // Default
-        frame.setClipping(true); // Default
 
         // We can define properties as such
         ComponentProperties properties = frame.getProperties();
@@ -89,13 +88,12 @@ public class JavaExampleUI {
             }));
         }).attachedTo(this);
 
-        // TODO
-        // private TextComponent text = Component.configure(new TextComponent("Hello, world!"), (text) -> {
-        //     text.setProperties(Component.properties(text.getProperties(), (properties) -> {
-        //         properties.setX(new CenteredProperty());
-        //         properties.setY(new CenteredProperty());
-        //     }));
-        // }).attachTo(this);
+        private TextComponent text = Component.configure(new TextComponent("Hello, world!"), (text) -> {
+            text.setProperties(Component.properties(text.getProperties(), (properties) -> {
+                properties.setX(new CenteredProperty());
+                properties.setY(new CenteredProperty());
+            }));
+        }).attachedTo(this);
 
     }
 
