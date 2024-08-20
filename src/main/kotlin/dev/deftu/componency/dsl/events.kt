@@ -30,3 +30,7 @@ public fun <T : Component> T.whenMouseUnhover(listener: MouseHoverEvent.() -> Un
 public fun <T : Component> T.whenKeyPress(listener: KeyPressEvent.() -> Unit): T = apply {
     events.keyPressListeners.add(listener)
 }
+
+public fun <T : Component> T.whenKeyRelease(listener: KeyReleaseEvent.() -> Unit): T = apply {
+    events.keyReleaseListeners.add(listener)
+}

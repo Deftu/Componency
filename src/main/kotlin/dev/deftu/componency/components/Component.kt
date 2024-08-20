@@ -557,6 +557,10 @@ public abstract class Component : Animateable {
         events.keyPressListeners.add(listener::accept)
     } as T
 
+    public fun <T : Component> onKeyRelease(listener: Consumer<KeyReleaseEvent>): T = apply {
+        events.keyReleaseListeners.add(listener::accept)
+    } as T
+
     public fun beginAnimation(): ComponentAnimationProperties {
         return config.beginAnimation()
     }
