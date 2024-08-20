@@ -9,6 +9,8 @@ import dev.deftu.componency.effects.Effect
 import dev.deftu.componency.engine.Engine
 import dev.deftu.componency.exceptions.EnginePresentException
 import dev.deftu.componency.exceptions.InvalidHierarchyException
+import dev.deftu.componency.input.Key
+import dev.deftu.componency.input.MouseButton
 import dev.deftu.componency.utils.Animateable
 import java.util.LinkedList
 import java.util.function.Consumer
