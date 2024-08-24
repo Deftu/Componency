@@ -13,28 +13,6 @@ plugins {
 
 kotlin.explicitApi()
 
-val lwjglVersion = when {
-    mcData.version >= MinecraftVersion.VERSION_1_20_6 -> "3.3.3"
-    mcData.version >= MinecraftVersion.VERSION_1_20_2 -> "3.3.2"
-    mcData.version >= MinecraftVersion.VERSION_1_19_2 -> "3.3.1"
-    mcData.version >= MinecraftVersion.VERSION_1_16_5 -> "3.2.2"
-    else -> "3.3.3"
-}
-
-preprocess {
-    vars.put("LWJGL", run {
-        val regex = "(?<major>\\d+).(?<minor>\\d+).?(?<patch>\\d+)?".toRegex()
-        val match = regex.find(lwjglVersion) ?: throw IllegalArgumentException("Invalid version format: $lwjglVersion")
-        val groups = match.groups
-
-        val major = groups["major"]?.value?.toInt() ?: throw IllegalArgumentException("Invalid version format: $version")
-        val minor = groups["minor"]?.value?.toInt() ?: throw IllegalArgumentException("Invalid version format: $version")
-        val patch = groups["patch"]?.value?.toInt() ?: 0
-
-        major * 10000 + minor * 100 + patch
-    })
-}
-
 toolkitMavenPublishing {
     artifactName.set("componency-minecraft-$mcData")
 }
@@ -47,9 +25,10 @@ dependencies {
     api(project(":"))
 
     // LWJGL
+    val lwjglVersion = "3.3.3"
     api("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
     api("org.lwjgl:lwjgl-stb:$lwjglVersion")
-    api("dev.deftu:lwjgl3-bootstrap:0.1.0") {
+    api("dev.deftu:isolated-lwjgl3-loader:0.2.0") {
         exclude(module = "lwjgl-opengl")
     }
 
