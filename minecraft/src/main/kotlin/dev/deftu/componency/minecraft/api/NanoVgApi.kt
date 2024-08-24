@@ -98,4 +98,10 @@ public interface NanoVgApi {
 
     public fun radialGradient(address: Long, cx: Float, cy: Float, inr: Float, outr: Float, startColor: Long, endColor: Long)
 
+    public fun svgBounds(address: Long): Pair<Float, Float>
+
+    public fun parseSvg(data: ByteBuffer): Triple<Long, Float, Float>
+
+    public fun rasterizeSvg(address: Long, x: Float, y: Float, w: Int, h: Int, scale: Float, stride: Int, data: ByteBuffer)
+
 }

@@ -2,12 +2,7 @@ package dev.deftu.componency.minecraft.impl
 
 import dev.deftu.componency.color.Color
 import dev.deftu.componency.minecraft.api.NanoVgApi
-import org.lwjgl.nanovg.NVGColor
-import org.lwjgl.nanovg.NVGPaint
-import org.lwjgl.nanovg.NanoSVG
-import org.lwjgl.nanovg.NanoVG
-import org.lwjgl.nanovg.NanoVGGL2
-import org.lwjgl.nanovg.NanoVGGL3
+import org.lwjgl.nanovg.*
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 
@@ -203,6 +198,29 @@ public class NanoVgImpl(
 
     override fun radialGradient(address: Long, cx: Float, cy: Float, inr: Float, outr: Float, startColor: Long, endColor: Long) {
         NanoVG.nvgRadialGradient(handle, cx, cy, inr, outr, NVGColor.create(startColor), NVGColor.create(endColor), NVGPaint.create(address))
+    }
+
+    override fun svgBounds(address: Long): Pair<Float, Float> {
+        val svg = NSVGImage.create(address)
+        return svg.width() to svg.height()
+    }
+
+    override fun parseSvg(data: ByteBuffer): Triple<Long, Float, Float> {
+        val result = NanoSVG.nsvgParse(data, PIXELS, 96f) ?: throw IllegalStateException("Failed to parse SVG data")
+        return Triple(result.address(), result.width(), result.height())
+    }
+
+    override fun rasterizeSvg(
+        address: Long,
+        x: Float,
+        y: Float,
+        w: Int,
+        h: Int,
+        scale: Float,
+        stride: Int,
+        data: ByteBuffer
+    ) {
+        NanoSVG.nsvgRasterize(svgHandle, NSVGImage.create(address), x, y, scale, data, w, h, stride)
     }
 
 }

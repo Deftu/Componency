@@ -19,6 +19,7 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.math.abs
 
 public class MinecraftRenderEngine(
     private val nanoVg: NanoVgApi,
@@ -73,7 +74,7 @@ public class MinecraftRenderEngine(
 
     private val fonts = mutableMapOf<Font, NvgFont>()
     private val images = mutableMapOf<Image, Int>()
-    // private val svgs = mutableMapOf<Image, Pair<NSVGImage, MutableMap<Int, Int>>>()
+    private val svgs = mutableMapOf<Image, Pair<Long, MutableMap<Int, Int>>>()
 
     // Render state
     private var blendState: BlendState? = null
@@ -280,26 +281,25 @@ public class MinecraftRenderEngine(
                 }
 
                 ImageType.VECTOR -> {
-//                    val (svgImage, map) = svgs.getOrPut(image) {
-//                        val buffer = ByteBuffer.allocateDirect(bytes.size + 1) // +1 for null terminator
-//                            .order(ByteOrder.nativeOrder())
-//                            .put(bytes)
-//                            .put(0) // null terminator
-//                            .flip() as ByteBuffer
-//                        val  = loadSvg(image, buffer)
-//                        return
-//                    }
-//
-//                    if (image.width == 0f || image.height == 0f) {
-//                        image.width = svgImage.width()
-//                        image.height = svgImage.height()
-//                    }
-//
-//                    map.getOrPut(width.hashCode() * 31 + height.hashCode()) {
-//                        resizeSvg(svgImage, width, height)
-//                    }
+                    val (svgImage, map) = svgs.getOrPut(image) {
+                        val buffer = ByteBuffer.allocateDirect(bytes.size + 1) // +1 for null terminator
+                            .order(ByteOrder.nativeOrder())
+                            .put(bytes)
+                            .put(0) // null terminator
+                            .flip() as ByteBuffer
+                        val id = loadSvg(image, buffer)
+                        return id
+                    }
 
-                    TODO()
+                    if (image.width == 0f || image.height == 0f) {
+                        val (svgWidth, svgHeight) = nanoVg.svgBounds(svgImage)
+                        image.width = svgWidth
+                        image.height = svgHeight
+                    }
+
+                    map.getOrPut(width.hashCode() * 31 + height.hashCode()) {
+                        resizeSvg(svgImage, width, height, width, height)
+                    }
                 }
 
                 else -> throw UnsupportedOperationException("Unsupported image type")
@@ -307,33 +307,33 @@ public class MinecraftRenderEngine(
         }
     }
 
-//    private fun loadSvg(image: Image, data: ByteBuffer): Int {
-//        val svgImage = NanoSVG.nsvgParse(data, PIXELS, 96f) ?: throw IllegalStateException("Failed to parse SVG")
-//        image.width = svgImage.width()
-//        image.height = svgImage.height()
-//
-//        val map = mutableMapOf<Int, Int>()
-//        val  = resizeSvg(svgImage, svgImage.width(), svgImage.height())
-//        map[image.width.hashCode() * 31 + image.height.hashCode()] =
-//        svgs[image] = svgImage to map
-//
-//        return
-//    }
-//
-//    private fun resizeSvg(svgImage: NSVGImage, width: Float, height: Float): Int {
-//        val w = (width * 2f).toInt()
-//        val h = (height * 2f).toInt()
-//
-//        val dest = MemoryUtil.memAlloc(w * h * 4)
-//        val scale = (if (abs((width / svgImage.width()) - 1f) <= abs((height / svgImage.height()) - 1f)) {
-//            width / svgImage.width()
-//        } else {
-//            height / svgImage.height()
-//        }) * 2f
-//
-//        NanoSVG.nsvgRasterize(svgContext.svgImage, 0f, 0f, scale, dest, w, h, w * 4)
-//        return NanoVG.nvgCreateImageRGBA(w, h, 0, dest)
-//    }
+    private fun loadSvg(image: Image, data: ByteBuffer): Int {
+        val (address, svgWidth, svgHeight) = nanoVg.parseSvg(data)
+        image.width = svgWidth
+        image.height = svgHeight
+
+        val map = mutableMapOf<Int, Int>()
+        val id = resizeSvg(address, svgWidth, svgHeight, svgWidth, svgHeight)
+        map[image.width.hashCode() * 31 + image.height.hashCode()] = id
+        svgs[image] = address to map
+
+        return id
+    }
+
+    private fun resizeSvg(address: Long, svgWidth: Float, svgHeight: Float, width: Float, height: Float): Int {
+        val w = (width * 2f).toInt()
+        val h = (height * 2f).toInt()
+
+        val dest = MemoryUtil.memAlloc(w * h * 4)
+        val scale = (if (abs((width / svgWidth) - 1f) <= abs((height / svgHeight) - 1f)) {
+            width / svgWidth
+        } else {
+            height / svgHeight
+        }) * 2f
+
+        nanoVg.rasterizeSvg(address, 0f, 0f, w, h, scale, w * 4, dest)
+        return nanoVg.createImage(w.toFloat(), h.toFloat(), dest)
+    }
 
     private fun populateNvgColor(color: Color, colorAddress: Long) {
         nanoVg.rgba(colorAddress, color.rgba)
