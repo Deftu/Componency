@@ -19,7 +19,7 @@ plugins {
 kotlin.explicitApi()
 
 toolkitMavenPublishing {
-    artifactName.set("componency-minecraft-$mcData")
+    artifactName.set("componency-minecraft")
 }
 
 toolkitLoomHelper {
