@@ -1,3 +1,5 @@
+import dev.deftu.gradle.utils.includeOrShade
+
 plugins {
     java
     kotlin("jvm")
@@ -20,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    api(project(":"))
+    api(includeOrShade(project(":"))!!)
 
     // LWJGL
     val lwjglVersion = "3.3.3"
