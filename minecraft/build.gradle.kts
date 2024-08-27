@@ -1,5 +1,3 @@
-import dev.deftu.gradle.utils.MinecraftVersion
-
 plugins {
     java
     kotlin("jvm")
@@ -28,7 +26,7 @@ dependencies {
     val lwjglVersion = "3.3.3"
     api("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
     api("org.lwjgl:lwjgl-stb:$lwjglVersion")
-    api("dev.deftu:isolated-lwjgl3-loader:0.2.0") {
+    api("dev.deftu:isolated-lwjgl3-loader:0.3.2") {
         exclude(module = "lwjgl-opengl")
     }
 
