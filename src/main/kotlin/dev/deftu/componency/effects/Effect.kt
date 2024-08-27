@@ -1,12 +1,12 @@
 package dev.deftu.componency.effects
 
-import dev.deftu.componency.components.BaseComponent
-import dev.deftu.multi.MultiMatrixStack
+import dev.deftu.componency.components.Component
+import dev.deftu.componency.utils.Animateable
 
-interface Effect {
-    fun applyPreRender(component: BaseComponent, stack: MultiMatrixStack, tickDelta: Float)
-    fun applyPostRender(component: BaseComponent, stack: MultiMatrixStack, tickDelta: Float)
+public interface Effect : Animateable {
 
-    fun handleAnimate(component: BaseComponent) {
-    }
+    public fun preRender(component: Component)
+
+    public fun postRender(component: Component)
+
 }

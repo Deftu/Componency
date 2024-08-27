@@ -1,0 +1,10 @@
+[
+    {
+        "modid": "${mod_id}",
+        "name": "${mod_name}",
+        "version": "${mod_version}",
+        "icon": "/assets/${mod_id}/icon.png",
+        "mcversion": "${mc_version}",
+        "authorList": ["Deftu"]
+    }
+]
