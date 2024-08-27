@@ -1,3 +1,4 @@
+import dev.deftu.gradle.utils.MinecraftVersion
 import dev.deftu.gradle.utils.includeOrShade
 
 plugins {
@@ -15,6 +16,12 @@ kotlin.explicitApi()
 
 toolkitMavenPublishing {
     artifactName.set("componency-minecraft-$mcData")
+}
+
+toolkitLoomHelper {
+    if (mcData.isForgeLike && mcData.version >= MinecraftVersion.VERSION_1_16_5) {
+        useKotlinForForge()
+    }
 }
 
 repositories {

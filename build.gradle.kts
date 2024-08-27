@@ -1,7 +1,7 @@
 plugins {
     java
     kotlin("jvm")
-    val dgtVersion = "2.7.0"
+    val dgtVersion = "2.7.3"
     id("dev.deftu.gradle.tools") version(dgtVersion)
     id("dev.deftu.gradle.tools.java") version(dgtVersion)
     id("dev.deftu.gradle.tools.kotlin") version(dgtVersion)
