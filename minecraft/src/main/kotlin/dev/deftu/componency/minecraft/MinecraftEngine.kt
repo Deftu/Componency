@@ -13,9 +13,13 @@ import dev.deftu.lwjgl.isolatedloader.Lwjgl3Manager
 
 public object MinecraftEngine : Engine() {
 
+    private const val API_PACKAGE = "dev.deftu.componency.minecraft.api."
+    private const val NANOVG_IMPL = "dev.deftu.componency.minecraft.impl.NanoVgImpl"
+    private const val STB_IMPL = "dev.deftu.componency.minecraft.impl.StbImpl"
+
     override val renderEngine: MinecraftRenderEngine by lazy {
-        val nanoVg = Lwjgl3Manager.getIsolated(NanoVgApi::class.java, "dev.deftu.componency.minecraft.impl.NanoVgImpl", isOpenGl3)
-        val stb = Lwjgl3Manager.getIsolated(StbApi::class.java, "dev.deftu.componency.minecraft.impl.StbImpl")
+        val nanoVg = Lwjgl3Manager.getIsolated(NanoVgApi::class.java, NANOVG_IMPL, isOpenGl3)
+        val stb = Lwjgl3Manager.getIsolated(StbApi::class.java, STB_IMPL)
         MinecraftRenderEngine(nanoVg, stb)
     }
 
@@ -32,7 +36,7 @@ public object MinecraftEngine : Engine() {
 
     init {
         Lwjgl3Manager.initialize(this::class.java.classLoader, arrayOf("nanovg", "stb"))
-        Lwjgl3Manager.getClassLoader().addLoadingException("dev.deftu.componency.minecraft.api.") // Ensure that the API classes aren't isolated.
+        Lwjgl3Manager.getClassLoader().addLoadingException(API_PACKAGE) // Ensure that the API classes aren't isolated.
     }
 
     @JvmStatic
