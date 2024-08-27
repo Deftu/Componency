@@ -1,0 +1,20 @@
+{
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "version": "${mod_version}",
+    "name": "${mod_name}",
+    "icon": "assets/${mod_id}/icon.png",
+    "authors": [
+        "Deftu"
+    ],
+    "contact": {
+        "issues": "https://github.com/Deftu/${mod_name}/issues",
+        "sources": "https://github.com/Deftu/${mod_name}"
+    },
+    "license": "LGPL-3.0-or-later",
+    "environment": "client",
+    "depends": {
+        "fabric-language-kotlin": "*",
+        "omnicore": ">=0.9.0"
+    }
+}
