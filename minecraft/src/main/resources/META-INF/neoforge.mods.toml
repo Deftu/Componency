@@ -11,6 +11,13 @@ license="LGPL-3.0-or-later"
     logoFile="assets/${mod_id}/icon.png"
 
 [[dependencies.${mod_id}]]
+    modId="textile"
+    mandatory=true
+    versionRange="[0.5.2,)"
+    ordering="AFTER"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
     modId="omnicore"
     mandatory=true
     versionRange="[0.9.0,)"
