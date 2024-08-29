@@ -1,8 +1,20 @@
 package dev.deftu.componency.dsl
 
-import java.awt.Color
+import dev.deftu.componency.color.Color
+import dev.deftu.componency.properties.impl.StaticColorProperty
 
-fun Color.withRed(red: Int) = Color(red, green, blue, alpha)
-fun Color.withGreen(green: Int) = Color(red, green, blue, alpha)
-fun Color.withBlue(blue: Int) = Color(red, green, blue, alpha)
-fun Color.withAlpha(alpha: Int) = Color(red, green, blue, alpha)
+public val Color.asProperty: StaticColorProperty
+    get() = StaticColorProperty(this)
+
+public fun Color.asProperty(): StaticColorProperty {
+    return StaticColorProperty(this)
+}
+
+public fun Color.withAlpha(alpha: Int): Color {
+    return Color.rgba(red, green, blue, alpha)
+}
+
+public fun Color.withAlphaPercentage(percent: Float): Color {
+    val alpha = (percent * 255).toInt()
+    return Color.rgba(red, green, blue, alpha)
+}

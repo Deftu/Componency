@@ -1,30 +1,29 @@
 package dev.deftu.componency.dsl
 
-import dev.deftu.componency.animations.ComponentAnimationConstraints
-import dev.deftu.componency.components.BaseComponent
-import dev.deftu.componency.constraints.ComponentConstraints
-import dev.deftu.componency.effects.Effect
-import dev.deftu.componency.filters.Filter
+import dev.deftu.componency.components.Component
+import dev.deftu.componency.components.ComponentEffects
+import dev.deftu.componency.components.ComponentProperties
 
-fun <T : BaseComponent> T.configure(scope: ConfigurationScope<T>.() -> Unit) = apply {
-    scope(ConfigurationScope(this))
-}
+public class ConfigurationScope<T : Component>(public val component: T) {
 
-fun <T : BaseComponent> T.animate(block: ComponentAnimationConstraints.() -> Unit) = apply {
-    val constraints = ComponentAnimationConstraints(this, constraints)
-    constraints.block()
-    this.constraints = constraints
-}
+    public var name: String?
+        get() = component.config.name
+        set(value) { component.config.name = value }
 
-class ConfigurationScope<T : BaseComponent>(
-    val component: T
-) {
-    val filters: MutableList<Filter>
-        get() = component.filters
-    val effects: MutableList<Effect>
-        get() = component.effects
-
-    fun constraints(scope: ComponentConstraints.() -> Unit) = apply {
-        component.constraints.apply(scope)
+    public fun properties(scope: ComponentProperties.() -> Unit): ComponentProperties {
+        return component.config.properties.apply(scope)
     }
+
+    public fun effects(scope: ComponentEffects.() -> Unit): ComponentEffects {
+        return component.config.effects.apply(scope)
+    }
+
+}
+
+public fun <T : Component> T.attachTo(parent: Component): T = apply {
+    parent.addChild(this)
+}
+
+public fun <T : Component> T.configure(scope: ConfigurationScope<T>.() -> Unit): T = apply {
+    scope(ConfigurationScope(this))
 }
