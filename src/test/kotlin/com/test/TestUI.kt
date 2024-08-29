@@ -1,17 +1,15 @@
 package com.test
 
+import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.impl.FrameComponent
 import dev.deftu.componency.components.impl.RectangleComponent
 import dev.deftu.componency.dsl.*
 import dev.deftu.componency.engine.Engine
-import java.awt.Color
 
 class TestUI(engine: Engine) {
 
     private val frame = FrameComponent().configure {
         name = "frame"
-        hidden = false
-        clipping = false
 
         properties {
             width = 100.percent
@@ -21,8 +19,6 @@ class TestUI(engine: Engine) {
 
     private val rect = RectangleComponent().configure {
         name = "rect"
-        hidden = false
-        clipping = false
 
         properties {
             x = 20.px
