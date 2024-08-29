@@ -61,10 +61,21 @@ dependencies {
     val lwjglVersion = "3.3.3"
     api("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
     api("org.lwjgl:lwjgl-stb:$lwjglVersion")
-    api("dev.deftu:isolated-lwjgl3-loader:0.3.2") {
-        exclude(module = "lwjgl-opengl")
-    }
+    api(includeOrShade("dev.deftu:isolated-lwjgl3-loader:0.3.2") {
+        exclude(group = "org.apache")
+        exclude(group = "org.intellij")
+        exclude(group = "org.jetbrains")
+    })
 
     // Minecraft
     modApi("dev.deftu:omnicore-$mcData:0.10.0")
+}
+
+tasks {
+    fatJar {
+        exclude("org/**/*")
+        exclude("Log4j-config.xsd")
+        exclude("Log4j-events.dtd")
+        exclude("Log4j-events.xsd")
+    }
 }
