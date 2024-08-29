@@ -33,6 +33,9 @@ rootProject.name = projectName
 include(":example-basic")
 include(":example-lwjgl3")
 
+// Utilities
+include(":text-input") // Text input component
+
 // Defign
 include(":defign") // Implementation of my design system
 
