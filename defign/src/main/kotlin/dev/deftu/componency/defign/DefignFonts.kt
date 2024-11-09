@@ -87,19 +87,19 @@ public object DefignFonts {
     @JvmStatic
     public val title1: Font
         get() {
-            return outfitFamily.get(FontWeight.SEMI_BOLD, 0f, TITLE1_LINE_HEIGHT, false)
+            return interFamily.get(FontWeight.SEMI_BOLD, 0f, TITLE1_LINE_HEIGHT, false)
         }
 
     @JvmStatic
     public val title2: Font
         get() {
-            return outfitFamily.get(FontWeight.SEMI_BOLD, 0f, TITLE2_LINE_HEIGHT, false)
+            return interFamily.get(FontWeight.SEMI_BOLD, 0f, TITLE2_LINE_HEIGHT, false)
         }
 
     @JvmStatic
     public val title3: Font
         get() {
-            return outfitFamily.get(FontWeight.SEMI_BOLD, 0f, TITLE3_LINE_HEIGHT, false)
+            return interFamily.get(FontWeight.SEMI_BOLD, 0f, TITLE3_LINE_HEIGHT, false)
         }
 
     @JvmStatic
