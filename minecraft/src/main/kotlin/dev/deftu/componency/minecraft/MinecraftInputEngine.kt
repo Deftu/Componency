@@ -1,6 +1,7 @@
 package dev.deftu.componency.minecraft
 
 import dev.deftu.componency.engine.InputEngine
+import dev.deftu.componency.input.Cursor
 import dev.deftu.componency.input.Key
 import dev.deftu.componency.input.MouseButton
 import dev.deftu.omnicore.client.OmniKeyboard
@@ -13,6 +14,45 @@ public object MinecraftInputEngine : InputEngine {
 
     override val mouseY: Float
         get() = OmniMouse.scaledY.toFloat()
+
+    override var clipboard: String?
+        get() {
+            //#if MC >= 1.16.5
+            //$$ return org.lwjgl.glfw.GLFW.glfwGetClipboardString(dev.deftu.omnicore.client.OmniClient.getInstance().window.handle)
+            //#else
+            return try {
+                java.awt.Toolkit.getDefaultToolkit().systemClipboard.getContents(null).getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor).toString()
+            } catch (t: Throwable) {
+                null
+            }
+            //#endif
+        }
+        set(value) {
+            //#if MC >= 1.16.5
+            //$$ org.lwjgl.glfw.GLFW.glfwSetClipboardString(dev.deftu.omnicore.client.OmniClient.getInstance().window.handle, value)
+            //#else
+            val stringSelection = java.awt.datatransfer.StringSelection(value)
+            java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(stringSelection, null)
+            //#endif
+        }
+
+    private val cursorMappings = mapOf(
+        //#if MC >= 1.16.5
+        //$$ Cursor.ARROW to org.lwjgl.glfw.GLFW.GLFW_ARROW_CURSOR,
+        //$$ Cursor.I_BEAM to org.lwjgl.glfw.GLFW.GLFW_IBEAM_CURSOR,
+        //$$ Cursor.WAIT to org.lwjgl.glfw.GLFW.GLFW_WAIT_CURSOR,
+        //$$ Cursor.CROSSHAIR to org.lwjgl.glfw.GLFW.GLFW_CROSSHAIR_CURSOR,
+        //$$ Cursor.HAND to org.lwjgl.glfw.GLFW.GLFW_POINTING_HAND_CURSOR,
+        //$$ Cursor.RESIZE_HORIZONTAL to org.lwjgl.glfw.GLFW.GLFW_HRESIZE_CURSOR,
+        //$$ Cursor.RESIZE_VERTICAL to org.lwjgl.glfw.GLFW.GLFW_VRESIZE_CURSOR,
+        //$$ Cursor.RESIZE_TOP_LEFT_BOTTOM_RIGHT to org.lwjgl.glfw.GLFW.GLFW_RESIZE_NWSE_CURSOR,
+        //$$ Cursor.RESIZE_TOP_RIGHT_BOTTOM_LEFT to org.lwjgl.glfw.GLFW.GLFW_RESIZE_NESW_CURSOR,
+        //$$ Cursor.RESIZE_ALL to org.lwjgl.glfw.GLFW.GLFW_RESIZE_ALL_CURSOR,
+        //$$ Cursor.NOT_ALLOWED to org.lwjgl.glfw.GLFW.GLFW_NOT_ALLOWED_CURSOR,
+        //#else
+        Cursor.ARROW to 0, // none, not supported
+        //#endif
+    )
 
     private val mouseMappings = mapOf(
         MouseButton.LEFT to OmniMouse.LEFT,
@@ -131,6 +171,12 @@ public object MinecraftInputEngine : InputEngine {
         Key.KEY_HOME to OmniKeyboard.KEY_HOME,
         Key.KEY_END to OmniKeyboard.KEY_END,
     )
+
+    override fun setCursor(cursor: Cursor) {
+        //#if MC >= 1.16.5
+        //$$ org.lwjgl.glfw.GLFW.glfwSetCursor(dev.deftu.omnicore.client.OmniClient.getInstance().window.handle, org.lwjgl.glfw.glfwCreateStandardCursor(cursorMappings.getValue(cursor)))
+        //#endif
+    }
 
     override fun isMouseButtonDown(button: MouseButton): Boolean {
         return OmniMouse.isPressed(mouseMappings.getValue(button))
