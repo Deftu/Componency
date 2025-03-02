@@ -27,4 +27,8 @@ public class ScissorEffect : Effect {
         // no-op
     }
 
+    override fun recalculate() {
+        // no-op
+    }
+
 }

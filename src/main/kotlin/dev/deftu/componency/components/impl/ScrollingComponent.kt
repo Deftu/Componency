@@ -574,8 +574,8 @@ public class ScrollingComponent @JvmOverloads constructor(
         return contentHolder.indexOfChild(child)
     }
 
-    override fun handleMouseClick(x: Double, y: Double, button: MouseButton): Boolean {
-        return contentHolder.handleMouseClick(x, y, button)
+    override fun handleMouseClick(x: Double, y: Double, button: MouseButton) {
+        contentHolder.handleMouseClick(x, y, button)
     }
 
 }
