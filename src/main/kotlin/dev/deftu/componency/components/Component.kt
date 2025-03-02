@@ -12,6 +12,7 @@ import dev.deftu.componency.exceptions.InvalidHierarchyException
 import dev.deftu.componency.input.Key
 import dev.deftu.componency.input.MouseButton
 import dev.deftu.componency.utils.Animateable
+import dev.deftu.componency.utils.Recalculable
 import java.util.LinkedList
 import java.util.function.Consumer
 
@@ -21,7 +22,7 @@ import java.util.function.Consumer
  * @since 0.1.0
  * @author Deftu
  */
-public abstract class Component : Animateable {
+public abstract class Component : Animateable, Recalculable {
 
     public companion object {
 
@@ -218,6 +219,17 @@ public abstract class Component : Animateable {
 
         this.config.frame()
         this.children.forEach(Animateable::frame)
+    }
+
+    /**
+     * Recalculates the component's properties and effects.
+     *
+     * @since 0.4.1
+     * @author Deftu
+     */
+    public override fun recalculate() {
+        this.config.recalculate()
+        this.children.forEach(Recalculable::recalculate)
     }
 
     public open fun isPointInside(x: Double, y: Double): Boolean {
@@ -637,7 +649,7 @@ public abstract class Component : Animateable {
         }
     }
 
-    public open fun handleMouseClick(x: Double, y: Double, button: MouseButton): Boolean {
+    public open fun handleMouseClick(x: Double, y: Double, button: MouseButton) {
         val clickedChild = hitTest(x, y)
 
         this.lastDraggedMouseX = x
@@ -657,8 +669,6 @@ public abstract class Component : Animateable {
                 requestingFocus = null
             }
         }
-
-        return true
     }
 
     public open fun handleMouseRelease() {

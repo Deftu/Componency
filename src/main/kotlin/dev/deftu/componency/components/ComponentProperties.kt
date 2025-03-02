@@ -8,8 +8,9 @@ import dev.deftu.componency.font.Font
 import dev.deftu.componency.properties.*
 import dev.deftu.componency.styling.Stroke
 import dev.deftu.componency.utils.Animateable
+import dev.deftu.componency.utils.Recalculable
 
-public open class ComponentProperties(public val component: Component) : Animateable {
+public open class ComponentProperties(public val component: Component) : Animateable, Recalculable {
 
     public var x: XProperty = 0.px
 
@@ -64,6 +65,20 @@ public open class ComponentProperties(public val component: Component) : Animate
         bottomLeftRadius.frame()
         bottomRightRadius.frame()
         angle.frame()
+    }
+
+    override fun recalculate() {
+        x.needsRecalculate = true
+        y.needsRecalculate = true
+        width.needsRecalculate = true
+        height.needsRecalculate = true
+        fill.needsRecalculate = true
+        stroke.needsRecalculate = true
+        topLeftRadius.needsRecalculate = true
+        topRightRadius.needsRecalculate = true
+        bottomLeftRadius.needsRecalculate = true
+        bottomRightRadius.needsRecalculate = true
+        angle.needsRecalculate = true
     }
 
     public fun copyFrom(properties: ComponentProperties): ComponentProperties = apply {

@@ -1,6 +1,6 @@
 import com.modrinth.minotaur.dependencies.DependencyType
 import com.modrinth.minotaur.dependencies.ModDependency
-import dev.deftu.gradle.utils.MinecraftVersion
+import dev.deftu.gradle.utils.version.MinecraftVersions
 import dev.deftu.gradle.utils.ModLoader
 import dev.deftu.gradle.utils.includeOrShade
 
@@ -10,9 +10,9 @@ plugins {
     id("dev.deftu.gradle.multiversion")
     id("dev.deftu.gradle.tools")
     id("dev.deftu.gradle.tools.resources")
-    id("dev.deftu.gradle.tools.shadow")
     id("dev.deftu.gradle.tools.publishing.maven")
     id("dev.deftu.gradle.tools.minecraft.loom")
+    id("dev.deftu.gradle.tools.shadow")
     id("dev.deftu.gradle.tools.minecraft.releases")
 }
 
@@ -23,7 +23,7 @@ toolkitMavenPublishing {
 }
 
 toolkitLoomHelper {
-    if (mcData.isForgeLike && mcData.version >= MinecraftVersion.VERSION_1_16_5) {
+    if (mcData.isForgeLike && mcData.version >= MinecraftVersions.VERSION_1_16_5) {
         useKotlinForForge()
     }
 }
@@ -37,13 +37,13 @@ toolkitReleases {
             dependencies.addAll(listOf(
                 ModDependency("Ha28R6CL", DependencyType.REQUIRED),                     // Fabric Language Kotlin
             ))
-        } else if (mcData.version >= MinecraftVersion.VERSION_1_16_5) {
+        } else if (mcData.version >= MinecraftVersions.VERSION_1_16_5) {
             dependencies.addAll(listOf(
                 ModDependency("ordsPcFz", DependencyType.REQUIRED)                      // Kotlin for Forge
             ))
         }
 
-        if (mcData.version >= MinecraftVersion.VERSION_1_16_5) {
+        if (mcData.version >= MinecraftVersions.VERSION_1_16_5) {
             dependencies.add(ModDependency("T0Zb6DLv", DependencyType.REQUIRED))        // Textile
             dependencies.add(ModDependency("MaDESStl", DependencyType.REQUIRED))        // Omnicore
         }
@@ -68,7 +68,7 @@ dependencies {
     })
 
     // Minecraft
-    modApi("dev.deftu:omnicore-$mcData:0.10.0")
+    modApi("dev.deftu:omnicore-$mcData:0.19.1")
 }
 
 tasks {

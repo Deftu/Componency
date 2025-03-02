@@ -25,29 +25,40 @@ public abstract class ComponencyScreen : OmniScreen() {
         frame.handleRender()
     }
 
-    override fun handleMouseClick(x: Double, y: Double, button: Int) {
+    override fun handleMouseClick(x: Double, y: Double, button: Int): Boolean {
         frame.handleMouseClick(x, y, MinecraftInputEngine.getMouseButtonMapping(button))
-        super.handleMouseClick(x, y, button)
+        return super.handleMouseClick(x, y, button)
     }
 
-    override fun handleMouseReleased(x: Double, y: Double, state: Int) {
+    override fun handleMouseReleased(x: Double, y: Double, state: Int): Boolean {
         frame.handleMouseRelease()
-        super.handleMouseReleased(x, y, state)
+        return super.handleMouseReleased(x, y, state)
     }
 
-    override fun handleMouseScrolled(delta: Double) {
+    override fun handleMouseScrolled(delta: Double): Boolean {
         frame.handleMouseScroll(delta.coerceIn(-1.0, 1.0))
-        super.handleMouseScrolled(delta)
+        return super.handleMouseScrolled(delta)
     }
 
-    override fun handleKeyPress(code: Int, char: Char, modifiers: OmniKeyboard.KeyboardModifiers) {
-        frame.handleKeyPress(MinecraftInputEngine.getKeyMapping(code, char), KeyboardModifiers(modifiers.shift, modifiers.alt, modifiers.ctrl, false))
-        super.handleKeyPress(code, char, modifiers)
+    public override fun handleKeyPress(
+        keyCode: Int,
+        scancode: Int,
+        typedChar: Char,
+        modifiers: OmniKeyboard.KeyboardModifiers,
+        trigger: KeyPressTrigger
+    ): Boolean {
+        frame.handleKeyPress(MinecraftInputEngine.getKeyMapping(keyCode, typedChar), KeyboardModifiers(modifiers.shift, modifiers.alt, modifiers.ctrl, false))
+        return super.handleKeyPress(keyCode, scancode, typedChar, modifiers, trigger)
     }
 
-    override fun handleKeyRelease(code: Int, char: Char, modifiers: Int) {
-        frame.handleKeyRelease(MinecraftInputEngine.getKeyMapping(code, char), KeyboardModifiers(modifiers and 1 != 0, modifiers and 2 != 0, modifiers and 4 != 0, false))
-        super.handleKeyRelease(code, char, modifiers)
+    public override fun handleKeyRelease(
+        code: Int,
+        scancode: Int,
+        char: Char,
+        modifiers: OmniKeyboard.KeyboardModifiers
+    ): Boolean {
+        frame.handleKeyRelease(MinecraftInputEngine.getKeyMapping(code, char), KeyboardModifiers(modifiers.shift, modifiers.ctrl, modifiers.alt, false))
+        return super.handleKeyRelease(code, scancode, char, modifiers)
     }
 
 }
