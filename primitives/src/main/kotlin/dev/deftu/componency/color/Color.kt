@@ -54,12 +54,12 @@ public abstract class Color(
         public val BLUE: Color = rgb(red = 0, green = 0, blue = 255)
 
         @JvmStatic
-        public fun rgba(red: Int, green: Int, blue: Int, alpha: Int): Color {
+        public fun rgba(red: Int, green: Int, blue: Int, alpha: Int): StaticColor {
             return StaticColor(red = red, green = green, blue = blue, alpha = alpha)
         }
 
         @JvmStatic
-        public fun rgba(rgba: Int): Color {
+        public fun rgba(rgba: Int): StaticColor {
             return StaticColor(
                 red = (rgba shr 16) and 0xFF,
                 green = (rgba shr 8) and 0xFF,
@@ -69,12 +69,12 @@ public abstract class Color(
         }
 
         @JvmStatic
-        public fun rgb(red: Int, green: Int, blue: Int): Color {
+        public fun rgb(red: Int, green: Int, blue: Int): StaticColor {
             return StaticColor(red = red, green = green, blue = blue)
         }
 
         @JvmStatic
-        public fun rgb(rgb: Int): Color {
+        public fun rgb(rgb: Int): StaticColor {
             return rgba(
                 red = (rgb shr 16) and 0xFF,
                 green = (rgb shr 8) and 0xFF,
@@ -84,13 +84,13 @@ public abstract class Color(
         }
 
         @JvmStatic
-        public fun argb(alpha: Int, red: Int, green: Int, blue: Int): Color {
+        public fun argb(alpha: Int, red: Int, green: Int, blue: Int): StaticColor {
             return StaticColor(red = red, green = green, blue = blue, alpha = alpha)
         }
 
         @JvmStatic
         @JvmOverloads
-        public fun hsb(hue: Float, saturation: Float, brightness: Float, alpha: Int = 255): Color {
+        public fun hsb(hue: Float, saturation: Float, brightness: Float, alpha: Int = 255): StaticColor {
             return StaticColor(hue = hue, saturation = saturation, brightness = brightness, alpha = alpha)
         }
 
@@ -282,5 +282,14 @@ public abstract class Color(
         blue: Int,
         alpha: Int = 255
     ) : this(RGBtoHSB(red, green, blue), alpha)
+
+    public fun withAlpha(alpha: Int): StaticColor {
+        return rgba(red, green, blue, alpha)
+    }
+
+    public fun withAlphaPercentage(percent: Float): StaticColor {
+        val alpha = (percent * 255).toInt()
+        return rgba(red, green, blue, alpha)
+    }
 
 }

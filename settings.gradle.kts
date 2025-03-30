@@ -34,8 +34,9 @@ val projectName: String = extra["project.name"]?.toString()
     ?: throw MissingPropertyException("project.name has not been set.")
 rootProject.name = projectName
 
-include(":example-basic")
-include(":example-lwjgl3")
+// Platform
+include(":primitives") // Primitive values such as colors, vectors, etc.
+include(":platform") // Platform API
 
 // Utilities
 include(":text-input") // Text input component
@@ -90,3 +91,7 @@ listOf(
         buildFileName = "../../build.gradle.kts"
     }
 }
+
+// Usage examples
+include(":example-basic")
+include(":example-lwjgl3")

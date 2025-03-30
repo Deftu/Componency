@@ -1,4 +1,4 @@
-package dev.deftu.componency.styling
+package dev.deftu.componency.stroke
 
 public enum class StrokeSide {
 

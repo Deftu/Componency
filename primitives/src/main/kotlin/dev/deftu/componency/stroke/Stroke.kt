@@ -1,4 +1,4 @@
-package dev.deftu.componency.styling
+package dev.deftu.componency.stroke
 
 import dev.deftu.componency.color.Color
 import dev.deftu.componency.dsl.px

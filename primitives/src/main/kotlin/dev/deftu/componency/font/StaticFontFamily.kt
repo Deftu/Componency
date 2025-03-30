@@ -1,8 +1,4 @@
-package dev.deftu.componency.defign
-
-import dev.deftu.componency.font.Font
-import dev.deftu.componency.font.FontFamily
-import dev.deftu.componency.font.FontWeight
+package dev.deftu.componency.font
 
 public class StaticFontFamily(
     name: String,
