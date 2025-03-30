@@ -47,18 +47,17 @@ public abstract class ComponencyScreen : OmniScreen() {
         modifiers: OmniKeyboard.KeyboardModifiers,
         trigger: KeyPressTrigger
     ): Boolean {
-        frame.handleKeyPress(MinecraftInputEngine.getKeyMapping(keyCode, typedChar), KeyboardModifiers(modifiers.shift, modifiers.alt, modifiers.ctrl, false))
+        frame.handleKeyPress(MinecraftInputEngine.getKeyMapping(keyCode), KeyboardModifiers(modifiers.shift, modifiers.alt, modifiers.ctrl, false))
         return super.handleKeyPress(keyCode, scancode, typedChar, modifiers, trigger)
     }
 
     public override fun handleKeyRelease(
-        code: Int,
+        keyCode: Int,
         scancode: Int,
-        char: Char,
         modifiers: OmniKeyboard.KeyboardModifiers
     ): Boolean {
-        frame.handleKeyRelease(MinecraftInputEngine.getKeyMapping(code, char), KeyboardModifiers(modifiers.shift, modifiers.ctrl, modifiers.alt, false))
-        return super.handleKeyRelease(code, scancode, char, modifiers)
+        frame.handleKeyRelease(MinecraftInputEngine.getKeyMapping(keyCode), KeyboardModifiers(modifiers.shift, modifiers.ctrl, modifiers.alt, false))
+        return super.handleKeyRelease(keyCode, scancode, modifiers)
     }
 
 }

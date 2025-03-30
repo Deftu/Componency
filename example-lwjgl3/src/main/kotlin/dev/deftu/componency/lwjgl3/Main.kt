@@ -1,5 +1,7 @@
 package dev.deftu.componency.lwjgl3
 
+import dev.deftu.componency.components.events.KeyboardModifiers
+import dev.deftu.componency.defign.DefignFonts
 import dev.deftu.componency.lwjgl3.engine.Lwjgl3Engine
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL
@@ -22,6 +24,17 @@ object Main {
 
         GLFW.glfwSwapInterval(0)
         GLFW.glfwShowWindow(handle)
+        GLFW.glfwSetInputMode(handle, GLFW.GLFW_LOCK_KEY_MODS, GLFW.GLFW_TRUE)
+
+        // Design system
+        DefignFonts.preload()
+
+        // Engine
+        val engine = Lwjgl3Engine(handle)
+        engine.resize(width, height)
+
+        // Create UI
+        val ui = MyUI(engine)
 
         // Inputs
         var mouseX = 0f
@@ -31,12 +44,57 @@ object Main {
             mouseY = y.toFloat()
         }
 
-        // Engine
-        val engine = Lwjgl3Engine()
-        engine.resize(width, height)
+        GLFW.glfwSetMouseButtonCallback(handle) { handle, button, action, mods ->
+            val x = engine.inputEngine.mouseX
+            val y = engine.inputEngine.mouseY
+            val mouseButton = engine.inputEngine.getMouseButton(button)
+            when (action) {
+                GLFW.GLFW_PRESS -> ui.frame.handleMouseClick(x.toDouble(), y.toDouble(), mouseButton)
+                GLFW.GLFW_RELEASE -> ui.frame.handleMouseRelease()
+                else -> Unit // Ignore
+            }
+        }
 
-        // Create UI
-        val ui = MyUI(engine)
+        GLFW.glfwSetScrollCallback(handle) { handle, xOff, yOff ->
+            ui.frame.handleMouseScroll(xOff)
+        }
+
+        GLFW.glfwSetKeyCallback(handle) { handle, keyCode, scancode, action, mods ->
+            val key = engine.inputEngine.getKey(keyCode)
+            val modifiers = KeyboardModifiers(
+                isShift = GLFW.GLFW_MOD_SHIFT and mods != 0,
+                isCtrl = GLFW.GLFW_MOD_CONTROL and mods != 0,
+                isAlt = GLFW.GLFW_MOD_ALT and mods != 0,
+                isSuper = GLFW.GLFW_MOD_SUPER and mods != 0,
+                isCapsLock = GLFW.GLFW_MOD_CAPS_LOCK and mods != 0,
+                isNumLock = GLFW.GLFW_MOD_NUM_LOCK and mods != 0,
+            )
+
+            when (action) {
+                GLFW.GLFW_PRESS -> ui.frame.handleKeyPress(key, modifiers)
+                GLFW.GLFW_RELEASE -> ui.frame.handleKeyRelease(key, modifiers)
+                else -> Unit // Ignore
+            }
+        }
+
+        GLFW.glfwSetCharModsCallback(handle) { handle, codepoint, mods ->
+            val modifiers = KeyboardModifiers(
+                isShift = GLFW.GLFW_MOD_SHIFT and mods != 0,
+                isCtrl = GLFW.GLFW_MOD_CONTROL and mods != 0,
+                isAlt = GLFW.GLFW_MOD_ALT and mods != 0,
+                isSuper = GLFW.GLFW_MOD_SUPER and mods != 0,
+                isCapsLock = GLFW.GLFW_MOD_CAPS_LOCK and mods != 0,
+                isNumLock = GLFW.GLFW_MOD_NUM_LOCK and mods != 0,
+            )
+
+            if (Character.charCount(codepoint) == 1) {
+                ui.frame.handleCharType(codepoint.toChar(), modifiers)
+            } else {
+                for (char in Character.toChars(codepoint)) {
+                    ui.frame.handleCharType(char, modifiers)
+                }
+            }
+        }
 
         // Render loop
         GLFW.glfwMakeContextCurrent(handle)
@@ -47,7 +105,7 @@ object Main {
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
 
             engine.updateMousePosition(mouseX, mouseY)
-            ui.render()
+            ui.frame.handleRender()
 
             GLFW.glfwSwapBuffers(handle)
             GLFW.glfwPollEvents()

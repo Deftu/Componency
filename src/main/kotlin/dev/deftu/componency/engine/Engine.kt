@@ -17,11 +17,6 @@ public abstract class Engine {
 
     }
 
-    public enum class FamilyLoadType {
-        VARIABLE,
-        DIRECTORY
-    }
-
     public abstract val renderEngine: RenderEngine
 
     public abstract val inputEngine: InputEngine

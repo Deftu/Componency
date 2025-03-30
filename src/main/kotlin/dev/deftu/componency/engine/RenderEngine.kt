@@ -37,15 +37,48 @@ public interface RenderEngine {
 
     public fun endFrame()
 
-    public fun stroke(x1: Float, y1: Float, x2: Float, y2: Float, color: Color, strokeWidth: Float, strokeSides: Set<StrokeSide>, topLeftRadius: Float, topRightRadius: Float, bottomRightRadius: Float, bottomLeftRadius: Float)
+    public fun stroke(
+        x1: Float,
+        y1: Float,
+        x2: Float,
+        y2: Float,
+        color: Color,
+        strokeWidth: Float,
+        strokeSides: Set<StrokeSide>,
+        topLeftRadius: Float = 0f,
+        topRightRadius: Float = 0f,
+        bottomRightRadius: Float = 0f,
+        bottomLeftRadius: Float = 0f
+    )
 
-    public fun fill(x1: Float, y1: Float, x2: Float, y2: Float, color: Color, topLeftRadius: Float, topRightRadius: Float, bottomRightRadius: Float, bottomLeftRadius: Float)
+    public fun fill(
+        x1: Float,
+        y1: Float,
+        x2: Float,
+        y2: Float,
+        color: Color,
+        topLeftRadius: Float = 0f,
+        topRightRadius: Float = 0f,
+        bottomRightRadius: Float = 0f,
+        bottomLeftRadius: Float = 0f
+    )
 
-    public fun text(font: Font, text: TextHolder, x: Float, y: Float, color: Color, fontSize: Float)
+    public fun text(font: Font, text: TextHolder<*, *>, x: Float, y: Float, color: Color, fontSize: Float)
 
-    public fun textSize(font: Font, text: TextHolder, fontSize: Float): Pair<Float, Float>
+    public fun textSize(font: Font, text: TextHolder<*, *>, fontSize: Float): Pair<Float, Float>
 
-    public fun image(image: Image, x1: Float, y1: Float, x2: Float, y2: Float, color: Color, topLeftRadius: Float, topRightRadius: Float, bottomRightRadius: Float, bottomLeftRadius: Float)
+    public fun image(
+        image: Image,
+        x1: Float,
+        y1: Float,
+        x2: Float,
+        y2: Float,
+        color: Color,
+        topLeftRadius: Float = 0f,
+        topRightRadius: Float = 0f,
+        bottomRightRadius: Float = 0f,
+        bottomLeftRadius: Float = 0f
+    )
 
     public fun pushScissor(x1: Float, y1: Float, x2: Float, y2: Float)
 

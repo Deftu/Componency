@@ -14,5 +14,5 @@ kotlin.explicitApi()
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     api("dev.deftu:stateful:0.3.0")
-    api("dev.deftu:textile:0.8.0")
+    api("dev.deftu:textile:0.11.1")
 }

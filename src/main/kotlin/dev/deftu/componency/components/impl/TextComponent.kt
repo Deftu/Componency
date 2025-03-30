@@ -6,7 +6,7 @@ import dev.deftu.textile.SimpleTextHolder
 import dev.deftu.textile.TextHolder
 
 public open class TextComponent @JvmOverloads constructor(
-    public val text: TextHolder,
+    public val text: TextHolder<*, *>,
     public val mode: Mode = Mode.NORMAL
 ) : Component() {
 

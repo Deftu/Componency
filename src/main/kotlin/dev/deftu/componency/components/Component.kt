@@ -417,12 +417,14 @@ public abstract class Component : Animateable, Recalculable {
         return children.indexOf(child)
     }
 
-    public fun addEffect(effect: Effect) {
+    public fun addEffect(effect: Effect): Component {
         config.effects.add(effect)
+        return this
     }
 
-    public fun removeEffect(effect: Effect) {
+    public fun removeEffect(effect: Effect): Component {
         config.effects.remove(effect)
+        return this
     }
 
     /// Visibility
@@ -504,6 +506,7 @@ public abstract class Component : Animateable, Recalculable {
      */
     public fun unfocus() {
         if (isRoot) {
+            this.focusedChild?.events?.unfocusListeners?.forEach { it() }
             this.focusedChild = null
         } else {
             val root = findRoot(this)
@@ -571,6 +574,10 @@ public abstract class Component : Animateable, Recalculable {
 
     public fun <T : Component> onKeyRelease(listener: Consumer<KeyReleaseEvent>): T = apply {
         events.keyReleaseListeners.add(listener::accept)
+    } as T
+
+    public fun <T : Component> onCharType(listener: Consumer<CharTypeEvent>): T = apply {
+        events.charTypeListeners.add(listener::accept)
     } as T
 
     public fun beginAnimation(): ComponentAnimationProperties {
@@ -666,8 +673,10 @@ public abstract class Component : Animateable, Recalculable {
             } else if (requestingFocus != focusedChild) {
                 focusedChild?.unfocus()
                 focusedChild = requestingFocus
-                requestingFocus = null
+                focusedChild!!.events.focusListeners.forEach { it() }
             }
+
+            requestingFocus = null
         }
     }
 
@@ -734,6 +743,16 @@ public abstract class Component : Animateable, Recalculable {
 
         if (isRoot && focusedChild != null) {
             focusedChild!!.handleKeyRelease(key, modifiers)
+        }
+    }
+
+    public open fun handleCharType(char: Char, modifiers: KeyboardModifiers) {
+        for (listener in events.charTypeListeners) {
+            listener.invoke(CharTypeEvent(this, char, modifiers))
+        }
+
+        if (isRoot && focusedChild != null) {
+            focusedChild!!.handleCharType(char, modifiers)
         }
     }
 

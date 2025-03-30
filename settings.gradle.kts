@@ -26,6 +26,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version ("0.8.+")
+}
+
 val projectName: String = extra["project.name"]?.toString()
     ?: throw MissingPropertyException("project.name has not been set.")
 rootProject.name = projectName
@@ -37,7 +41,7 @@ include(":example-lwjgl3")
 include(":text-input") // Text input component
 
 // Defign
-include(":defign") // Implementation of my design system
+include(":defign") // Implementation of Deftu's design system
 
 // Minecraft implementation
 include(":minecraft")

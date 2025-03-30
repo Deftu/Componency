@@ -4,6 +4,7 @@ import dev.deftu.componency.engine.InputEngine
 import dev.deftu.componency.input.Cursor
 import dev.deftu.componency.input.Key
 import dev.deftu.componency.input.MouseButton
+import dev.deftu.omnicore.client.OmniClipboard
 import dev.deftu.omnicore.client.OmniKeyboard
 import dev.deftu.omnicore.client.OmniMouse
 
@@ -16,39 +17,27 @@ public object MinecraftInputEngine : InputEngine {
         get() = OmniMouse.scaledY.toFloat()
 
     override var clipboard: String?
-        get() {
-            //#if MC >= 1.16.5
-            //$$ return org.lwjgl.glfw.GLFW.glfwGetClipboardString(dev.deftu.omnicore.client.OmniClient.getInstance().window.handle)
-            //#else
-            return try {
-                java.awt.Toolkit.getDefaultToolkit().systemClipboard.getContents(null).getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor).toString()
-            } catch (t: Throwable) {
-                null
-            }
-            //#endif
-        }
+        get() = OmniClipboard.clipboardString
         set(value) {
-            //#if MC >= 1.16.5
-            //$$ org.lwjgl.glfw.GLFW.glfwSetClipboardString(dev.deftu.omnicore.client.OmniClient.getInstance().window.handle, value)
-            //#else
-            val stringSelection = java.awt.datatransfer.StringSelection(value)
-            java.awt.Toolkit.getDefaultToolkit().systemClipboard.setContents(stringSelection, null)
-            //#endif
+            if (value != null) {
+                OmniClipboard.clipboardString = value
+            }
         }
 
     private val cursorMappings = mapOf(
         //#if MC >= 1.16.5
-        //$$ Cursor.ARROW to org.lwjgl.glfw.GLFW.GLFW_ARROW_CURSOR,
-        //$$ Cursor.I_BEAM to org.lwjgl.glfw.GLFW.GLFW_IBEAM_CURSOR,
-        //$$ Cursor.WAIT to org.lwjgl.glfw.GLFW.GLFW_WAIT_CURSOR,
-        //$$ Cursor.CROSSHAIR to org.lwjgl.glfw.GLFW.GLFW_CROSSHAIR_CURSOR,
-        //$$ Cursor.HAND to org.lwjgl.glfw.GLFW.GLFW_POINTING_HAND_CURSOR,
-        //$$ Cursor.RESIZE_HORIZONTAL to org.lwjgl.glfw.GLFW.GLFW_HRESIZE_CURSOR,
-        //$$ Cursor.RESIZE_VERTICAL to org.lwjgl.glfw.GLFW.GLFW_VRESIZE_CURSOR,
-        //$$ Cursor.RESIZE_TOP_LEFT_BOTTOM_RIGHT to org.lwjgl.glfw.GLFW.GLFW_RESIZE_NWSE_CURSOR,
-        //$$ Cursor.RESIZE_TOP_RIGHT_BOTTOM_LEFT to org.lwjgl.glfw.GLFW.GLFW_RESIZE_NESW_CURSOR,
-        //$$ Cursor.RESIZE_ALL to org.lwjgl.glfw.GLFW.GLFW_RESIZE_ALL_CURSOR,
-        //$$ Cursor.NOT_ALLOWED to org.lwjgl.glfw.GLFW.GLFW_NOT_ALLOWED_CURSOR,
+        //$$ Cursor.ARROW to 0,
+        //$$ // Cursor.ARROW to org.lwjgl.glfw.GLFW.GLFW_ARROW_CURSOR,
+        //$$ // Cursor.I_BEAM to org.lwjgl.glfw.GLFW.GLFW_IBEAM_CURSOR,
+        //$$ // Cursor.WAIT to org.lwjgl.glfw.GLFW.GLFW_WAIT_CURSOR,
+        //$$ // Cursor.CROSSHAIR to org.lwjgl.glfw.GLFW.GLFW_CROSSHAIR_CURSOR,
+        //$$ // Cursor.HAND to org.lwjgl.glfw.GLFW.GLFW_POINTING_HAND_CURSOR,
+        //$$ // Cursor.RESIZE_HORIZONTAL to org.lwjgl.glfw.GLFW.GLFW_HRESIZE_CURSOR,
+        //$$ // Cursor.RESIZE_VERTICAL to org.lwjgl.glfw.GLFW.GLFW_VRESIZE_CURSOR,
+        //$$ // Cursor.RESIZE_TOP_LEFT_BOTTOM_RIGHT to org.lwjgl.glfw.GLFW.GLFW_RESIZE_NWSE_CURSOR,
+        //$$ // Cursor.RESIZE_TOP_RIGHT_BOTTOM_LEFT to org.lwjgl.glfw.GLFW.GLFW_RESIZE_NESW_CURSOR,
+        //$$ // Cursor.RESIZE_ALL to org.lwjgl.glfw.GLFW.GLFW_RESIZE_ALL_CURSOR,
+        //$$ // Cursor.NOT_ALLOWED to org.lwjgl.glfw.GLFW.GLFW_NOT_ALLOWED_CURSOR,
         //#else
         Cursor.ARROW to 0, // none, not supported
         //#endif
@@ -89,19 +78,19 @@ public object MinecraftInputEngine : InputEngine {
         Key.KEY_COMMA to OmniKeyboard.KEY_COMMA,
         Key.KEY_PERIOD to OmniKeyboard.KEY_PERIOD,
         Key.KEY_SLASH to OmniKeyboard.KEY_SLASH,
-        Key.KEY_MULTIPLY to OmniKeyboard.KEY_MULTIPLY,
+        Key.KEY_NUMPAD_MULTIPLY to OmniKeyboard.KEY_MULTIPLY,
         Key.KEY_SPACE to OmniKeyboard.KEY_SPACE,
-        Key.KEY_CAPITAL to OmniKeyboard.KEY_CAPITAL,
+        Key.KEY_CAPS_LOCK to OmniKeyboard.KEY_CAPITAL,
         Key.KEY_LEFT to OmniKeyboard.KEY_LEFT,
         Key.KEY_UP to OmniKeyboard.KEY_UP,
         Key.KEY_RIGHT to OmniKeyboard.KEY_RIGHT,
         Key.KEY_DOWN to OmniKeyboard.KEY_DOWN,
-        Key.KEY_NUMLOCK to OmniKeyboard.KEY_NUMLOCK,
-        Key.KEY_SCROLL to OmniKeyboard.KEY_SCROLL,
-        Key.KEY_SUBTRACT to OmniKeyboard.KEY_SUBTRACT,
-        Key.KEY_ADD to OmniKeyboard.KEY_ADD,
-        Key.KEY_DIVIDE to OmniKeyboard.KEY_DIVIDE,
-        Key.KEY_DECIMAL to OmniKeyboard.KEY_DECIMAL,
+        Key.KEY_NUM_LOCK to OmniKeyboard.KEY_NUMLOCK,
+        Key.KEY_SCROLL_LOCK to OmniKeyboard.KEY_SCROLL,
+        Key.KEY_NUMPAD_SUBTRACT to OmniKeyboard.KEY_SUBTRACT,
+        Key.KEY_NUMPAD_ADD to OmniKeyboard.KEY_ADD,
+        Key.KEY_NUMPAD_DIVIDE to OmniKeyboard.KEY_DIVIDE,
+        Key.KEY_NUMPAD_DECIMAL to OmniKeyboard.KEY_DECIMAL,
         Key.KEY_NUMPAD0 to OmniKeyboard.KEY_NUMPAD0,
         Key.KEY_NUMPAD1 to OmniKeyboard.KEY_NUMPAD1,
         Key.KEY_NUMPAD2 to OmniKeyboard.KEY_NUMPAD2,
@@ -174,7 +163,7 @@ public object MinecraftInputEngine : InputEngine {
 
     override fun setCursor(cursor: Cursor) {
         //#if MC >= 1.16.5
-        //$$ org.lwjgl.glfw.GLFW.glfwSetCursor(dev.deftu.omnicore.client.OmniClient.getInstance().window.handle, org.lwjgl.glfw.glfwCreateStandardCursor(cursorMappings.getValue(cursor)))
+        //$$ // org.lwjgl.glfw.GLFW.glfwSetCursor(dev.deftu.omnicore.client.OmniClient.getInstance().window.handle, org.lwjgl.glfw.glfwCreateStandardCursor(cursorMappings.getValue(cursor)))
         //#endif
     }
 
@@ -192,10 +181,10 @@ public object MinecraftInputEngine : InputEngine {
         }?.key ?: throw IllegalArgumentException("Unknown mouse button code: $code")
     }
 
-    public fun getKeyMapping(keyCode: Int, typedChar: Char): Key {
+    public fun getKeyMapping(keyCode: Int): Key {
         return keyMappings.entries.firstOrNull { entry ->
             entry.value == keyCode
-        }?.key ?: Key.fromChar(typedChar) ?: Key.KEY_UNKNOWN
+        }?.key ?: Key.KEY_UNKNOWN
     }
 
 }

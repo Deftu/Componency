@@ -34,3 +34,15 @@ public fun <T : Component> T.whenKeyPress(listener: KeyPressEvent.() -> Unit): T
 public fun <T : Component> T.whenKeyRelease(listener: KeyReleaseEvent.() -> Unit): T = apply {
     events.keyReleaseListeners.add(listener)
 }
+
+public fun <T : Component> T.whenCharType(listener: CharTypeEvent.() -> Unit): T = apply {
+    events.charTypeListeners.add(listener)
+}
+
+public fun <T : Component> T.whenFocus(listener: () -> Unit): T = apply {
+    events.focusListeners.add(listener)
+}
+
+public fun <T : Component> T.whenUnfocus(listener: () -> Unit): T = apply {
+    events.unfocusListeners.add(listener)
+}

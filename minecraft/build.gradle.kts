@@ -68,7 +68,7 @@ dependencies {
     })
 
     // Minecraft
-    modApi("dev.deftu:omnicore-$mcData:0.19.1")
+    modApi("dev.deftu:omnicore-$mcData:0.25.0")
 }
 
 tasks {

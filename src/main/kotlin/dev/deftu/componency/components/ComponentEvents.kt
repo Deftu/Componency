@@ -12,5 +12,8 @@ public open class ComponentEvents {
     public val mouseUnhoverListeners: MutableList<(MouseHoverEvent) -> Unit> = mutableListOf()
     public val keyPressListeners: MutableList<(KeyPressEvent) -> Unit> = mutableListOf()
     public val keyReleaseListeners: MutableList<(KeyReleaseEvent) -> Unit> = mutableListOf()
+    public val charTypeListeners : MutableList<(CharTypeEvent) -> Unit> = mutableListOf()
+    public val focusListeners: MutableList<() -> Unit> = mutableListOf()
+    public val unfocusListeners: MutableList<() -> Unit> = mutableListOf()
 
 }
