@@ -1,46 +1,46 @@
 package dev.deftu.componency.components
 
 import dev.deftu.componency.effects.Effect
-import dev.deftu.componency.utils.Animateable
-import dev.deftu.componency.utils.Recalculable
 
-public open class ComponentEffects(public val component: Component) : Animateable, Recalculable {
+public open class ComponentEffects<T : Component<T, C>, C : ComponentProperties<T, C>>(
+    public val component: Component<T, C>
+) {
 
-    public val effects: MutableList<Effect> = mutableListOf()
+    public val effects: MutableList<Effect<T, C>> = mutableListOf()
 
-    override fun frame() {
+    public open fun animationFrame(deltaTime: Float) {
         for (effect in effects) {
-            effect.frame()
+            effect.animationFrame(deltaTime)
         }
     }
 
-    override fun recalculate() {
+    public open fun recalculate() {
         for (effect in effects) {
             effect.recalculate()
         }
     }
 
-    public fun add(effect: Effect) {
+    public fun add(effect: Effect<T, C>) {
         effects.add(effect)
     }
 
-    public operator fun plusAssign(effect: Effect) {
+    public operator fun plusAssign(effect: Effect<T, C>) {
         add(effect)
     }
 
-    public operator fun Effect.unaryPlus() {
+    public operator fun Effect<T, C>.unaryPlus() {
         add(this)
     }
 
-    public fun remove(effect: Effect) {
+    public fun remove(effect: Effect<T, C>) {
         effects.remove(effect)
     }
 
-    public operator fun minusAssign(effect: Effect) {
+    public operator fun minusAssign(effect: Effect<T, C>) {
         remove(effect)
     }
 
-    public operator fun Effect.unaryMinus() {
+    public operator fun Effect<T, C>.unaryMinus() {
         remove(this)
     }
 

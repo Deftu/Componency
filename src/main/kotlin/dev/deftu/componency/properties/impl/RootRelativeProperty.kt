@@ -20,23 +20,23 @@ public class RootRelativeProperty(
 
     public constructor(value: Number) : this(stateOf(value.toFloat()))
 
-    override fun calculateX(component: Component): Float {
+    override fun calculateX(component: Component<*, *>): Float {
         return Component.findRoot(component).left + getWidth(component)
     }
 
-    override fun calculateY(component: Component): Float {
+    override fun calculateY(component: Component<*, *>): Float {
         return Component.findRoot(component).top + getHeight(component)
     }
 
-    override fun calculateWidth(component: Component): Float {
+    override fun calculateWidth(component: Component<*, *>): Float {
         return Component.findRoot(component).width * value
     }
 
-    override fun calculateHeight(component: Component): Float {
+    override fun calculateHeight(component: Component<*, *>): Float {
         return Component.findRoot(component).height * value
     }
 
-    override fun calculateRadius(component: Component): Float {
+    override fun calculateRadius(component: Component<*, *>): Float {
         return (Component.findRoot(component).width * value) / 2
     }
 

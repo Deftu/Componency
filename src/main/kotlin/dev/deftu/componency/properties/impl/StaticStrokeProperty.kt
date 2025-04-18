@@ -2,7 +2,7 @@ package dev.deftu.componency.properties.impl
 
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.properties.StrokeProperty
-import dev.deftu.componency.styling.Stroke
+import dev.deftu.componency.stroke.Stroke
 import dev.deftu.stateful.State
 import dev.deftu.stateful.utils.mappedMutableStateOf
 import dev.deftu.stateful.utils.mutableStateBound
@@ -21,7 +21,7 @@ public class StaticStrokeProperty(
 
     public constructor(value: Stroke) : this(stateOf(value))
 
-    override fun calculateStroke(component: Component): Stroke {
+    override fun calculateStroke(component: Component<*, *>): Stroke {
         return value
     }
 

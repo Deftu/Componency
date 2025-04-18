@@ -1,16 +1,15 @@
 package dev.deftu.componency.properties.impl
 
 import dev.deftu.componency.components.Component
-import dev.deftu.componency.engine.Engine
 import dev.deftu.componency.properties.PositionalProperty
+import dev.deftu.componency.utils.roundToPixel
 
 public class CenteredProperty : PositionalProperty {
 
     override var cachedValue: Float = 0f
     override var needsRecalculate: Boolean = true
 
-    override fun calculateX(component: Component): Float {
-        val engine = Engine.get(component)
+    override fun calculateX(component: Component<*, *>): Float {
         val value = if (component.hasParent) {
             val parent = component.parent!!
             if (component.isAlreadyCentered) {
@@ -22,11 +21,10 @@ public class CenteredProperty : PositionalProperty {
             component.width / 2 - component.width / 2
         }
 
-        return engine.renderEngine.roundToPixel(value)
+        return roundToPixel(Component.findPlatform(component), value)
     }
 
-    override fun calculateY(component: Component): Float {
-        val engine = Engine.get(component)
+    override fun calculateY(component: Component<*, *>): Float {
         val value = if (component.hasParent) {
             val parent = component.parent!!
             if (component.isAlreadyCentered) {
@@ -38,7 +36,7 @@ public class CenteredProperty : PositionalProperty {
             component.height / 2 - component.height / 2
         }
 
-        return engine.renderEngine.roundToPixel(value)
+        return roundToPixel(Component.findPlatform(component), value)
     }
 
 }

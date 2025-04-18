@@ -1,10 +1,10 @@
 package dev.deftu.componency.properties.impl
 
-import dev.deftu.componency.animations.AnimationTime
 import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.dsl.second
 import dev.deftu.componency.properties.ColorProperty
+import dev.deftu.componency.time.AnimationTime
 import dev.deftu.stateful.State
 import dev.deftu.stateful.utils.mappedMutableStateOf
 import dev.deftu.stateful.utils.mutableStateBound
@@ -38,8 +38,8 @@ public class RainbowColorProperty(
         stateOf(brightness)
     )
 
-    override fun calculateColor(component: Component): Color {
-        val cycleDuration = cycleDuration.unit.toMillis(cycleDuration.value).toFloat()
+    override fun calculateColor(component: Component<*, *>): Color {
+        val cycleDuration = cycleDuration.millis.toFloat()
         return Color.hsb((System.currentTimeMillis() % cycleDuration) / cycleDuration, saturation, brightness)
     }
 

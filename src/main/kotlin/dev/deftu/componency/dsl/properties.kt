@@ -1,51 +1,74 @@
+@file:Suppress("UnusedReceiverParameter")
+
 package dev.deftu.componency.dsl
 
-import dev.deftu.componency.animations.AnimationTime
 import dev.deftu.componency.components.ComponentProperties
+import dev.deftu.componency.properties.*
 import dev.deftu.componency.properties.impl.*
+import dev.deftu.componency.time.AnimationTime
 
-public val ComponentProperties.centered: CenteredProperty
+public val ComponentProperties<*, *>.centered: CenteredProperty
     get() = CenteredProperty()
 
-public val ComponentProperties.hugging: ContentHuggingProperty
+public val ComponentProperties<*, *>.hugging: ContentHuggingProperty
     get() = ContentHuggingProperty()
 
-public val ComponentProperties.fill: FillProperty
+public val ComponentProperties<*, *>.filling: FillProperty
     get() = FillProperty()
 
-public val ComponentProperties.largestChild: LargestChildProperty
+public val ComponentProperties<*, *>.largestChild: LargestChildProperty
     get() = LargestChildProperty()
 
-public val ComponentProperties.mousePosition: MousePositionProperty
-    get() = MousePositionProperty()
+public val ComponentProperties<*, *>.pointerPosition: PointerPositionProperty
+    get() = PointerPositionProperty()
 
-public val ComponentProperties.rainbow: RainbowColorProperty
+public val ComponentProperties<*, *>.rainbow: RainbowColorProperty
     get() = RainbowColorProperty()
 
-public val ComponentProperties.siblingBased: SiblingBasedProperty
+public val ComponentProperties<*, *>.siblingBased: SiblingBasedProperty
     get() = SiblingBasedProperty()
 
-public fun ComponentProperties.centered(): CenteredProperty {
+public fun ComponentProperties<*, *>.centered(): CenteredProperty {
     return CenteredProperty()
 }
 
-public fun ComponentProperties.hugging(padding: Float = 0f): ContentHuggingProperty {
+public fun ComponentProperties<*, *>.hugging(padding: Float = 0f): ContentHuggingProperty {
     return ContentHuggingProperty(padding)
 }
 
-public fun ComponentProperties.fill(useSiblings: Boolean = true): FillProperty {
+public fun ComponentProperties<*, *>.filling(useSiblings: Boolean = true): FillProperty {
     return FillProperty(useSiblings)
 }
 
-public fun ComponentProperties.largestChild(): LargestChildProperty {
+public fun ComponentProperties<*, *>.linked(target: XProperty): LinkedProperty {
+    return LinkedProperty(target as VectorProperty)
+}
+
+public fun ComponentProperties<*, *>.linked(target: YProperty): LinkedProperty {
+    return LinkedProperty(target as VectorProperty)
+}
+
+public fun ComponentProperties<*, *>.linked(target: WidthProperty): LinkedProperty {
+    return LinkedProperty(target as VectorProperty)
+}
+
+public fun ComponentProperties<*, *>.linked(target: HeightProperty): LinkedProperty {
+    return LinkedProperty(target as VectorProperty)
+}
+
+public fun ComponentProperties<*, *>.linked(target: RadialProperty): LinkedProperty {
+    return LinkedProperty(target as VectorProperty)
+}
+
+public fun ComponentProperties<*, *>.largestChild(): LargestChildProperty {
     return LargestChildProperty()
 }
 
-public fun ComponentProperties.mousePosition(centerAligned: Boolean = false): MousePositionProperty {
-    return MousePositionProperty(centerAligned)
+public fun ComponentProperties<*, *>.pointerPosition(centerAligned: Boolean = false): PointerPositionProperty {
+    return PointerPositionProperty(centerAligned)
 }
 
-public fun ComponentProperties.rainbow(
+public fun ComponentProperties<*, *>.rainbow(
     cycleDuration: AnimationTime = 1.second,
     saturation: Float = 1f,
     brightness: Float = 1f
@@ -53,7 +76,7 @@ public fun ComponentProperties.rainbow(
     return RainbowColorProperty(cycleDuration, saturation, brightness)
 }
 
-public fun ComponentProperties.siblingBased(
+public fun ComponentProperties<*, *>.siblingBased(
     padding: Float = 0f,
     isInverse: Boolean = false
 ): SiblingBasedProperty {

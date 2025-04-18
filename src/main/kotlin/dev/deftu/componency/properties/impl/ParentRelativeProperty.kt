@@ -1,7 +1,6 @@
 package dev.deftu.componency.properties.impl
 
 import dev.deftu.componency.components.Component
-import dev.deftu.componency.engine.Engine
 import dev.deftu.componency.properties.VectorProperty
 import dev.deftu.stateful.State
 import dev.deftu.stateful.utils.mappedMutableStateOf
@@ -21,7 +20,7 @@ public class ParentRelativeProperty(
 
     public constructor(value: Number) : this(stateOf(value.toFloat()))
 
-    override fun calculateX(component: Component): Float {
+    override fun calculateX(component: Component<*, *>): Float {
         return if (component.hasParent) {
             component.parent!!.left + getWidth(component)
         } else {
@@ -29,7 +28,7 @@ public class ParentRelativeProperty(
         }
     }
 
-    override fun calculateY(component: Component): Float {
+    override fun calculateY(component: Component<*, *>): Float {
         return if (component.hasParent) {
             component.parent!!.top + getHeight(component)
         } else {
@@ -37,23 +36,23 @@ public class ParentRelativeProperty(
         }
     }
 
-    override fun calculateWidth(component: Component): Float {
+    override fun calculateWidth(component: Component<*, *>): Float {
         return if (component.hasParent) {
             component.parent!!.width * value
         } else {
-            Engine.get(component).renderEngine.viewportWidth.toFloat()
+            Component.findPlatform(component).viewportWidth
         }
     }
 
-    override fun calculateHeight(component: Component): Float {
+    override fun calculateHeight(component: Component<*, *>): Float {
         return if (component.hasParent) {
             component.parent!!.height * value
         } else {
-            Engine.get(component).renderEngine.viewportHeight.toFloat()
+            Component.findPlatform(component).viewportHeight
         }
     }
 
-    override fun calculateRadius(component: Component): Float {
+    override fun calculateRadius(component: Component<*, *>): Float {
         return if (component.hasParent) {
             (component.parent!!.width * value) / 2
         } else {

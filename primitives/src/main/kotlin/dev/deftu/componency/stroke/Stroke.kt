@@ -1,23 +1,21 @@
 package dev.deftu.componency.stroke
 
 import dev.deftu.componency.color.Color
-import dev.deftu.componency.dsl.px
-import dev.deftu.componency.properties.WidthProperty
 
 public data class Stroke @JvmOverloads constructor(
     public val color: Color,
-    public val width: WidthProperty,
+    public val width: Float,
     public val sides: Set<StrokeSide> = StrokeSide.ALL
 ) {
 
     public companion object {
 
         @JvmField
-        public val NONE: Stroke = Stroke(Color.TRANSPARENT, 0.px)
+        public val NONE: Stroke = Stroke(Color.TRANSPARENT, 0f)
 
         @JvmStatic
         public fun isNone(stroke: Stroke): Boolean {
-            return stroke == NONE || (stroke.color == Color.TRANSPARENT && stroke.width == 0.px)
+            return stroke == NONE || (stroke.color == Color.TRANSPARENT && stroke.width == 0f)
         }
 
     }
@@ -29,7 +27,7 @@ public data class Stroke @JvmOverloads constructor(
         return copy(color = color)
     }
 
-    public fun withWidth(width: WidthProperty): Stroke {
+    public fun withWidth(width: Float): Stroke {
         return copy(width = width)
     }
 

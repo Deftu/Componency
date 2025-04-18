@@ -16,9 +16,6 @@ public interface PointerInput {
     public val pointerY: Float
         get() = primaryPointer.y
 
-    public val isPointerDown: Boolean
-        get() = primaryPointer.isDown
-
     public fun getPointer(index: Int): PointerState
 
 }

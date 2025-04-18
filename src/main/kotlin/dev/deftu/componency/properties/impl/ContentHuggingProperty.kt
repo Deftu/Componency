@@ -11,15 +11,15 @@ public class ContentHuggingProperty(
     override var cachedValue: Float = 0f
     override var needsRecalculate: Boolean = true
 
-    override fun calculateWidth(component: Component): Float {
+    override fun calculateWidth(component: Component<*, *>): Float {
         return component.getChildren().sumOf { child ->
-            child.width + ((child.config.properties.x as? PaddingProperty)?.getHorizontalPadding(child) ?: 0f).toDouble()
+            child.width + ((child.properties.x as? PaddingProperty)?.getHorizontalPadding(child) ?: 0f).toDouble()
         }.toFloat() + (component.getChildren().size - 1) * padding
     }
 
-    override fun calculateHeight(component: Component): Float {
+    override fun calculateHeight(component: Component<*, *>): Float {
         return component.getChildren().sumOf { child ->
-            child.height + ((child.config.properties.y as? PaddingProperty)?.getVerticalPadding(child) ?: 0f).toDouble()
+            child.height + ((child.properties.y as? PaddingProperty)?.getVerticalPadding(child) ?: 0f).toDouble()
         }.toFloat() + (component.getChildren().size - 1) * padding
     }
 

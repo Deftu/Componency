@@ -39,7 +39,8 @@ include(":primitives") // Primitive values such as colors, vectors, etc.
 include(":platform") // Platform API
 
 // Utilities
-include(":text-input") // Text input component
+include(":gif-component") // GIF component
+include(":text-input") // Text input components
 
 // Defign
 include(":defign") // Implementation of Deftu's design system

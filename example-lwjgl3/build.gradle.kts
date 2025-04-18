@@ -35,9 +35,9 @@ repositories {
 }
 
 dependencies {
+    api(project(":primitives"))
+    api(project(":platform"))
     api(project(":"))
-    api(project(":defign"))
-    api(project(":text-input"))
 
     implementation(platform("org.lwjgl:lwjgl-bom:3.3.4-SNAPSHOT"))
     implementation("org.lwjgl", "lwjgl")

@@ -1,21 +1,39 @@
+@file:Suppress("FunctionName")
+
 package dev.deftu.componency.components.impl
 
 import dev.deftu.componency.components.Component
-import dev.deftu.componency.engine.Engine
+import dev.deftu.componency.components.ComponentProperties
 import dev.deftu.componency.image.Image
+import org.intellij.lang.annotations.Pattern
 
-public open class ImageComponent(public val image: Image) : Component() {
+public open class ImageComponentProperties(component: ImageComponent) : ComponentProperties<ImageComponent, ImageComponentProperties>(component) {
+
+    public var image: Image = Image.EMPTY
+
+    override fun copyFrom(properties: ComponentProperties<*, *>): ComponentProperties<ImageComponent, ImageComponentProperties> {
+        if (properties is ImageComponentProperties) {
+            image = properties.image
+        }
+
+        return super.copyFrom(properties)
+    }
+
+}
+
+public open class ImageComponent : Component<ImageComponent, ImageComponentProperties>(::ImageComponentProperties) {
 
     override fun render() {
-        val engine = Engine.get(this)
+        val platform = findPlatform(this)
 
-        val fill = config.properties.fill.getColor(this)
-        val topLeftRadius = config.properties.topLeftRadius.getRadius(this)
-        val topRightRadius = config.properties.topRightRadius.getRadius(this)
-        val bottomRightRadius = config.properties.bottomRightRadius.getRadius(this)
-        val bottomLeftRadius = config.properties.bottomLeftRadius.getRadius(this)
+        val image = properties.image
+        val fill = properties.fill.getColor(this)
+        val topLeftRadius = properties.topLeftRadius.getRadius(this)
+        val topRightRadius = properties.topRightRadius.getRadius(this)
+        val bottomRightRadius = properties.bottomRightRadius.getRadius(this)
+        val bottomLeftRadius = properties.bottomLeftRadius.getRadius(this)
 
-        engine.renderEngine.image(
+        platform.renderer.imageRenderer.image(
             image = image,
             x1 = left,
             y1 = top,
@@ -29,4 +47,27 @@ public open class ImageComponent(public val image: Image) : Component() {
         )
     }
 
+}
+
+public fun Image(
+    @Pattern(ComponentProperties.NAME_REGEX)
+    name: String? = null,
+    block: ImageComponentProperties.() -> Unit = {}
+): ImageComponent {
+    val component = ImageComponent()
+    component.properties.name = name
+    component.properties.block()
+    return component
+}
+
+public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.Image(
+    @Pattern(ComponentProperties.NAME_REGEX)
+    name: String? = null,
+    block: ImageComponentProperties.() -> Unit = {}
+): T {
+    val component = ImageComponent()
+    component.properties.name = name
+    component.properties.block()
+    component.attachTo(this@Image.component)
+    return component as T
 }

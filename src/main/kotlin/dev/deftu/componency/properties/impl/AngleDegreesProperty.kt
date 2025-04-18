@@ -20,7 +20,7 @@ public class AngleDegreesProperty(
 
     public constructor(value: Number) : this(stateOf(value.toFloat()))
 
-    override fun calculateAngle(component: Component): Float {
+    override fun calculateAngle(component: Component<*, *>): Float {
         return value
     }
 

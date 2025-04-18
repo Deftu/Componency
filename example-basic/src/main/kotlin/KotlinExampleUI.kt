@@ -1,100 +1,62 @@
-import dev.deftu.componency.animations.Easings
+@file:Suppress("FunctionName")
+
 import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Component
-import dev.deftu.componency.components.impl.FrameComponent
-import dev.deftu.componency.components.impl.RectangleComponent
-import dev.deftu.componency.components.impl.TextComponent
+import dev.deftu.componency.components.ComponentProperties
+import dev.deftu.componency.components.impl.*
 import dev.deftu.componency.dsl.*
-import dev.deftu.componency.engine.Engine
-import dev.deftu.componency.properties.VectorProperty
-import dev.deftu.componency.properties.impl.CenteredProperty
-import dev.deftu.componency.properties.impl.LinkedProperty
+import dev.deftu.componency.platform.Platform
+import dev.deftu.textile.SimpleTextHolder
 
-class KotlinExampleUI(engine: Engine) {
+class KotlinExampleUI(platform: Platform) {
 
-    private val frame = FrameComponent().configure {
-        name = "window" // A name is optional. Only visible in debugging tools. Names are limited to [a-z0-9_].
+    private val frame = Frame("window") { // A name is optional. Only visible in debugging tools. Names are limited to [a-z0-9_].
+        position(0.px, 0.px) // Defaults both to 0 already
+        size(100.percent, 100.percent) // Sizing properties. You likely want both to be 100% for your root component so that it fills the window
 
-        properties {
-            x = 0.px // Default
-            y = 0.px // Default
-            topLeftRadius = 0.px // Default
-
-            // Sizing properties, both 100% by default
-            // Because this frame is the root component, it's full width and height are the size of the window
-            width = 100.percent
-            height = 100.percent
-        }
-
-        // The root component cannot have effects applied to it
-    }.makeRoot(engine) // The root component needs to be attached to our window
-
-    private val box = RectangleComponent().configure {
-        name = "box"
-
-        properties {
-            x = 25.px
-            y = 25.px
+        // Nesting this component inside our frame tells the backend to create a new component
+        Rectangle("box") {
+            position(25.px, 25.px)
             width = 25.percent
-            height = LinkedProperty(width as VectorProperty) // We can link properties together
-        }
-    }.whenMouseClick {
-        println("Box clicked at $x, $y")
-    }.attachTo(frame) // Finally, we attach the component to another; in this case, the root frame, which all components need to have in their hierarchy.
+            height = linked(width) // We can link properties together when we aren't already grouping together / want to maintain a reference to the property
 
-    private val footer = KotlinFooterComponent().configure {
-        name = "footer"
-
-        properties {
-            width = 100.percent
-            height = 50.px
-        }
-    }.attachTo(frame)
-
-    init {
-        // Or, alternatively, we can listen to events on components after they have been created
-        box.whenMouseHover {
-            println("Mouse entered box at $x, $y")
-
-            // It's possible to animate properties on the fly
-            component.animate {
-                // Inside here, we have access to all of our properties
-                animateWidth(
-                    easing = Easings.IN_OUT_CUBIC,
-                    duration = 500.millis,
-                    newValue = 50.percent
-                )
+            onPointerClick {
+                println("Box clicked at $x, $y")
             }
-        }.whenMouseUnhover {
-            println("Mouse exited box at $x, $y")
+
+            onHover {
+                println("Box hovered at $x, $y")
+
+                // TODO: Animate
+            }
+
+            onUnhover {
+                println("Box unhovered at $x, $y")
+            }
         }
-    }
 
-    // You'll want to wrap all of your frame's IO in exposed functions like this
-
-    fun render() {
-        frame.handleRender()
-    }
+        Footer()
+    }.makeRoot(platform) // Inform our root frame that it is the root component and provide it with our platform-specific implementation
 
 }
 
-// If our component is going too complex (requiring a lot of configuration), we can split it into a separate class.
+// If our component is going too complex (requiring a lot of configuration), we can split it into a sub-component function.
 // Alternatively, if you just need to have it be reusable, this is the best means of doing so.
-class KotlinFooterComponent : Component() {
+fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.Footer(
+    name: String? = null,
+    block: RectangleComponentProperties.() -> Unit = {}
+): C = apply {
+    Rectangle(name) {
+        size(100.percent, 50.px)
+        y = 0.px(isInverse = true)
+        fill = Color.BLACK.withAlphaPercentage(50f).asProperty
 
-    private val background = RectangleComponent().configure {
-        properties {
-            width = 100.percent
-            height = 100.percent
-            fill = Color.BLACK.withAlphaPercentage(50f).asProperty
+        Text("text") {
+            position(centered, centered)
+            fill = Color.WHITE.asProperty
+            text = SimpleTextHolder("Hello, world!")
         }
-    }.attachTo(this)
 
-    private val text = TextComponent("Hello, world!").configure {
-        properties {
-            x = CenteredProperty()
-            y = CenteredProperty()
-        }
-    }.attachTo(background)
-
+        block()
+    }
 }

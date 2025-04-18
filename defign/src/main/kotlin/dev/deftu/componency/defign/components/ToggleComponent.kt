@@ -1,119 +1,94 @@
-@file:Suppress("UNCHECKED_CAST", "LeakingThis")
+@file:Suppress("UNCHECKED_CAST", "LeakingThis", "FunctionName")
 
 package dev.deftu.componency.defign.components
 
-import dev.deftu.componency.animations.Easings
 import dev.deftu.componency.components.Component
-import dev.deftu.componency.components.impl.CircleComponent
+import dev.deftu.componency.components.ComponentProperties
+import dev.deftu.componency.components.SimpleComponentProperties
+import dev.deftu.componency.components.impl.Circle
 import dev.deftu.componency.components.impl.FrameComponent
-import dev.deftu.componency.components.impl.RectangleComponent
+import dev.deftu.componency.components.impl.Rectangle
+import dev.deftu.componency.components.traits.focusable
+import dev.deftu.componency.components.traits.setFocusableDisabled
 import dev.deftu.componency.defign.DefignPalette
 import dev.deftu.componency.dsl.*
+import dev.deftu.componency.easings.Easings
 import dev.deftu.componency.input.MouseButton
 import dev.deftu.componency.properties.ColorProperty
 import dev.deftu.componency.properties.XProperty
-import dev.deftu.componency.properties.impl.CenteredProperty
-import dev.deftu.componency.styling.Stroke
-import dev.deftu.stateful.State
-import dev.deftu.stateful.utils.mappedMutableStateOf
+import dev.deftu.componency.stroke.Stroke
+import dev.deftu.stateful.MutableState
 import dev.deftu.stateful.utils.mutableStateBound
-import dev.deftu.stateful.utils.stateOf
+import dev.deftu.stateful.utils.mutableStateOf
+import org.intellij.lang.annotations.Pattern
 import java.util.function.Consumer
 
-public open class ToggleComponent @JvmOverloads constructor(
-    valueState: State<Boolean>,
-    private val isDark: Boolean = true
-) : FrameComponent() {
+public class ToggleComponentProperties(private val _component: ToggleComponent) : DefignComponentProperties<ToggleComponent, ToggleComponentProperties>(_component) {
+
+    public var value: MutableState<Boolean> = mutableStateOf(false)
+
+    public var isDisabled: Boolean = false
+        set(value) {
+            _component.setFocusableDisabled(value)
+            field = value
+        }
+
+}
+
+public open class ToggleComponent() : Component<ToggleComponent, ToggleComponentProperties>(::ToggleComponentProperties) {
 
     public companion object {
-
-        public const val DEFAULT_WIDTH: Float = 32.5f
-        public const val DEFAULT_HEIGHT: Float = 15f
-
+        public const val DEFAULT_TOGGLE_WIDTH: Float = 32.5f
+        public const val DEFAULT_TOGGLE_HEIGHT: Float = 15f
     }
-
-    public val changeListeners: MutableList<(Boolean) -> Unit> = mutableListOf()
-
-    private val valueState = mappedMutableStateOf(valueState) { it }
-
-    public var value: Boolean by mutableStateBound(this.valueState)
-
+    
     private val trackColor: ColorProperty
-        get() {
-            return if (value) {
-                DefignPalette.get(isDark).primary.asProperty
-            } else {
-                DefignPalette.get(isDark).background2.asProperty
-            }
+        get() = if (properties.isDark.get()) {
+            DefignPalette.get(properties.isDark.get()).primary.asProperty
+        } else {
+            DefignPalette.get(properties.isDark.get()).background2.asProperty
         }
 
     private val thumbColor: ColorProperty
-        get() {
-            return if (value) {
-                DefignPalette.get(isDark).background2.asProperty
-            } else {
-                DefignPalette.get(isDark).primary.asProperty
-            }
+        get() = if (properties.isDark.get()) {
+            DefignPalette.get(properties.isDark.get()).background2.asProperty
+        } else {
+            DefignPalette.get(properties.isDark.get()).primary.asProperty
         }
+
+    public val changeListeners: MutableList<(Boolean) -> Unit> = mutableListOf()
+
+    public var value: Boolean by mutableStateBound(properties.value)
 
     private val thumbPosition: XProperty
-        get() = if (value) (80.percent - simpleXProperty(Component::width) / 2) else 10.percent
+        get() = if (value) (80.percent - simpleXProperty(Component<*, *>::width) / 2) else 10.percent
 
-    private val track = RectangleComponent().configure {
-        properties {
-            width = 100.percent
-            height = 100.percent
-            radius = 7.px
-            fill = trackColor
-            stroke = Stroke(DefignPalette.get(isDark).primary, 1.5.px).asProperty
-        }
+    private val track = Rectangle("track") {
+        size(100.percent, 100.percent)
+        radius = 10.px
+        fill = trackColor
+        stroke = Stroke(DefignPalette.get(properties.isDark.get()).primary, 1.5f).asProperty
     }.attachTo(this)
 
-    private val thumb = CircleComponent().configure {
-        properties {
-            x = thumbPosition
-            y = CenteredProperty()
-            height = 80.percent
-            width = simpleWidthProperty { height.getHeight(component) }
-            fill = thumbColor
-        }
+    private val thumb = Circle("thumb") {
+        position(thumbPosition, centered)
+        size(80.percent, 80.percent)
+        fill = thumbColor
     }.attachTo(track)
 
-    public constructor(
-        toggle: Boolean,
-        isDark: Boolean = true
-    ) : this(stateOf(toggle), isDark)
-
     init {
-        whenMouseClick {
-            if (button != MouseButton.LEFT) {
-                return@whenMouseClick
+        focusable()
+        onPointerClick { event ->
+            if (event.button != MouseButton.LEFT) {
+                return@onPointerClick
             }
 
             value = !value
             changeListeners.forEach { listener -> listener.invoke(value) }
 
-            track.animate {
-                animateFill(
-                    easing = Easings.IN_OUT_QUAD,
-                    duration = 200.millis,
-                    newValue = trackColor
-                )
-            }
-
-            thumb.animate {
-                animateFill(
-                    easing = Easings.IN_OUT_QUAD,
-                    duration = 200.millis,
-                    newValue = thumbColor
-                )
-
-                animateX(
-                    easing = Easings.IN_OUT_QUAD,
-                    duration = 200.millis,
-                    newValue = thumbPosition
-                )
-            }
+            track.properties.animateFill(Easings.IN_OUT_QUAD, 200.millis, trackColor)
+            thumb.properties.animateFill(Easings.IN_OUT_QUAD, 200.millis, thumbColor)
+            thumb.properties.animateX(Easings.IN_OUT_QUAD, 200.millis, thumbPosition)
         }
     }
 
@@ -121,4 +96,27 @@ public open class ToggleComponent @JvmOverloads constructor(
         changeListeners.add(listener::accept)
     } as T
 
+}
+
+public fun Toggle(
+    @Pattern(ComponentProperties.NAME_REGEX)
+    name: String? = null,
+    block: ToggleComponentProperties.() -> Unit = {}
+): ToggleComponent {
+    val component = ToggleComponent()
+    component.properties.name = name
+    component.properties.block()
+    return component
+}
+
+public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.Toggle(
+    @Pattern(ComponentProperties.NAME_REGEX)
+    name: String? = null,
+    block: ToggleComponentProperties.() -> Unit = {}
+): T {
+    val component = ToggleComponent()
+    component.properties.name = name
+    component.properties.block()
+    component.attachTo(this@Toggle.component)
+    return component as T
 }

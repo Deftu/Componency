@@ -1,9 +1,12 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package dev.deftu.componency.defign
 
 import dev.deftu.componency.components.ComponentProperties
 import dev.deftu.componency.dsl.px
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.font.FontWeight
+import dev.deftu.componency.font.StaticFontFamily
 
 public object DefignFonts {
 
@@ -162,91 +165,91 @@ public object DefignFonts {
 
     @JvmStatic
     @JvmOverloads
-    public fun useAttention1(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyAttention1(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = attention1
         properties.fontSize = (ATTENTION1_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useAttention2(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyAttention2(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = attention2
         properties.fontSize = (ATTENTION2_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useAttention3(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyAttention3(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = attention3
         properties.fontSize = (ATTENTION3_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useHeader1(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyHeader1(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = header1
         properties.fontSize = (HEADER1_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useHeader2(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyHeader2(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = header2
         properties.fontSize = (HEADER2_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useHeader3(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyHeader3(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = header3
         properties.fontSize = (HEADER3_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useTitle1(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyTitle1(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = title1
         properties.fontSize = (TITLE1_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useTitle2(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyTitle2(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = title2
         properties.fontSize = (TITLE2_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useTitle3(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyTitle3(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = title3
         properties.fontSize = (TITLE3_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useBody1(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyBody1(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = body1
         properties.fontSize = (BODY1_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useBody2(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyBody2(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = body2
         properties.fontSize = (BODY2_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useBody3(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyBody3(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = body3
         properties.fontSize = (BODY3_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useCaption1(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyCaption1(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = caption1
         properties.fontSize = (CAPTION1_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useCaption2(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyCaption2(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = caption2
         properties.fontSize = (CAPTION2_SIZE / scalingFactor).px
     }
 
     @JvmStatic
-    public fun useCaption3(properties: ComponentProperties, scalingFactor: Float = 1f) {
+    public fun applyCaption3(properties: ComponentProperties<*, *>, scalingFactor: Float = 1f) {
         properties.font = caption3
         properties.fontSize = (CAPTION3_SIZE / scalingFactor).px
     }

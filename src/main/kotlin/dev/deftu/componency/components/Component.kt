@@ -2,32 +2,27 @@
 
 package dev.deftu.componency.components
 
-import dev.deftu.componency.animations.ComponentAnimationProperties
 import dev.deftu.componency.components.events.*
+import dev.deftu.componency.components.traits.Trait
 import dev.deftu.componency.dsl.px
 import dev.deftu.componency.effects.Effect
-import dev.deftu.componency.engine.Engine
 import dev.deftu.componency.exceptions.EnginePresentException
 import dev.deftu.componency.exceptions.InvalidHierarchyException
 import dev.deftu.componency.input.Key
 import dev.deftu.componency.input.MouseButton
-import dev.deftu.componency.utils.Animateable
-import dev.deftu.componency.utils.Recalculable
+import dev.deftu.componency.platform.Platform
 import java.util.LinkedList
 import java.util.function.Consumer
+import kotlin.reflect.KClass
 
-/**
- * The base class for all components, housing the basic functionality for rendering, managing children, handling events, etc.
- *
- * @since 0.1.0
- * @author Deftu
- */
-public abstract class Component : Animateable, Recalculable {
+public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, C>>(
+    propertiesFactory: (T) -> C,
+) : ComponentRoot<T>, ComponentEventConsumer<T> {
 
     public companion object {
 
         @JvmStatic
-        public fun findRootOrNull(component: Component): Component? {
+        public fun findRootOrNull(component: Component<*, *>): Component<*, *>? {
             var current = component
             while (current.hasParent) {
                 current = current.parent ?: return null
@@ -37,91 +32,94 @@ public abstract class Component : Animateable, Recalculable {
         }
 
         @JvmStatic
-        public fun findRoot(component: Component): Component {
+        public fun findRoot(component: Component<*, *>): Component<*, *> {
             return findRootOrNull(component) ?: throw IllegalStateException("Component has no root")
         }
 
         @JvmStatic
-        public fun <T : Component> configure(component: T, block: Consumer<ComponentConfiguration>): T {
-            block.accept(component.config)
-            return component
+        public fun findPlatformOrNull(component: Component<*, *>): Platform? {
+            return findRootOrNull(component)?.platform
         }
 
         @JvmStatic
-        public fun <T : ComponentProperties> properties(properties: T, block: Consumer<T>): T {
-            block.accept(properties)
-            return properties
-        }
-
-        @JvmStatic
-        public fun <T : ComponentEffects> effects(effects: T, block: Consumer<T>): T {
-            block.accept(effects)
-            return effects
+        public fun findPlatform(component: Component<*, *>): Platform {
+            return findPlatformOrNull(component) ?: throw IllegalStateException("Component has no platform")
         }
 
     }
 
-    public var engine: Engine? = null
-        private set
-    public var parent: Component? = null
+    public var parent: Component<*, *>? = null
         private set
 
     public val hasParent: Boolean
         get() = parent != null
 
-    public val config: ComponentConfiguration = ComponentConfiguration(this)
+    public var properties: C = propertiesFactory(this as T)
+        private set
 
-    public val events: ComponentEvents = ComponentEvents()
+    public val effects: ComponentEffects<T, C> by lazy {
+        ComponentEffects(this)
+    }
+
+    public val x: Float
+        get() = properties.x.getX(this)
+
+    public val y: Float
+        get() = properties.y.getY(this)
 
     public var width: Float
-        get() = config.properties.width.getWidth(this)
-        set(value) { config.properties.width = value.px }
+        get() = properties.width.getWidth(this)
+        set(value) { properties.width = value.px }
 
     public var height: Float
-        get() = config.properties.height.getHeight(this)
-        set(value) { config.properties.height = value.px }
+        get() = properties.height.getHeight(this)
+        set(value) { properties.height = value.px }
 
     public val top: Float
-        get() = config.properties.y.getY(this)
+        get() = y
 
     public val left: Float
-        get() = config.properties.x.getX(this)
-
-    public val right: Float
-        get() = left + width
+        get() = x
 
     public val bottom: Float
         get() = top + height
 
-    private var isRoot = false
+    public val right: Float
+        get() = left + width
+
+    override var isRoot: Boolean = false
     private var systemTime = -1L
 
-    private val children = LinkedList<Component>()
+    private val children = LinkedList<Component<*, *>>()
     private var indexInParent: Int = -1
+    private val eventBus = ComponentEventBus<T, C>()
+    private val traits = mutableListOf<Trait>()
 
-    // Only interacted with in the root component
-    private var requestingFocus: Component? = null
-    private var focusedChild: Component? = null
-
-    protected val mousePos: Pair<Double, Double>
+    public val isFocused: Boolean
         get() {
-            val engine = engine!!
-            val halfPixel = 0.5 / engine.renderEngine.pixelRatio
-            return Pair(engine.inputEngine.mouseX + halfPixel, engine.inputEngine.mouseY + halfPixel)
+            return if (isRoot) {
+                focusManager.isFocused
+            } else {
+                findRoot(this).focusManager.currentlyFocused == this
+            }
         }
 
-    // Input state
-    /// Mouse Hover
-    private var isCurrentlyHovered = false
-    private var lastHoveredMouseX = 0.0
-    private var lastHoveredMouseY = 0.0
+    // Responsibilities of root components
+    public final override var platform: Platform? = null
+        private set
+    public val focusManager: FocusManager = FocusManager()
 
-    /// Mouse Drag & Click
-    private var lastDraggedMouseX = 0.0
-    private var lastDraggedMouseY = 0.0
-    private var currentClickCount = 0
-    private var lastClickButton = MouseButton.UNKNOWN
-    private var lastClickTime = 0L
+    // Pointer state
+    private val pointerTracker = PointerTracker<T, C>()
+    protected val pointerPos: Pair<Double, Double>
+        get() {
+            val platform = platform!!
+            val halfPixel = 0.5 / platform.pixelRatio
+            return Pair(
+                platform.inputHandler.pointerInput.pointerX + halfPixel,
+                platform.inputHandler.pointerInput.pointerY + halfPixel
+            )
+        }
 
     private var internalIndex = -1
     private var initialized = false
@@ -130,113 +128,74 @@ public abstract class Component : Animateable, Recalculable {
 
     public open val isAlreadyCentered: Boolean = false
 
-    /**
-     * Called on the first render frame.
-     *
-     * @since 0.1.0
-     * @author Deftu
-     */
     public open fun initialize() {
     }
 
-    /**
-     * Renders before anything else, including effects, called before [render].
-     *
-     * @see render
-     * @see renderChildren
-     * @see postRender
-     * @since 0.1.0
-     * @author Deftu
-     */
     public open fun preRender() {
     }
 
-    /**
-     * Renders the component itself, called after [preRender] and before [renderChildren].
-     *
-     * @see preRender
-     * @see renderChildren
-     * @see postRender
-     * @since 0.1.0
-     * @author Deftu
-     */
     public open fun render() {
     }
 
-    /**
-     * Renders the children of this component, called after [render] and before [postRender].
-     *
-     * @see preRender
-     * @see render
-     * @see renderChildren
-     * @see postRender
-     * @since 0.1.0
-     * @author Deftu
-     */
     public open fun renderChildren() {
         children.forEach { child -> renderChild(child) }
     }
 
-    /**
-     * Renders a child component.
-     *
-     * @see preRender
-     * @see render
-     * @see renderChildren
-     * @see postRender
-     * @since 0.1.0
-     * @author Deftu
-     */
-    public open fun renderChild(
-        child: Component
-    ) {
+    public open fun renderChild(child: Component<*, *>) {
         child.handleRender()
     }
 
-    /**
-     * Renders after everything else, called after [renderChildren].
-     *
-     * @see preRender
-     * @see render
-     * @see renderChildren
-     * @since 0.1.0
-     * @author Deftu
-     */
     public open fun postRender() {
     }
 
-    /**
-     * Handles an animation frame.
-     *
-     * @since 0.1.0
-     * @author Deftu
-     */
-    public override fun frame() {
-        if (isRoot && lastClickButton != MouseButton.UNKNOWN) {
-            val (x, y) = mousePos
+    public open fun animationFrame(deltaTime: Float) {
+        if (isRoot && pointerTracker.lastClickedButton != MouseButton.UNKNOWN) {
+            val (x, y) = pointerPos
             handleMouseDrag(x, y)
         }
 
-        this.config.frame()
-        this.children.forEach(Animateable::frame)
+        this.properties.animationFrame(deltaTime)
+        this.children.forEach { child ->
+            child.animationFrame(deltaTime)
+        }
     }
 
-    /**
-     * Recalculates the component's properties and effects.
-     *
-     * @since 0.4.1
-     * @author Deftu
-     */
-    public override fun recalculate() {
-        this.config.recalculate()
-        this.children.forEach(Recalculable::recalculate)
+    public open fun recalculate() {
+        this.properties.recalculate()
+        this.children.forEach(Component<*, *>::recalculate)
     }
+
+    // Configuration
+
+    public fun setProperties(properties: C): T = apply {
+        this.properties = properties
+        properties.recalculate()
+    } as T
+
+    public fun configure(block: Consumer<C>): T = apply {
+        block.accept(properties)
+    } as T
+
+    /// Hierarchy
+
+    public override fun makeRoot(platform: Platform): T = apply {
+        if (this.platform != null) {
+            throw EnginePresentException("Root component already has a platform instance assigned to it")
+        }
+
+        if (hasParent) {
+            throw InvalidHierarchyException("Root component cannot have a parent")
+        }
+
+        this.isRoot = true
+        this.platform = platform
+    } as T
 
     public open fun isPointInside(x: Double, y: Double): Boolean {
-        return x in left..right && y in top..bottom
+        return x in this.x..right && y in this.y..bottom
     }
 
-    public open fun hitTest(x: Double, y: Double): Component {
+    public open fun hitTest(x: Double, y: Double): Component<*, *> {
         for (child in children.reversed()) {
             if (child.isPointInside(x, y)) {
                 return child.hitTest(x, y)
@@ -246,53 +205,18 @@ public abstract class Component : Animateable, Recalculable {
         return this
     }
 
-    // Implementation
-
-    /// Hierarchy
-
-    public open fun makeRoot(engine: Engine): Component = apply {
-        if (this.engine != null) {
-            throw EnginePresentException("Root component already has a window assigned to it")
-        }
-
-        if (hasParent) {
-            throw InvalidHierarchyException("Root component cannot have a parent")
-        }
-
-        this.isRoot = true
-        this.engine = engine
-    }
-
-    public open fun <T : Component> attachedTo(parent: Component): T = apply {
+    public open fun attachTo(parent: Component<*, *>): T = apply {
         parent.addChild(this)
     } as T
 
-    /**
-     * Adds a child to this component.
-     *
-     * @param child The child to add
-     *
-     * @since 0.1.0
-     * @author Deftu
-     */
-    public open fun addChild(child: Component) {
+    public open fun addChild(child: Component<*, *>): T = apply {
         child.parent?.removeChild(child)
         this.children.add(child)
         child.parent = this
-        child.engine = this.engine
-    }
+        child.platform = this.platform
+    } as T
 
-    /**
-     * Adds a child to this component at the specified index.
-     *
-     * @param index The index to add the child at
-     * @param child The child to add
-     * @throws IndexOutOfBoundsException If the index is less than 0 or greater than the size of the children list
-     *
-     * @since 0.1.0
-     * @author Deftu
-     */
-    public open fun addChild(index: Int, child: Component) {
+    public open fun addChild(index: Int, child: Component<*, *>) {
         if (index < 0 || index > this.children.size) {
             throw IndexOutOfBoundsException("Index $index is out of bounds for children list of size ${children.size}")
         }
@@ -300,20 +224,10 @@ public abstract class Component : Animateable, Recalculable {
         child.parent?.removeChild(child)
         this.children.add(index, child)
         child.parent = this
-        child.engine = this.engine
+        child.platform = this.platform
     }
 
-    /**
-     * Replaces a child at the specified index with the specified child.
-     *
-     * @param index The index to replace the child at
-     * @param child The child to replace the old child with
-     * @throws IndexOutOfBoundsException If the index is less than 0 or greater than the size of the children list
-     *
-     * @since 0.1.0
-     * @author Deftu
-     */
-    public open fun replaceChild(index: Int, child: Component) {
+    public open fun replaceChild(index: Int, child: Component<*, *>) {
         if (index < 0 || index >= this.children.size) {
             throw IndexOutOfBoundsException("Index $index is out of bounds for children list of size ${this.children.size}")
         }
@@ -321,30 +235,13 @@ public abstract class Component : Animateable, Recalculable {
         this.children[index].parent = null
         this.children[index] = child
         child.parent = this
-        child.engine = this.engine
+        child.platform = this.platform
     }
 
-    /**
-     * Removes a child from this component.
-     *
-     * @param child The child to remove
-     *
-     * @since 0.1.0
-     * @author Deftu
-     */
-    public open fun removeChild(child: Component) {
+    public open fun removeChild(child: Component<*, *>) {
         this.children.remove(child)
     }
 
-    /**
-     * Removes a child from this component at the specified index.
-     *
-     * @param index The index to remove the child at
-     * @throws IndexOutOfBoundsException If the index is less than 0 or greater than the size of the children list
-     *
-     * @since 0.1.0
-     * @author Deftu
-     */
     public open fun removeChild(index: Int) {
         if (index < 0 || index >= this.children.size) {
             throw IndexOutOfBoundsException("Index $index is out of bounds for children list of size ${this.children.size}")
@@ -354,77 +251,140 @@ public abstract class Component : Animateable, Recalculable {
         this.children.removeAt(index)
     }
 
-    /**
-     * Removes all children from this component.
-     *
-     * @since 0.1.0
-     * @author Deftu
-     */
     public open fun clearChildren() {
         this.children.forEach { it.parent = null }
         this.children.clear()
     }
 
-    /**
-     * Adds multiple children to this component.
-     *
-     * @param children The children to add
-     *
-     * @see addChild
-     * @since 0.1.0
-     * @author Deftu
-     */
-    public fun addChildren(vararg children: Component) {
+    public fun addChildren(vararg children: Component<*, *>) {
         children.forEach(::addChild)
     }
 
-    /**
-     * Removes multiple children from this component.
-     *
-     * @param children The children to remove
-     *
-     * @see removeChild
-     * @since 0.1.0
-     * @author Deftu
-     */
-    public fun removeChildren(vararg children: Component) {
+    public fun removeChildren(vararg children: Component<*, *>) {
         children.forEach(::removeChild)
     }
 
-    /**
-     * Removes children from this component at the given indices.
-     *
-     * @param indices The indices to remove children at
-     * @throws IndexOutOfBoundsException If any of the indices are less than 0 or greater than the size of the children list
-     *
-     * @see removeChild
-     * @since 0.1.0
-     * @author Deftu
-     */
     public fun removeChildren(vararg indices: Int) {
         indices.forEach(::removeChild)
     }
 
-    public open fun getChildren(): List<Component> {
+    public open fun getChildren(): List<Component<*, *>> {
         return children.toList()
     }
 
-    public open fun getChildAt(index: Int): Component {
+    public open fun getChildAt(index: Int): Component<*, *> {
         return children[index]
     }
 
-    public open fun indexOfChild(child: Component): Int {
+    public open fun indexOfChild(child: Component<*, *>): Int {
         return children.indexOf(child)
     }
 
-    public fun addEffect(effect: Effect): Component {
-        config.effects.add(effect)
+    // Effects
+
+    public fun addEffect(effect: Effect<T, C>): Component<T, C> {
+        effects.add(effect)
         return this
     }
 
-    public fun removeEffect(effect: Effect): Component {
-        config.effects.remove(effect)
+    public fun removeEffect(effect: Effect<T, C>): Component<T, C> {
+        effects.remove(effect)
         return this
+    }
+
+    // Traits
+
+    public fun addTrait(trait: Trait): Component<T, C> {
+        traits.add(trait)
+        return this
+    }
+
+    public fun removeTrait(trait: Trait): Component<T, C> {
+        traits.remove(trait)
+        return this
+    }
+
+    public fun <T : Trait> getTrait(trait: Class<T>): T? {
+        return traits.firstOrNull { it::class.java == trait } as? T
+    }
+
+    public fun <T : Trait> getTrait(trait: KClass<T>): T? {
+        return traits.firstOrNull { it::class == trait } as? T
+    }
+
+    public fun <T : Trait> getTrait(trait: Trait): T? {
+        return traits.firstOrNull { it == trait } as? T
+    }
+
+    public fun getTraits(): List<Trait> {
+        return traits.toList()
+    }
+
+    public fun hasTrait(trait: Class<out Trait>): Boolean {
+        return traits.any { it::class.java == trait }
+    }
+
+    public fun hasTrait(trait: KClass<out Trait>): Boolean {
+        return traits.any { it::class == trait }
+    }
+
+    public fun hasTrait(trait: Trait): Boolean {
+        return traits.contains(trait)
+    }
+
+    public fun <T : Trait> findChildrenByTrait(
+        type: Class<T>,
+        recursive: Boolean = false,
+        predicate: (Component<*, *>, T) -> Boolean = { _, _ -> true }
+    ): List<Component<*, *>> {
+        val result = mutableListOf<Component<*, *>>()
+        fun findChildren(component: Component<*, *>) {
+            if (component.getTrait(type)?.let { predicate(component, it) } == true) {
+                result.add(component)
+            }
+
+            if (recursive) {
+                component.children.forEach(::findChildren)
+            }
+        }
+
+        findChildren(this)
+        return result
+    }
+
+    public fun <T : Trait> findChildrenByTrait(
+        type: KClass<T>,
+        recursive: Boolean = false,
+        predicate: (Component<*, *>, T) -> Boolean = { _, _ -> true }
+    ): List<Component<*, *>> {
+        return findChildrenByTrait(type.java, recursive, predicate)
+    }
+
+    public fun <T : Trait> findChildrenByTrait(
+        trait: Trait,
+        recursive: Boolean = false,
+        predicate: (Component<*, *>, T) -> Boolean = { _, _ -> true }
+    ): List<Component<*, *>> {
+        val result = mutableListOf<Component<*, *>>()
+        fun findChildren(component: Component<*, *>) {
+            if (component.getTrait<T>(trait)?.let { predicate(component, it) } == true) {
+                result.add(component)
+            }
+
+            if (recursive) {
+                component.children.forEach(::findChildren)
+            }
+        }
+
+        findChildren(this)
+        return result
+    }
+
+    public inline fun <reified T : Trait> findChildrenByTrait(
+        recursive: Boolean = false,
+        noinline predicate: (Component<*, *>, T) -> Boolean = { _, _ -> true }
+    ): List<Component<*, *>> {
+        return findChildrenByTrait(T::class, recursive, predicate)
     }
 
     /// Visibility
@@ -457,45 +417,11 @@ public abstract class Component : Animateable, Recalculable {
         parent.removeChild(this)
     }
 
-    /// Focus
+    // Focus
 
-    /**
-     * Focuses a child component.
-     *
-     * MUST BE CALLED ON THE ROOT COMPONENT!
-     *
-     * @param component The component to focus
-     * @throws IllegalStateException If the component is not the root component
-     * @throws IllegalArgumentException If the component is not a child of this component
-     *
-     * @see requestFocus
-     *
-     * @since 0.1.0
-     * @author Deftu
-     */
-    public fun focus(component: Component) {
-        if (!isRoot) {
-            throw IllegalStateException("Only root components can focus children")
-        }
-
-        if (component.parent != this) {
-            throw IllegalArgumentException("Component is not a child of this component")
-        }
-
-        this.requestingFocus = component
-    }
-
-    /**
-     * Requests focus for this component.
-     *
-     * @see focus
-     *
-     * @since 0.1.0
-     * @author Deftu
-     */
     public fun requestFocus() {
         val root = findRoot(this)
-        root.focus(this)
+        root.focusManager.requestFocus(this)
     }
 
     /**
@@ -506,19 +432,106 @@ public abstract class Component : Animateable, Recalculable {
      */
     public fun unfocus() {
         if (isRoot) {
-            this.focusedChild?.events?.unfocusListeners?.forEach { it() }
-            this.focusedChild = null
-        } else {
             val root = findRoot(this)
             root.unfocus()
+        } else {
+            focusManager.releaseFocus()
         }
     }
 
     /// Events
 
-    protected fun fireMouseClickEvent(event: MouseClickEvent) {
-        for (listener in events.mouseClickListeners) {
-            listener.invoke(event)
+    public override fun onPointerClick(listener: Consumer<PointerClickEvent>): T = apply {
+        eventBus.pointerClickListeners.add(listener::accept)
+    } as T
+
+    public override fun onPointerRelease(listener: Consumer<PointerReleaseEvent>): T = apply {
+        eventBus.pointerReleaseListeners.add(listener::accept)
+    } as T
+
+    public override fun onPointerDrag(listener: Consumer<PointerDragEvent>): T = apply {
+        eventBus.pointerDragListeners.add(listener::accept)
+    } as T
+
+    public override fun onScroll(listener: Consumer<ScrollEvent>): T = apply {
+        eventBus.scrollListeners.add(listener::accept)
+    } as T
+
+    public override fun onHover(listener: Consumer<HoverEvent>): T = apply {
+        eventBus.hoverListeners.add(listener::accept)
+    } as T
+
+    public override fun onUnhover(listener: Consumer<HoverEvent>): T = apply {
+        eventBus.unhoverListeners.add(listener::accept)
+    } as T
+
+    public override fun onKeyPress(listener: Consumer<KeyPressEvent>): T = apply {
+        eventBus.keyPressListeners.add(listener::accept)
+    } as T
+
+    public override fun onKeyRelease(listener: Consumer<KeyReleaseEvent>): T = apply {
+        eventBus.keyReleaseListeners.add(listener::accept)
+    } as T
+
+    public override fun onCharType(listener: Consumer<CharTypeEvent>): T = apply {
+        eventBus.charTypeListeners.add(listener::accept)
+    } as T
+
+    override fun onFocus(listener: Runnable): T = apply {
+        eventBus.focusListeners.add(listener)
+    } as T
+
+    override fun onUnfocus(listener: Runnable): T = apply {
+        eventBus.unfocusListeners.add(listener)
+    } as T
+
+    override fun removePointerClickListener(listener: Consumer<PointerClickEvent>): T = apply {
+        eventBus.pointerClickListeners.remove(listener)
+    } as T
+
+    override fun removePointerReleaseListener(listener: Consumer<PointerReleaseEvent>): T = apply {
+        eventBus.pointerReleaseListeners.remove(listener)
+    } as T
+
+    override fun removePointerDragListener(listener: Consumer<PointerDragEvent>): T = apply {
+        eventBus.pointerDragListeners.remove(listener)
+    } as T
+
+    override fun removeScrollListener(listener: Consumer<ScrollEvent>): T = apply {
+        eventBus.scrollListeners.remove(listener)
+    } as T
+
+    override fun removeHoverListener(listener: Consumer<HoverEvent>): T = apply {
+        eventBus.hoverListeners.remove(listener)
+    } as T
+
+    override fun removeUnhoverListener(listener: Consumer<HoverEvent>): T = apply {
+        eventBus.unhoverListeners.remove(listener)
+    } as T
+
+    override fun removeKeyPressListener(listener: Consumer<KeyPressEvent>): T = apply {
+        eventBus.keyPressListeners.remove(listener)
+    } as T
+
+    override fun removeKeyReleaseListener(listener: Consumer<KeyReleaseEvent>): T = apply {
+        eventBus.keyReleaseListeners.remove(listener)
+    } as T
+
+    override fun removeCharTypeListener(listener: Consumer<CharTypeEvent>): T = apply {
+        eventBus.charTypeListeners.remove(listener)
+    } as T
+
+    override fun removeFocusListener(listener: Runnable): T = apply {
+        eventBus.focusListeners.remove(listener)
+    } as T
+
+    override fun removeUnfocusListener(listener: Runnable): T = apply {
+        eventBus.unfocusListeners.remove(listener)
+    } as T
+
+    override fun firePointerClickEvent(event: PointerClickEvent) {
+        for (listener in eventBus.pointerClickListeners) {
+            listener.accept(event)
 
             if (event.isCancelled) {
                 return
@@ -526,13 +539,41 @@ public abstract class Component : Animateable, Recalculable {
         }
 
         if (hasParent) {
-            parent!!.fireMouseClickEvent(event.copy(component = parent!!))
+            parent!!.firePointerClickEvent(event.copy(component = parent!!))
         }
     }
 
-    protected fun fireMouseScrollEvent(event: MouseScrollEvent) {
-        for (listener in events.mouseScrollListeners) {
-            listener.invoke(event)
+    override fun firePointerReleaseEvent(event: PointerReleaseEvent) {
+        for (listener in eventBus.pointerReleaseListeners) {
+            listener.accept(event)
+            
+            if (event.isCancelled) {
+                return
+            }
+        }
+        
+        if (event.isBubbling && hasParent && parent != this) {
+            parent!!.firePointerReleaseEvent(event.copy(component = parent!!))
+        }
+    }
+
+    override fun firePointerDragEvent(event: PointerDragEvent) {
+        for (listener in eventBus.pointerDragListeners) {
+            listener.accept(event)
+            
+            if (event.isCancelled) {
+                return
+            }
+        }
+
+        if (event.isBubbling && hasParent && parent != this) {
+            parent!!.firePointerDragEvent(event.copy(component = parent!!))
+        }
+    }
+
+    override fun fireScrollEvent(event: ScrollEvent) {
+        for (listener in eventBus.scrollListeners) {
+            listener.accept(event)
 
             if (event.isCancelled) {
                 return
@@ -540,48 +581,66 @@ public abstract class Component : Animateable, Recalculable {
         }
 
         if (event.isBubbling && hasParent && parent != this) {
-            parent!!.fireMouseScrollEvent(event.copy(component = parent!!))
+            parent!!.fireScrollEvent(event.copy(component = parent!!))
         }
     }
 
-    public fun <T : Component> onMouseClick(listener: Consumer<MouseClickEvent>): T = apply {
-        events.mouseClickListeners.add(listener::accept)
-    } as T
+    override fun fireHoverEvent(event: HoverEvent) {
+        for (listener in eventBus.hoverListeners) {
+            listener.accept(event)
+        }
 
-    public fun <T : Component> onMouseRelease(listener: Consumer<MouseReleaseEvent>): T = apply {
-        events.mouseReleaseListeners.add(listener::accept)
-    } as T
+        if (hasParent && parent != this) {
+            parent!!.fireHoverEvent(event.copy(component = parent!!))
+        }
+    }
+    
+    override fun fireUnhoverEvent(event: HoverEvent) {
+        for (listener in eventBus.unhoverListeners) {
+            listener.accept(event)
+        }
 
-    public fun <T : Component> onMouseDrag(listener: Consumer<MouseDragEvent>): T = apply {
-        events.mouseDragListeners.add(listener::accept)
-    } as T
+        if (hasParent && parent != this) {
+            parent!!.fireUnhoverEvent(event.copy(component = parent!!))
+        }
+    }
+    
+    override fun fireKeyPressEvent(event: KeyPressEvent) {
+        for (listener in eventBus.keyPressListeners) {
+            listener.accept(event)
+        }
+    }
+    
+    override fun fireKeyReleaseEvent(event: KeyReleaseEvent) {
+        for (listener in eventBus.keyReleaseListeners) {
+            listener.accept(event)
+        }
+    }
+    
+    override fun fireCharTypeEvent(event: CharTypeEvent) {
+        for (listener in eventBus.charTypeListeners) {
+            listener.accept(event)
+        }
+    }
+    
+    override fun fireFocusEvent() {
+        for (listener in eventBus.focusListeners) {
+            listener.run()
+        }
 
-    public fun <T : Component> onMouseScroll(listener: Consumer<MouseScrollEvent>): T = apply {
-        events.mouseScrollListeners.add(listener::accept)
-    } as T
+        if (hasParent && parent != this) {
+            parent!!.fireFocusEvent()
+        }
+    }
+    
+    override fun fireUnfocusEvent() {
+        for (listener in eventBus.unfocusListeners) {
+            listener.run()
+        }
 
-    public fun <T : Component> onMouseHover(listener: Consumer<MouseHoverEvent>): T = apply {
-        events.mouseHoverListeners.add(listener::accept)
-    } as T
-
-    public fun <T : Component> onMouseUnhover(listener: Consumer<MouseHoverEvent>): T = apply {
-        events.mouseUnhoverListeners.add(listener::accept)
-    } as T
-
-    public fun <T : Component> onKeyPress(listener: Consumer<KeyPressEvent>): T = apply {
-        events.keyPressListeners.add(listener::accept)
-    } as T
-
-    public fun <T : Component> onKeyRelease(listener: Consumer<KeyReleaseEvent>): T = apply {
-        events.keyReleaseListeners.add(listener::accept)
-    } as T
-
-    public fun <T : Component> onCharType(listener: Consumer<CharTypeEvent>): T = apply {
-        events.charTypeListeners.add(listener::accept)
-    } as T
-
-    public fun beginAnimation(): ComponentAnimationProperties {
-        return config.beginAnimation()
+        if (hasParent && parent != this) {
+            parent!!.fireUnfocusEvent()
+        }
     }
 
     /**
@@ -596,9 +655,9 @@ public abstract class Component : Animateable, Recalculable {
      * @author Deftu
      */
     public fun handleRender() {
-        // Tell our engine that we're starting a new frame
+        // Tell our platform that we're starting a new frame
         if (isRoot) {
-            engine!!.renderEngine.startFrame()
+            platform!!.renderer.startFrame()
         }
 
         if (!initialized) {
@@ -609,7 +668,7 @@ public abstract class Component : Animateable, Recalculable {
 
         // Begin our render operations!
         preRender()
-        config.effects.preRender()
+        effects.preRender()
         if (isRoot) {
             renderRoot()
         }
@@ -617,96 +676,56 @@ public abstract class Component : Animateable, Recalculable {
         render()
         renderChildren()
         postRender()
-        config.effects.postRender()
+        effects.postRender()
 
         // Tell our engine that we're ending the frame
         if (isRoot) {
-            engine!!.renderEngine.endFrame()
+            platform!!.renderer.endFrame()
         }
 
         // Update mouse state
         if (isRoot) {
-            val (x, y) = mousePos
-            handleMouseMove(x, y)
+            val (x, y) = pointerPos
+            handlePointerMove(x, y)
         }
     }
 
-    public fun handleMouseMove(x: Double, y: Double) {
+    public fun handlePointerMove(x: Double, y: Double) {
         val isHovered = isPointInside(x, y)
-
-        this.lastHoveredMouseX = x
-        this.lastHoveredMouseY = y
-
-        if (isHovered && !isCurrentlyHovered) {
-            for (listener in events.mouseHoverListeners) {
-                listener.invoke(MouseHoverEvent(this, x, y))
-            }
-
-            this.isCurrentlyHovered = true
-        } else if (!isHovered && isCurrentlyHovered) {
-            for (listener in events.mouseUnhoverListeners) {
-                listener.invoke(MouseHoverEvent(this, x, y))
-            }
-
-            this.isCurrentlyHovered = false
-        }
-
-        for (child in children) {
-            child.handleMouseMove(x, y)
+        val event = HoverEvent(this, x, y)
+        val change = pointerTracker.handlePointerMove(x, y, isHovered)
+        when (change) {
+            PointerTracker.HoverStateChange.ENTERED -> fireHoverEvent(event)
+            PointerTracker.HoverStateChange.EXITED -> fireUnhoverEvent(event)
+            else -> {} // no-op
         }
     }
 
-    public open fun handleMouseClick(x: Double, y: Double, button: MouseButton) {
+    public open fun handlePointerClick(x: Double, y: Double, button: MouseButton) {
         val clickedChild = hitTest(x, y)
-
-        this.lastDraggedMouseX = x
-        this.lastDraggedMouseY = y
-        this.currentClickCount = if (System.currentTimeMillis() - lastClickTime < 500) currentClickCount + 1 else 1
-        this.lastClickButton = button
-        this.lastClickTime = System.currentTimeMillis()
-
-        clickedChild.fireMouseClickEvent(MouseClickEvent(clickedChild, x, y, button, currentClickCount))
-
+        pointerTracker.handlePointerClick(x, y, button)
+        clickedChild.firePointerClickEvent(PointerClickEvent(clickedChild, x, y, button, pointerTracker.currentClickCount))
         if (isRoot) {
-            if (requestingFocus == null) {
-                unfocus()
-            } else if (requestingFocus != focusedChild) {
-                focusedChild?.unfocus()
-                focusedChild = requestingFocus
-                focusedChild!!.events.focusListeners.forEach { it() }
-            }
-
-            requestingFocus = null
+            focusManager.handleRequests()
         }
     }
 
-    public open fun handleMouseRelease() {
-        for (listener in events.mouseReleaseListeners) {
-            listener.invoke(MouseReleaseEvent(this, lastDraggedMouseX, lastDraggedMouseY, lastClickButton))
-        }
-
-        lastDraggedMouseX = -1.0
-        lastDraggedMouseY = -1.0
-        lastClickButton = MouseButton.UNKNOWN
-
-        children.forEach(Component::handleMouseRelease)
+    public open fun handlePointerRelease() {
+        firePointerReleaseEvent(PointerReleaseEvent(this, pointerTracker.lastDraggedX, pointerTracker.lastDraggedY, pointerTracker.lastClickedButton))
+        pointerTracker.handlePointerRelease()
+        children.forEach(Component<*, *>::handlePointerRelease)
     }
 
     public open fun handleMouseDrag(x: Double, y: Double) {
         if (
-            lastDraggedMouseY == x ||
-            lastDraggedMouseY == y
+            pointerTracker.lastDraggedY == x ||
+            pointerTracker.lastDraggedY == y
         ) {
             return
         }
 
-        this.lastDraggedMouseX = x
-        this.lastDraggedMouseY = y
-
-        for (listener in events.mouseDragListeners) {
-            listener.invoke(MouseDragEvent(this, x, y, lastClickButton))
-        }
-
+        pointerTracker.updateDragPosition(x, y)
+        firePointerDragEvent(PointerDragEvent(this, x, y, pointerTracker.lastClickedButton))
         children.forEach { child -> child.handleMouseDrag(x, y) }
     }
 
@@ -717,70 +736,72 @@ public abstract class Component : Animateable, Recalculable {
 
 
         for (child in children.reversed()) {
-            if (child.isCurrentlyHovered) {
+            if (child.pointerTracker.isCurrentlyHovered) {
                 child.handleMouseScroll(amount)
                 return
             }
         }
 
-        fireMouseScrollEvent(MouseScrollEvent(this, amount))
+        fireScrollEvent(ScrollEvent(this, amount))
     }
 
     public open fun handleKeyPress(key: Key, modifiers: KeyboardModifiers) {
-        for (listener in events.keyPressListeners) {
-            listener.invoke(KeyPressEvent(this, key, modifiers))
-        }
+        fireKeyPressEvent(KeyPressEvent(this, key, modifiers))
 
-        if (isRoot && focusedChild != null) {
-            focusedChild!!.handleKeyPress(key, modifiers)
+        if (isRoot && isFocused) {
+            focusManager.currentlyFocused!!.handleKeyPress(key, modifiers)
         }
     }
 
     public open fun handleKeyRelease(key: Key, modifiers: KeyboardModifiers) {
-        for (listener in events.keyReleaseListeners) {
-            listener.invoke(KeyReleaseEvent(this, key, modifiers))
-        }
+        fireKeyReleaseEvent(KeyReleaseEvent(this, key, modifiers))
 
-        if (isRoot && focusedChild != null) {
-            focusedChild!!.handleKeyRelease(key, modifiers)
+        if (isRoot && isFocused) {
+            focusManager.currentlyFocused!!.handleKeyRelease(key, modifiers)
         }
     }
 
     public open fun handleCharType(char: Char, modifiers: KeyboardModifiers) {
-        for (listener in events.charTypeListeners) {
-            listener.invoke(CharTypeEvent(this, char, modifiers))
-        }
+        fireCharTypeEvent(CharTypeEvent(this, char, modifiers))
 
-        if (isRoot && focusedChild != null) {
-            focusedChild!!.handleCharType(char, modifiers)
+        if (isRoot && isFocused) {
+            focusManager.currentlyFocused!!.handleCharType(char, modifiers)
         }
     }
 
     private fun renderRoot() {
-        val engine = engine!!
+        val platform = findPlatform(this)
+        val targetFramerate = platform.targetFramerate
+        val targetFrameTimeMs = 1_000L / targetFramerate
 
         if (systemTime == -1L) {
             systemTime = System.currentTimeMillis()
         }
 
         try {
-            val animationFps = engine.renderEngine.animationFps
             val currentTime = System.currentTimeMillis()
 
-            // Our window is behind - We're going to have to skip a few frames to catch up
+            // If we're too far behind, resync to avoid spiraling
             if (currentTime - systemTime > 2_500) {
-                systemTime = System.currentTimeMillis()
+                systemTime = currentTime
             }
 
-            val targetTime = currentTime + 1_000 / animationFps
-            val frameCount = (targetTime - systemTime).toInt() / animationFps
-            repeat(frameCount.coerceAtMost((animationFps / 30).coerceAtLeast(1))) {
-                frame()
-                systemTime += 1_000 / animationFps
+            val timeToCatchUp = currentTime - systemTime
+            val maxFrames = (targetFramerate / 30).coerceAtLeast(1)
+            val frameCount = (timeToCatchUp / targetFrameTimeMs).toInt().coerceAtMost(maxFrames)
+
+            repeat(frameCount) {
+                val frameStartTime = systemTime
+                systemTime += targetFrameTimeMs
+
+                val nextTime = systemTime
+                val delta = (nextTime - frameStartTime) / 1000f // in seconds
+                animationFrame(delta)
             }
         } catch (t: Throwable) {
             t.printStackTrace()
         }
     }
+
 
 }

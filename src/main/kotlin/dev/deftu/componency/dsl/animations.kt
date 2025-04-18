@@ -1,9 +1,7 @@
 package dev.deftu.componency.dsl
 
-import dev.deftu.componency.animations.AnimationTime
-import dev.deftu.componency.animations.ComponentAnimationProperties
-import dev.deftu.componency.animations.TimeUnit
-import dev.deftu.componency.components.Component
+import dev.deftu.componency.time.AnimationTime
+import dev.deftu.componency.time.TimeUnit
 
 public val Number.millis: AnimationTime
     get() = AnimationTime(TimeUnit.MILLISECONDS, this.toDouble())
@@ -22,8 +20,3 @@ public val Number.minutes: AnimationTime
 
 public val Number.minute: AnimationTime
     get() = AnimationTime(TimeUnit.MINUTES, this.toDouble())
-
-public fun <T : Component> T.animate(scope: ComponentAnimationProperties.() -> Unit): T = apply {
-    val properties = beginAnimation()
-    scope(properties)
-}

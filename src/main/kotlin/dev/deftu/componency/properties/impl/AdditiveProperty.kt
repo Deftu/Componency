@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package dev.deftu.componency.properties.impl
 
 import dev.deftu.componency.components.Component
@@ -11,37 +13,37 @@ public class AdditiveProperty(
     override var cachedValue: Float = 0f
     override var needsRecalculate: Boolean = true
 
-    override fun frame() {
-        super.frame()
-        first.frame()
-        second.frame()
+    override fun animationFrame(deltaTime: Float) {
+        super.animationFrame(deltaTime)
+        first.animationFrame(deltaTime)
+        second.animationFrame(deltaTime)
     }
 
-    override fun calculateX(component: Component): Float {
+    override fun calculateX(component: Component<*, *>): Float {
         val firstX = first as XProperty
         val secondX = second as XProperty
         return firstX.getX(component) + secondX.getX(component)
     }
 
-    override fun calculateY(component: Component): Float {
+    override fun calculateY(component: Component<*, *>): Float {
         val firstY = first as YProperty
         val secondY = second as YProperty
         return firstY.getY(component) + secondY.getY(component)
     }
 
-    override fun calculateWidth(component: Component): Float {
+    override fun calculateWidth(component: Component<*, *>): Float {
         val firstWidth = first as WidthProperty
         val secondWidth = second as WidthProperty
         return firstWidth.getWidth(component) + secondWidth.getWidth(component)
     }
 
-    override fun calculateHeight(component: Component): Float {
+    override fun calculateHeight(component: Component<*, *>): Float {
         val firstHeight = first as HeightProperty
         val secondHeight = second as HeightProperty
         return firstHeight.getHeight(component) + secondHeight.getHeight(component)
     }
 
-    override fun calculateRadius(component: Component): Float {
+    override fun calculateRadius(component: Component<*, *>): Float {
         val firstRadius = first as RadialProperty
         val secondRadius = second as RadialProperty
         return firstRadius.getRadius(component) + secondRadius.getRadius(component)

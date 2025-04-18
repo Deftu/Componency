@@ -1,11 +1,12 @@
 package dev.deftu.componency.components.events
 
 import dev.deftu.componency.components.Component
+import dev.deftu.componency.components.ComponentProperties
 import dev.deftu.componency.input.MouseButton
 
-private sealed interface PositionedMouseEvent {
+private sealed interface PositionedPointerEvent {
 
-    val component: Component
+    val component: Component<*, *>
     val x: Double
     val y: Double
 
@@ -17,35 +18,35 @@ private sealed interface PositionedMouseEvent {
 
 }
 
-public data class MouseClickEvent(
-    override val component: Component,
+public data class PointerClickEvent(
+    override val component: Component<*, *>,
     override val x: Double,
     override val y: Double,
     public val button: MouseButton,
     public val clickCount: Int
-) : CancellableComponentEvent(component), PositionedMouseEvent
+) : CancellableComponentEvent(component), PositionedPointerEvent
 
-public data class MouseReleaseEvent(
-    override val component: Component,
+public data class PointerReleaseEvent(
+    override val component: Component<*, *>,
     override val x: Double,
     override val y: Double,
     public val button: MouseButton
-) : CancellableComponentEvent(component), PositionedMouseEvent
+) : CancellableComponentEvent(component), PositionedPointerEvent
 
-public data class MouseDragEvent(
-    override val component: Component,
+public data class PointerDragEvent(
+    override val component: Component<*, *>,
     override val x: Double,
     override val y: Double,
     public val button: MouseButton
-) : CancellableComponentEvent(component), PositionedMouseEvent
+) : CancellableComponentEvent(component), PositionedPointerEvent
 
-public data class MouseHoverEvent(
-    override val component: Component,
+public data class HoverEvent(
+    override val component: Component<*, *>,
     override val x: Double,
     override val y: Double
-) : ComponentEvent(component), PositionedMouseEvent
+) : ComponentEvent(component), PositionedPointerEvent
 
-public data class MouseScrollEvent(
-    override val component: Component,
+public data class ScrollEvent(
+    override val component: Component<*, *>,
     public val delta: Double
 ) : CancellableComponentEvent(component)

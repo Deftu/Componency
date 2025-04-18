@@ -12,5 +12,7 @@ toolkitMavenPublishing {
 }
 
 dependencies {
+    api(project(":primitives"))
+    api(project(":platform"))
     api(project(":"))
 }

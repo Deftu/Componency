@@ -9,6 +9,11 @@ public interface Platform {
 
     public val viewportHeight: Float
 
+    public val pixelRatio: Float
+
+    public val targetFramerate: Int
+        get() = 500
+
     public val inputHandler: InputHandler
 
     public val renderer: Renderer

@@ -1,14 +1,21 @@
+@file:Suppress("FunctionName")
+
 package dev.deftu.componency.components.impl
 
 import dev.deftu.componency.components.Component
-import dev.deftu.componency.engine.Engine
-import dev.deftu.textile.SimpleTextHolder
+import dev.deftu.componency.components.ComponentProperties
 import dev.deftu.textile.TextHolder
+import org.intellij.lang.annotations.Pattern
 
-public open class TextComponent @JvmOverloads constructor(
-    public val text: TextHolder<*, *>,
-    public val mode: Mode = Mode.NORMAL
-) : Component() {
+public open class TextComponentProperties(component: TextComponent) : ComponentProperties<TextComponent, TextComponentProperties>(component) {
+
+    public var text: TextHolder<*, *>? = null
+
+    public var mode: TextComponent.Mode = TextComponent.Mode.NORMAL
+
+}
+
+public open class TextComponent() : Component<TextComponent, TextComponentProperties>(::TextComponentProperties) {
 
     public enum class Mode {
         NORMAL,
@@ -17,23 +24,20 @@ public open class TextComponent @JvmOverloads constructor(
 
     public data class Line(val text: String, val width: Float)
 
-    @JvmOverloads
-    public constructor(text: String, mode: Mode = Mode.NORMAL) : this(SimpleTextHolder(text), mode)
-
     public val lines: List<Line>
-        get() = when (mode) {
+        get() = when (properties.mode) {
             Mode.NORMAL -> {
                 // Only accounts for newlines, otherwhise it will be a single line
 
-                val font = this.config.properties.font ?: throw IllegalStateException("Cannot render text without a font")
-                val fontSize = this.config.properties.fontSize.getFontSize(this)
-                val engine = Engine.get(this)
+                val font = properties.font ?: throw IllegalStateException("Cannot render text without a font")
+                val fontSize = properties.fontSize.getFontSize(this)
+                val platform = findPlatform(this)
 
-                val lines = text.asUnformattedString().split("\n")
+                val lines = properties.text?.asUnformattedString()?.split("\n") ?: listOf()
                 val result = mutableListOf<Line>()
 
                 for (line in lines) {
-                    val (width, _) = engine.renderEngine.textSize(font, SimpleTextHolder(line), fontSize)
+                    val (width, _) = platform.renderer.textRenderer.textSize(font, line, fontSize)
                     result.add(Line(line, width))
                 }
 
@@ -43,11 +47,11 @@ public open class TextComponent @JvmOverloads constructor(
             Mode.WRAP -> {
                 // Accounts for newlines and wraps text
 
-                val font = this.config.properties.font ?: throw IllegalStateException("Cannot render text without a font")
-                val fontSize = this.config.properties.fontSize.getFontSize(this)
-                val engine = Engine.get(this)
+                val font = properties.font ?: throw IllegalStateException("Cannot render text without a font")
+                val fontSize = properties.fontSize.getFontSize(this)
+                val platform = findPlatform(this)
 
-                val lines = text.asUnformattedString().split("\n")
+                val lines = properties.text?.asUnformattedString()?.split("\n") ?: listOf()
                 val width = this.width
                 val result = mutableListOf<Line>()
 
@@ -58,7 +62,7 @@ public open class TextComponent @JvmOverloads constructor(
                     var currentWidth = 0f
 
                     for (word in words) {
-                        val (wordWidth, _) = engine.renderEngine.textSize(font, SimpleTextHolder(word), fontSize)
+                        val (wordWidth, _) = platform.renderer.textRenderer.textSize(font, word, fontSize)
 
                         if (currentWidth + wordWidth > width) {
                             lines.add(currentLine)
@@ -71,7 +75,7 @@ public open class TextComponent @JvmOverloads constructor(
                     }
 
                     lines.add(currentLine)
-                    result.addAll(lines.map { Line(it, engine.renderEngine.textSize(font, SimpleTextHolder(it), fontSize).first) })
+                    result.addAll(lines.map { Line(it, platform.renderer.textRenderer.textSize(font, it, fontSize).width) })
                 }
 
                 result
@@ -79,17 +83,18 @@ public open class TextComponent @JvmOverloads constructor(
         }
 
     override fun initialize() {
-        val font = this.config.properties.font ?: throw IllegalStateException("Cannot render text without a font")
-        val fontSize = this.config.properties.fontSize.getFontSize(this)
-        val engine = Engine.get(this)
+        val font = properties.font ?: throw IllegalStateException("Cannot render text without a font")
+        val text = properties.text ?: throw IllegalStateException("Cannot render text without the text")
+        val fontSize = properties.fontSize.getFontSize(this)
+        val platform = findPlatform(this)
 
-        if (mode == Mode.NORMAL) {
-            val (width, height) = engine.renderEngine.textSize(font, text, fontSize)
+        if (properties.mode == Mode.NORMAL) {
+            val (width, height) = platform.renderer.textRenderer.textSize(font, text.asExclusiveString(), fontSize)
             this.width = width
             this.height = height
         } else {
             val height = lines.fold(0f) { acc, line ->
-                val (_, lineHeight) = engine.renderEngine.textSize(font, SimpleTextHolder(line.text), fontSize)
+                val (_, lineHeight) = platform.renderer.textRenderer.textSize(font, line.text, fontSize)
                 acc + lineHeight + font.lineSpacing
             }
 
@@ -98,17 +103,17 @@ public open class TextComponent @JvmOverloads constructor(
     }
 
     override fun render() {
-        val font = this.config.properties.font ?: throw IllegalStateException("Cannot render text without a font")
-        val fill = this.config.properties.fill.getColor(this)
-        val fontSize = this.config.properties.fontSize.getFontSize(this)
+        val font = properties.font ?: throw IllegalStateException("Cannot render text without a font")
+        val fill = properties.fill.getColor(this)
+        val fontSize = properties.fontSize.getFontSize(this)
 
-        val engine = Engine.get(this)
+        val platform = findPlatform(this)
 
         var y = this.top
         for ((index, line) in lines.withIndex()) {
-            val text = SimpleTextHolder(line.text)
+            val text = line.text
 
-            engine.renderEngine.text(
+            platform.renderer.textRenderer.text(
                 x = this.left,
                 y = y,
                 text = text,
@@ -117,11 +122,34 @@ public open class TextComponent @JvmOverloads constructor(
                 fontSize = fontSize
             )
 
-            y += engine.renderEngine.textSize(font, text, fontSize).second
+            y += platform.renderer.textRenderer.textSize(font, text, fontSize).height
             if (index != lines.size - 1) {
                 y += font.lineSpacing
             }
         }
     }
 
+}
+
+public fun Text(
+    @Pattern(ComponentProperties.NAME_REGEX)
+    name: String? = null,
+    block: TextComponentProperties.() -> Unit = {}
+): TextComponent {
+    val component = TextComponent()
+    component.properties.name = name
+    component.properties.block()
+    return component
+}
+
+public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.Text(
+    @Pattern(ComponentProperties.NAME_REGEX)
+    name: String? = null,
+    block: TextComponentProperties.() -> Unit = {}
+): T {
+    val component = TextComponent()
+    component.properties.name = name
+    component.properties.block()
+    component.attachTo(this@Text.component)
+    return component as T
 }

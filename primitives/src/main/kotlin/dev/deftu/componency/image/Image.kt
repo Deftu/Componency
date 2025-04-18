@@ -1,9 +1,12 @@
 package dev.deftu.componency.image
 
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
 import java.net.URLConnection
 import java.nio.file.Path
+import javax.imageio.ImageIO
 import kotlin.io.path.extension
 
 public class Image(
@@ -12,6 +15,9 @@ public class Image(
 ) {
 
     public companion object {
+
+        @JvmField
+        public val EMPTY: Image = Image(ImageType.UNKNOWN, ByteArray(0))
 
         @JvmStatic
         public fun from(file: File): Image {
@@ -37,6 +43,22 @@ public class Image(
         @JvmStatic
         public fun from(data: ByteArray): Image? {
             return from(data.inputStream())
+        }
+
+        @JvmStatic
+        public fun from(image: BufferedImage): Image {
+            val output = ByteArrayOutputStream()
+            ImageIO.write(image, "png", output)
+            return Image(ImageType.RASTER, output.toByteArray()).apply {
+                width = image.width.toFloat()
+                height = image.height.toFloat()
+            }
+        }
+
+        @JvmStatic
+        public fun createBufferedImage(image: Image): BufferedImage {
+            val inputStream = image.data.inputStream()
+            return ImageIO.read(inputStream) ?: throw IllegalStateException("Failed to decode image data")
         }
 
     }

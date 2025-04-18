@@ -1,29 +1,20 @@
 package dev.deftu.componency.dsl
 
 import dev.deftu.componency.components.Component
-import dev.deftu.componency.components.ComponentEffects
 import dev.deftu.componency.components.ComponentProperties
+import dev.deftu.componency.platform.Platform
+import dev.deftu.componency.properties.*
 
-public class ConfigurationScope<T : Component>(public val component: T) {
-
-    public var name: String?
-        get() = component.config.name
-        set(value) { component.config.name = value }
-
-    public fun properties(scope: ComponentProperties.() -> Unit): ComponentProperties {
-        return component.config.properties.apply(scope)
-    }
-
-    public fun effects(scope: ComponentEffects.() -> Unit): ComponentEffects {
-        return component.config.effects.apply(scope)
-    }
-
+public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.root(platform: Platform): C = apply {
+    this.component.makeRoot(platform)
 }
 
-public fun <T : Component> T.attachTo(parent: Component): T = apply {
-    parent.addChild(this)
+public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.position(x: XProperty, y: YProperty): C = apply {
+    this.x = x
+    this.y = y
 }
 
-public fun <T : Component> T.configure(scope: ConfigurationScope<T>.() -> Unit): T = apply {
-    scope(ConfigurationScope(this))
+public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.size(width: WidthProperty, height: HeightProperty): C = apply {
+    this.width = width
+    this.height = height
 }

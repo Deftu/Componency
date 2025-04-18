@@ -1,7 +1,6 @@
 package dev.deftu.componency.defign
 
 import dev.deftu.componency.color.Color
-import dev.deftu.componency.dsl.withAlphaPercentage
 
 public data class DefignPalette(
     public val primary: Color,

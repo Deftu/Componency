@@ -9,15 +9,15 @@ public class LargestChildProperty : SizingProperty {
     override var cachedValue: Float = 0f
     override var needsRecalculate: Boolean = true
 
-    override fun calculateWidth(component: Component): Float {
+    override fun calculateWidth(component: Component<*, *>): Float {
         return component.getChildren().maxOfOrNull { child ->
-            child.width + ((child.config.properties.x as? PaddingProperty)?.getHorizontalPadding(child) ?: 0f)
+            child.width + ((child.properties.x as? PaddingProperty)?.getHorizontalPadding(child) ?: 0f)
         } ?: 0f
     }
 
-    override fun calculateHeight(component: Component): Float {
+    override fun calculateHeight(component: Component<*, *>): Float {
         return component.getChildren().maxOfOrNull { child ->
-            child.height + ((child.config.properties.y as? PaddingProperty)?.getVerticalPadding(child) ?: 0f)
+            child.height + ((child.properties.y as? PaddingProperty)?.getVerticalPadding(child) ?: 0f)
         } ?: 0f
     }
 

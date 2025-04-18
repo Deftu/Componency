@@ -1,32 +1,27 @@
 package com.test
 
 import dev.deftu.componency.color.Color
-import dev.deftu.componency.components.impl.FrameComponent
-import dev.deftu.componency.components.impl.RectangleComponent
+import dev.deftu.componency.components.impl.Frame
+import dev.deftu.componency.components.impl.Rectangle
 import dev.deftu.componency.dsl.*
-import dev.deftu.componency.engine.Engine
+import dev.deftu.componency.platform.Platform
 
-class TestUI(engine: Engine) {
+class TestUI(platform: Platform) {
 
-    private val frame = FrameComponent().configure {
-        name = "frame"
+    private val frame = Frame("window") {
+        root(platform)
+        size(100.percent, 100.percent)
 
-        properties {
-            width = 100.percent
-            height = 100.percent
-        }
-    }.makeRoot(engine)
-
-    private val rect = RectangleComponent().configure {
-        name = "rect"
-
-        properties {
-            x = 20.px
-            y = 20.px
-            width = 100.px
-            height = 100.px
+        Rectangle("box") {
+            position(25.px, 25.px)
+            size(50.percent, 50.percent)
+            width = linked(height)
             fill = Color.RED.asProperty
+
+            onPointerClick {
+                println("Clicked on $name at $x, $y")
+            }
         }
-    }.attachTo(frame)
+    }
 
 }

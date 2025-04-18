@@ -1,6 +1,7 @@
 package dev.deftu.componency.platform.rendering
 
 import dev.deftu.componency.color.Color
+import dev.deftu.componency.stroke.StrokeSide
 
 public interface Renderer {
 
@@ -43,6 +44,7 @@ public interface Renderer {
         y2: Float,
         color: Color,
         strokeWidth: Float,
+        strokeSides: Set<StrokeSide>,
         topLeftRadius: Float,
         topRightRadius: Float,
         bottomRightRadius: Float,
@@ -55,9 +57,10 @@ public interface Renderer {
         x2: Float,
         y2: Float,
         color: Color,
-        strokeWidth: Float
+        strokeWidth: Float,
+        strokeSides: Set<StrokeSide>,
     ) {
-        stroke(x1, y1, x2, y2, color, strokeWidth, 0f, 0f, 0f, 0f)
+        stroke(x1, y1, x2, y2, color, strokeWidth, strokeSides, 0f, 0f, 0f, 0f)
     }
 
     public fun pushScissor(x1: Float, y1: Float, x2: Float, y2: Float)

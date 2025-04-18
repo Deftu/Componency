@@ -1,8 +1,13 @@
 package dev.deftu.componency.lwjgl3
 
+import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.events.KeyboardModifiers
-import dev.deftu.componency.defign.DefignFonts
-import dev.deftu.componency.lwjgl3.engine.Lwjgl3Engine
+import dev.deftu.componency.components.impl.Frame
+import dev.deftu.componency.components.impl.Rectangle
+import dev.deftu.componency.components.traits.focusable
+import dev.deftu.componency.dsl.*
+import dev.deftu.componency.easings.Easings
+import dev.deftu.componency.lwjgl3.engine.Lwjgl3Platform
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
@@ -26,15 +31,39 @@ object Main {
         GLFW.glfwShowWindow(handle)
         GLFW.glfwSetInputMode(handle, GLFW.GLFW_LOCK_KEY_MODS, GLFW.GLFW_TRUE)
 
-        // Design system
-        DefignFonts.preload()
-
         // Engine
-        val engine = Lwjgl3Engine(handle)
-        engine.resize(width, height)
+        val platform = Lwjgl3Platform(handle)
+        platform.viewportWidth = width.toFloat()
+        platform.viewportHeight = height.toFloat()
 
         // Create UI
-        val ui = MyUI(engine)
+        val frame = Frame("window") {
+            root(platform)
+            size(100.percent, 100.percent)
+
+            Rectangle("button") {
+                size(25.percent, 25.percent)
+                position(25.percent, 25.percent)
+                fill = Color.GREEN.asProperty
+
+                onPointerClick {
+                    println("Button clicked @ $x, $y")
+                }
+
+                onFocus {
+                    println("Button focused!")
+
+                    val targetWidth = 50.percent
+                    this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
+                }
+
+                onUnfocus {
+                    println("Button unfocused!")
+                    val targetWidth = 25.percent
+                    this.width.animateTo(Easings.IN_OUT_QUAD, 5.seconds, targetWidth)
+                }
+            }.focusable()
+        }
 
         // Inputs
         var mouseX = 0f
@@ -45,22 +74,22 @@ object Main {
         }
 
         GLFW.glfwSetMouseButtonCallback(handle) { handle, button, action, mods ->
-            val x = engine.inputEngine.mouseX
-            val y = engine.inputEngine.mouseY
-            val mouseButton = engine.inputEngine.getMouseButton(button)
+            val x = platform.inputHandler.pointerInput.mouseX
+            val y = platform.inputHandler.pointerInput.mouseY
+            val mouseButton = platform.inputHandler.pointerInput.getMouseButton(button)
             when (action) {
-                GLFW.GLFW_PRESS -> ui.frame.handleMouseClick(x.toDouble(), y.toDouble(), mouseButton)
-                GLFW.GLFW_RELEASE -> ui.frame.handleMouseRelease()
+                GLFW.GLFW_PRESS -> frame.handlePointerClick(x.toDouble(), y.toDouble(), mouseButton)
+                GLFW.GLFW_RELEASE -> frame.handlePointerRelease()
                 else -> Unit // Ignore
             }
         }
 
         GLFW.glfwSetScrollCallback(handle) { handle, xOff, yOff ->
-            ui.frame.handleMouseScroll(xOff)
+            frame.handleMouseScroll(xOff)
         }
 
         GLFW.glfwSetKeyCallback(handle) { handle, keyCode, scancode, action, mods ->
-            val key = engine.inputEngine.getKey(keyCode)
+            val key = platform.inputHandler.keyboardInput.getKey(keyCode)
             val modifiers = KeyboardModifiers(
                 isShift = GLFW.GLFW_MOD_SHIFT and mods != 0,
                 isCtrl = GLFW.GLFW_MOD_CONTROL and mods != 0,
@@ -71,8 +100,8 @@ object Main {
             )
 
             when (action) {
-                GLFW.GLFW_PRESS -> ui.frame.handleKeyPress(key, modifiers)
-                GLFW.GLFW_RELEASE -> ui.frame.handleKeyRelease(key, modifiers)
+                GLFW.GLFW_PRESS -> frame.handleKeyPress(key, modifiers)
+                GLFW.GLFW_RELEASE -> frame.handleKeyRelease(key, modifiers)
                 else -> Unit // Ignore
             }
         }
@@ -88,10 +117,10 @@ object Main {
             )
 
             if (Character.charCount(codepoint) == 1) {
-                ui.frame.handleCharType(codepoint.toChar(), modifiers)
+                frame.handleCharType(codepoint.toChar(), modifiers)
             } else {
                 for (char in Character.toChars(codepoint)) {
-                    ui.frame.handleCharType(char, modifiers)
+                    frame.handleCharType(char, modifiers)
                 }
             }
         }
@@ -104,8 +133,8 @@ object Main {
         while (!GLFW.glfwWindowShouldClose(handle)) {
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
 
-            engine.updateMousePosition(mouseX, mouseY)
-            ui.frame.handleRender()
+            platform.inputHandler.pointerInput.updatePositions(mouseX, mouseY)
+            frame.handleRender()
 
             GLFW.glfwSwapBuffers(handle)
             GLFW.glfwPollEvents()

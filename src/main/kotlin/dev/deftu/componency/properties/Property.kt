@@ -1,13 +1,11 @@
 package dev.deftu.componency.properties
 
-import dev.deftu.componency.utils.Animateable
-
-public interface Property<T> : Animateable {
+public interface Property<T> {
 
     public var cachedValue: T
     public var needsRecalculate: Boolean
 
-    override fun frame() {
+    public fun animationFrame(deltaTime: Float) {
         this.needsRecalculate = true
     }
 

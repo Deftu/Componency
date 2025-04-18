@@ -28,51 +28,51 @@ public open class SiblingBasedProperty(
 
     public constructor(padding: Float = 0f) : this(padding, false)
 
-    override fun calculateX(component: Component): Float {
-        return if (component.hasParent) {
-            val parent = component.parent!!
-            val componentIndex = parent.indexOfChild(component)
-            if (isInverse) {
-                if (componentIndex == 0) return parent.right - component.width
-                val sibling = parent.getChildAt(componentIndex - 1)
-                getLeftMostPoint(sibling, parent, componentIndex) - component.width - padding
-            } else {
-                if (componentIndex == 0) return parent.left
-                val sibling = parent.getChildAt(componentIndex - 1)
-                getRightMostPoint(sibling, parent, componentIndex) + padding
-            }
-        } else {
+    override fun calculateX(component: Component<*, *>): Float {
+        if (!component.hasParent) {
             throw UnsupportedOperationException("Cannot use SiblingProperty on root component")
+        }
+
+        val parent = component.parent!!
+        val componentIndex = parent.indexOfChild(component)
+        return if (isInverse) {
+            if (componentIndex == 0) return parent.right - component.width
+            val sibling = parent.getChildAt(componentIndex - 1)
+            getLeftMostPoint(sibling, parent, componentIndex) - component.width - padding
+        } else {
+            if (componentIndex == 0) return parent.left
+            val sibling = parent.getChildAt(componentIndex - 1)
+            getRightMostPoint(sibling, parent, componentIndex) + padding
         }
     }
 
-    override fun calculateY(component: Component): Float {
-        return if (component.hasParent) {
-            val parent = component.parent!!
-            val componentIndex = parent.indexOfChild(component)
-            if (isInverse) {
-                if (componentIndex == 0) return parent.bottom - component.height
-                val sibling = parent.getChildAt(componentIndex - 1)
-                getHighestPoint(sibling, parent, componentIndex) - component.height - padding
-            } else {
-                if (componentIndex == 0) return parent.top
-                val sibling = parent.getChildAt(componentIndex - 1)
-                getLowestPoint(sibling, parent, componentIndex) + padding
-            }
-        } else {
+    override fun calculateY(component: Component<*, *>): Float {
+        if (!component.hasParent) {
             throw UnsupportedOperationException("Cannot use SiblingProperty on root component")
+        }
+
+        val parent = component.parent!!
+        val componentIndex = parent.indexOfChild(component)
+        return if (isInverse) {
+            if (componentIndex == 0) return parent.bottom - component.height
+            val sibling = parent.getChildAt(componentIndex - 1)
+            getHighestPoint(sibling, parent, componentIndex) - component.height - padding
+        } else {
+            if (componentIndex == 0) return parent.top
+            val sibling = parent.getChildAt(componentIndex - 1)
+            getLowestPoint(sibling, parent, componentIndex) + padding
         }
     }
 
-    override fun getHorizontalPadding(component: Component): Float {
+    override fun getHorizontalPadding(component: Component<*, *>): Float {
         return getPadding(component)
     }
 
-    override fun getVerticalPadding(component: Component): Float {
+    override fun getVerticalPadding(component: Component<*, *>): Float {
         return getPadding(component)
     }
 
-    protected fun getLowestPoint(sibling: Component, parent: Component, index: Int): Float {
+    protected fun getLowestPoint(sibling: Component<*, *>, parent: Component<*, *>, index: Int): Float {
         var lowestPoint = sibling.bottom
 
         for (n in index - 1 downTo 0) {
@@ -90,7 +90,7 @@ public open class SiblingBasedProperty(
         return lowestPoint
     }
 
-    protected fun getHighestPoint(sibling: Component, parent: Component, index: Int): Float {
+    protected fun getHighestPoint(sibling: Component<*, *>, parent: Component<*, *>, index: Int): Float {
         var highestPoint = sibling.top
 
         for (n in index - 1 downTo 0) {
@@ -108,7 +108,7 @@ public open class SiblingBasedProperty(
         return highestPoint
     }
 
-    protected fun getRightMostPoint(sibling: Component, parent: Component, index: Int): Float {
+    protected fun getRightMostPoint(sibling: Component<*, *>, parent: Component<*, *>, index: Int): Float {
         var rightmostPoint = sibling.right
 
         for (n in index - 1 downTo 0) {
@@ -126,7 +126,7 @@ public open class SiblingBasedProperty(
         return rightmostPoint
     }
 
-    protected fun getLeftMostPoint(sibling: Component, parent: Component, index: Int): Float {
+    protected fun getLeftMostPoint(sibling: Component<*, *>, parent: Component<*, *>, index: Int): Float {
         var leftmostPoint = sibling.left
 
         for (n in index - 1 downTo 0) {
@@ -144,7 +144,7 @@ public open class SiblingBasedProperty(
         return leftmostPoint
     }
 
-    private fun getPadding(component: Component): Float {
+    private fun getPadding(component: Component<*, *>): Float {
         return if (component.hasParent) {
             val index = component.parent!!.indexOfChild(component)
             if (index == 0) {

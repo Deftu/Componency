@@ -22,12 +22,10 @@ public class PixelProperty(
     public var isInverse: Boolean by mutableStateBound(this.inverseState)
 
     public constructor(value: Number) : this(stateOf(value.toFloat()), stateOf(false))
-
     public constructor(value: Float, isInverse: Boolean) : this(stateOf(value), stateOf(isInverse))
-
     public constructor(value: Number, isInverse: Boolean) : this(value.toFloat(), isInverse)
 
-    override fun calculateX(component: Component): Float {
+    override fun calculateX(component: Component<*, *>): Float {
         return if (isInverse) {
             (component.parent?.right ?: 0f) - value - component.width
         } else {
@@ -35,7 +33,7 @@ public class PixelProperty(
         }
     }
 
-    override fun calculateY(component: Component): Float {
+    override fun calculateY(component: Component<*, *>): Float {
         return if (isInverse) {
             (component.parent?.bottom ?: 0f) - value - component.height
         } else {
@@ -43,15 +41,15 @@ public class PixelProperty(
         }
     }
 
-    override fun calculateWidth(component: Component): Float {
+    override fun calculateWidth(component: Component<*, *>): Float {
         return value
     }
 
-    override fun calculateHeight(component: Component): Float {
+    override fun calculateHeight(component: Component<*, *>): Float {
         return value
     }
 
-    override fun calculateRadius(component: Component): Float {
+    override fun calculateRadius(component: Component<*, *>): Float {
         return value
     }
 

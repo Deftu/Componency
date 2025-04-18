@@ -7,6 +7,7 @@ import dev.deftu.stateful.State
 import dev.deftu.stateful.utils.mappedMutableStateOf
 import dev.deftu.stateful.utils.mutableStateBound
 import dev.deftu.stateful.utils.stateOf
+import kotlin.math.roundToInt
 
 public class StaticColorProperty(
     valueState: State<Color>
@@ -21,7 +22,7 @@ public class StaticColorProperty(
 
     public constructor(color: Color) : this(stateOf(color))
 
-    override fun calculateColor(component: Component): Color {
+    override fun calculateColor(component: Component<*, *>): Color {
         return value
     }
 
