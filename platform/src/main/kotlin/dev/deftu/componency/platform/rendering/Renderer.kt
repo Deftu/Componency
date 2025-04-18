@@ -32,6 +32,17 @@ public interface Renderer {
         y1: Float,
         x2: Float,
         y2: Float,
+        color: Color,
+        radius: Float
+    ) {
+        fill(x1, y1, x2, y2, color, radius, radius, radius, radius)
+    }
+
+    public fun fill(
+        x1: Float,
+        y1: Float,
+        x2: Float,
+        y2: Float,
         color: Color
     ) {
         fill(x1, y1, x2, y2, color, 0f, 0f, 0f, 0f)
