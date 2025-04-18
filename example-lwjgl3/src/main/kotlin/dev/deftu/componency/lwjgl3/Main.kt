@@ -27,7 +27,6 @@ object Main {
         val handle = createWindow("Hello World!", width, height)
         centerWindow(handle)
 
-        GLFW.glfwSwapInterval(0)
         GLFW.glfwShowWindow(handle)
         GLFW.glfwSetInputMode(handle, GLFW.GLFW_LOCK_KEY_MODS, GLFW.GLFW_TRUE)
 
@@ -39,6 +38,7 @@ object Main {
         // Create UI
         val frame = Frame("window") {
             root(platform)
+            debugger()
             size(100.percent, 100.percent)
 
             Rectangle("button") {
@@ -60,7 +60,7 @@ object Main {
                 onUnfocus {
                     println("Button unfocused!")
                     val targetWidth = 25.percent
-                    this.width.animateTo(Easings.IN_OUT_QUAD, 5.seconds, targetWidth)
+                    this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
                 }
             }.focusable()
         }
@@ -127,6 +127,7 @@ object Main {
 
         // Render loop
         GLFW.glfwMakeContextCurrent(handle)
+        GLFW.glfwSwapInterval(0)
         GL.createCapabilities()
 
         GL11.glClearColor(0f, 0f, 0f, 0f)
