@@ -9,6 +9,10 @@ public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.root(platform:
     this.component.makeRoot(platform)
 }
 
+public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.debugger(): C = apply {
+    this.component.enableDebugger()
+}
+
 public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.position(x: XProperty, y: YProperty): C = apply {
     this.x = x
     this.y = y

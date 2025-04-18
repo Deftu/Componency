@@ -89,6 +89,7 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
 
     override var isRoot: Boolean = false
     private var systemTime = -1L
+    private var debugger: Debugger? = null
 
     private val children = LinkedList<Component<*, *>>()
     private var indexInParent: Int = -1
@@ -176,6 +177,14 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
         block.accept(properties)
     } as T
 
+    public fun enableDebugger(): T = apply {
+        if (this.isRoot) {
+            this.debugger?.isEnabled = true
+        } else {
+            throw IllegalStateException("Debugger can only be enabled on root components")
+        }
+    } as T
+
     /// Hierarchy
 
     public override fun makeRoot(platform: Platform): T = apply {
@@ -188,6 +197,7 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
         }
 
         this.isRoot = true
+        this.debugger = Debugger(this)
         this.platform = platform
     } as T
 
@@ -670,12 +680,14 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
         preRender()
         effects.preRender()
         if (isRoot) {
+            debugger?.initialize()
             renderRoot()
         }
 
         render()
         renderChildren()
         postRender()
+        debugger?.render() // Render after everything else to ensure that it doesn't interfere with the rendering process
         effects.postRender()
 
         // Tell our engine that we're ending the frame
