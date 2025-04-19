@@ -40,24 +40,8 @@ public fun ComponentProperties<*, *>.filling(useSiblings: Boolean = true): FillP
     return FillProperty(useSiblings)
 }
 
-public fun ComponentProperties<*, *>.linked(target: XProperty): LinkedProperty {
-    return LinkedProperty(target as VectorProperty)
-}
-
-public fun ComponentProperties<*, *>.linked(target: YProperty): LinkedProperty {
-    return LinkedProperty(target as VectorProperty)
-}
-
-public fun ComponentProperties<*, *>.linked(target: WidthProperty): LinkedProperty {
-    return LinkedProperty(target as VectorProperty)
-}
-
-public fun ComponentProperties<*, *>.linked(target: HeightProperty): LinkedProperty {
-    return LinkedProperty(target as VectorProperty)
-}
-
-public fun ComponentProperties<*, *>.linked(target: RadialProperty): LinkedProperty {
-    return LinkedProperty(target as VectorProperty)
+public fun ComponentProperties<*, *>.linked(target: Property<Float>): LinkedProperty {
+    return LinkedProperty(target)
 }
 
 public fun ComponentProperties<*, *>.largestChild(): LargestChildProperty {

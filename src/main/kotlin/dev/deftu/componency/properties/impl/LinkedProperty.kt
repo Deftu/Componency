@@ -1,10 +1,10 @@
 package dev.deftu.componency.properties.impl
 
 import dev.deftu.componency.components.Component
-import dev.deftu.componency.properties.VectorProperty
+import dev.deftu.componency.properties.*
 
 public class LinkedProperty(
-    private val property: VectorProperty,
+    private val property: Property<Float>,
 ) : VectorProperty {
 
     override var cachedValue: Float = 0f
@@ -16,23 +16,28 @@ public class LinkedProperty(
     }
 
     override fun calculateX(component: Component<*, *>): Float {
-        return property.getX(component)
+        val x = property as XProperty
+        return x.getX(component)
     }
 
     override fun calculateY(component: Component<*, *>): Float {
-        return property.getY(component)
+        val y = property as YProperty
+        return y.getY(component)
     }
 
     override fun calculateWidth(component: Component<*, *>): Float {
-        return property.getWidth(component)
+        val width = property as WidthProperty
+        return width.getWidth(component)
     }
 
     override fun calculateHeight(component: Component<*, *>): Float {
-        return property.getHeight(component)
+        val height = property as HeightProperty
+        return height.getHeight(component)
     }
 
     override fun calculateRadius(component: Component<*, *>): Float {
-        return property.getRadius(component)
+        val radius = property as RadialProperty
+        return radius.getRadius(component)
     }
 
 }
