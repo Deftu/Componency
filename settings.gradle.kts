@@ -40,6 +40,7 @@ include(":platform") // Platform API
 
 // Utilities
 include(":gif-component") // GIF component
+include(":video-component") // Video component
 include(":text-input") // Text input components
 
 // Defign
