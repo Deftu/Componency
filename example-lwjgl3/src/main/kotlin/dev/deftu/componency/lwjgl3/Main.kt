@@ -8,11 +8,15 @@ import dev.deftu.componency.components.traits.focusable
 import dev.deftu.componency.dsl.*
 import dev.deftu.componency.easings.Easings
 import dev.deftu.componency.lwjgl3.engine.Lwjgl3Platform
+import dev.deftu.componency.platform.audio.AudioPlayer
+import dev.deftu.componency.platform.audio.StreamingAudioSource
+import dev.deftu.componency.platform.audio.WavAudioSource
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
+import kotlin.io.path.Path
 
 object Main {
 
@@ -32,6 +36,7 @@ object Main {
 
         // Engine
         val platform = Lwjgl3Platform(handle)
+        platform.audioEngine.initialize()
         platform.viewportWidth = width.toFloat()
         platform.viewportHeight = height.toFloat()
 
@@ -55,6 +60,15 @@ object Main {
 
                     val targetWidth = 50.percent
                     this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
+
+                    platform.audioEngine.createPlayer(WavAudioSource(
+                        path = Path("D:\\Projects\\Personal\\Componency\\shutter.wav"),
+                        sampleRate = 44_100,
+                        channelCount = 2
+                    )).also {
+                        it.volume = 0.5f
+                        it.play()
+                    }
                 }
 
                 onUnfocus {

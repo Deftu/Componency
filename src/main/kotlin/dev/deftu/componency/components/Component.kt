@@ -807,7 +807,7 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
                 systemTime += targetFrameTimeMs
 
                 val nextTime = systemTime
-                val delta = (nextTime - frameStartTime) / 1000f // in seconds
+                val delta = (nextTime - frameStartTime) / 1_000f // in seconds
                 animationFrame(delta)
             }
         } catch (t: Throwable) {

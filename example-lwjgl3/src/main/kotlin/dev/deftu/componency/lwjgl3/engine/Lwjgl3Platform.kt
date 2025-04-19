@@ -14,4 +14,6 @@ class Lwjgl3Platform(private val handle: Long) : Platform {
 
     override val renderer = Lwjgl3Renderer(this)
 
+    override val audioEngine = Lwjgl3AudioEngine()
+
 }

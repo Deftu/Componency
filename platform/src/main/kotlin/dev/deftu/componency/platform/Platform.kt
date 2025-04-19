@@ -1,5 +1,6 @@
 package dev.deftu.componency.platform
 
+import dev.deftu.componency.platform.audio.AudioEngine
 import dev.deftu.componency.platform.input.InputHandler
 import dev.deftu.componency.platform.rendering.Renderer
 
@@ -17,5 +18,7 @@ public interface Platform {
     public val inputHandler: InputHandler
 
     public val renderer: Renderer
+
+    public val audioEngine: AudioEngine
 
 }
