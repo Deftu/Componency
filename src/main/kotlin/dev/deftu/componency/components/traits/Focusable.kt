@@ -2,12 +2,10 @@ package dev.deftu.componency.components.traits
 
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.components.ComponentProperties
-import dev.deftu.componency.components.events.KeyPressEvent
 import dev.deftu.componency.input.Key
 import dev.deftu.componency.input.MouseButton
 import dev.deftu.stateful.MutableState
 import dev.deftu.stateful.utils.mutableStateOf
-import java.util.function.Consumer
 
 public data class Focusable(public val isDisabled: MutableState<Boolean> = mutableStateOf(false)) : Trait {
 
@@ -128,10 +126,6 @@ public fun <T : Component<T, C>, C : ComponentProperties<T, C>> T.setFocusableDi
 }
 
 private fun <T : Component<T, C>, C : ComponentProperties<T, C>> setupKeyboardNavigation(component: Component<T, C>) {
-    component.onPointerClick { event ->
-        event.component.requestFocus()
-    }
-
     component.onKeyPress { event ->
         if (!event.component.isFocused) {
             return@onKeyPress
@@ -154,19 +148,17 @@ private fun <T : Component<T, C>, C : ComponentProperties<T, C>> setupKeyboardNa
 }
 
 private fun <T : Component<T, C>, C : ComponentProperties<T, C>> findNextFocusableComponent(component: Component<T, C>, backwards: Boolean = false) {
-    val focusableComponents = component.findChildrenByTrait<Focusable> { checkedComponent, trait -> checkedComponent == component || !trait.isDisabled.get() }
+    val root = Component.findRoot(component)
+    val focusableComponents = root.findChildrenByTrait<Focusable>(recursive = true) { _, trait -> !trait.isDisabled.get() }
     val currentIndex = focusableComponents.indexOf(component)
-    if (currentIndex == -1) {
+    if (currentIndex == -1 || focusableComponents.isEmpty()) {
         return
     }
 
     val direction = if (backwards) -1 else 1
-    val nextIndex = (currentIndex + direction) % focusableComponents.size
-    if (nextIndex < 0) {
-        return
-    }
-
+    val nextIndex = (focusableComponents.size + currentIndex + direction) % focusableComponents.size
     val nextComponent = focusableComponents[nextIndex]
+
     nextComponent.requestFocus()
 }
 
