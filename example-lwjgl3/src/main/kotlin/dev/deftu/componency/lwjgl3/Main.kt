@@ -3,15 +3,22 @@
 package dev.deftu.componency.lwjgl3
 
 import dev.deftu.componency.color.Color
+import dev.deftu.componency.components.Debugger
+import dev.deftu.componency.components.Nav
 import dev.deftu.componency.components.events.KeyboardModifiers
 import dev.deftu.componency.components.impl.Frame
 import dev.deftu.componency.components.impl.Gif
 import dev.deftu.componency.components.impl.Rectangle
+import dev.deftu.componency.components.impl.Text
 import dev.deftu.componency.components.traits.focusable
 import dev.deftu.componency.dsl.*
 import dev.deftu.componency.easings.Easings
+import dev.deftu.componency.font.Font
+import dev.deftu.componency.font.FontWeight
 import dev.deftu.componency.gif.GifAnimation
 import dev.deftu.componency.lwjgl3.engine.Lwjgl3Platform
+import dev.deftu.componency.nav.NavController
+import dev.deftu.textile.SimpleTextHolder
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
@@ -27,8 +34,13 @@ object Main {
             throw IllegalStateException("Unable to initialize GLFW")
         }
 
-        var windowWidth = 800
-        var windowHeight = 600
+        val interFont = loadFont() // Preload the font
+        // Preload animations
+        val gif1 = GifAnimation.from(Path("D:\\Downloads\\test.gif"))
+        val gif2 = GifAnimation.from(Path("D:\\Downloads\\test2.gif"))
+
+        var windowWidth = 1280
+        var windowHeight = 720
         val handle = createWindow("Hello World!", windowWidth, windowHeight)
         centerWindow(handle)
 
@@ -48,90 +60,100 @@ object Main {
         platform.pixelRatio = platform.viewportWidth / windowWidth.toFloat()
 
         // Create UI
-        val frame = Frame("window") {
-            root(platform)
-            debugger()
-            size(100.percent, 100.percent)
-
-            Rectangle("button") {
+        val navController = NavController()
+        navController.register("/first") {
+            Gif("animation1") {
                 size(50.percent, 50.percent)
-                position(centered, 25.percent)
-                fill = Color.GREEN.asProperty
+                position(centered, 10.px)
+                fill = Color.WHITE.asProperty
+                animation = gif1
 
                 onPointerClick {
-                    println("Button clicked @ $x, $y")
+                    println("Gif clicked @ $x, $y")
 
                     component.requestFocus()
                     cancel()
                 }
 
                 onFocus {
-                    println("Button focused!")
+                    println("Gif focused!")
 
                     val targetWidth = 75.percent
                     this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
                 }
 
                 onUnfocus {
-                    println("Button unfocused!")
+                    println("Gif unfocused!")
                     val targetWidth = 50.percent
                     this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
                 }
-
-                Gif("animation1") {
-                    size(25.percent, 25.percent)
-                    position(centered, 10.px)
-                    fill = Color.WHITE.asProperty
-                    animation = GifAnimation.from(Path("D:\\Downloads\\test.gif"))
-
-                    onPointerClick {
-                        println("Gif clicked @ $x, $y")
-
-                        component.requestFocus()
-                        cancel()
-                    }
-
-                    onFocus {
-                        println("Gif focused!")
-
-                        val targetWidth = 50.percent
-                        this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
-                    }
-
-                    onUnfocus {
-                        println("Gif unfocused!")
-                        val targetWidth = 25.percent
-                        this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
-                    }
-                }.focusable()
-
-                Gif("animation2") {
-                    size(25.percent, 25.percent)
-                    position(centered, 10.px(isInverse = true))
-                    fill = Color.WHITE.asProperty
-                    animation = GifAnimation.from(Path("D:\\Downloads\\test.gif"))
-
-                    onPointerClick {
-                        println("Gif clicked @ $x, $y")
-
-                        component.requestFocus()
-                        cancel()
-                    }
-
-                    onFocus {
-                        println("Gif focused!")
-
-                        val targetWidth = 50.percent
-                        this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
-                    }
-
-                    onUnfocus {
-                        println("Gif unfocused!")
-                        val targetWidth = 25.percent
-                        this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
-                    }
-                }.focusable()
             }.focusable()
+        }
+
+        navController.register("/second") {
+            Gif("animation2") {
+                size(50.percent, 50.percent)
+                position(centered, 10.px(isInverse = true))
+                fill = Color.WHITE.asProperty
+                animation = gif2
+
+                onPointerClick {
+                    println("Gif clicked @ $x, $y")
+
+                    component.requestFocus()
+                    cancel()
+                }
+
+                onFocus {
+                    println("Gif focused!")
+
+                    val targetWidth = 75.percent
+                    this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
+                }
+
+                onUnfocus {
+                    println("Gif unfocused!")
+                    val targetWidth = 50.percent
+                    this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
+                }
+            }.focusable()
+        }
+
+        val frame = Frame("window") {
+            root(platform)
+            debugger()
+            size(100.percent, 100.percent)
+
+            Rectangle("button") {
+                size(100.px, 20.px)
+                position(centered, 10.px)
+                fill = Color.GREEN.asProperty
+
+                onPointerClick {
+                    println("Button clicked @ $x, $y")
+
+                    when (navController.currentRoute) {
+                        "/first" -> navController.navigate("/second")
+                        "/second" -> navController.navigate("/first")
+                        null -> navController.navigate("/first")
+                        else -> println("Unknown route: ${navController.currentRoute}")
+                    }
+                }
+
+                Text("button_text") {
+                    position(centered, centered)
+                    font = interFont
+                    text = SimpleTextHolder("Click me!")
+                    fontSize = 20.px
+                    fill = Color.BLACK.asProperty
+                }
+            }.focusable()
+
+            Nav {
+                size(50.percent, 50.percent)
+                position(centered, centered)
+                controller = navController
+            }
         }
 
         // Window state
@@ -255,6 +277,20 @@ object Main {
             val y = (vidMode.height() - pHeight.get(0)) / 2
             GLFW.glfwSetWindowPos(handle, x, y)
         }
+    }
+
+    private fun loadFont(): Font {
+        val path = "/fonts/Inter-Regular.ttf"
+        val stream = Debugger::class.java.getResourceAsStream(path)
+            ?: throw IllegalArgumentException("Font $path does not exist.")
+        return Font(
+            name = "Inter",
+            inputStream = stream,
+            letterSpacing = 0f,
+            lineSpacing = 0f,
+            isItalic = false,
+            weight = FontWeight.REGULAR
+        )
     }
 
 }

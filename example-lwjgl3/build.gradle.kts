@@ -39,6 +39,7 @@ dependencies {
     api(project(":platform"))
     api(project(":"))
     api(project(":gif-component"))
+    api(project(":navigation"))
 
     implementation(platform("org.lwjgl:lwjgl-bom:3.3.4-SNAPSHOT"))
     implementation("org.lwjgl", "lwjgl")
