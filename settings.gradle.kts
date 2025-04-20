@@ -39,7 +39,6 @@ include(":primitives") // Primitive values such as colors, vectors, etc.
 include(":platform") // Platform API
 
 // Utilities
-include(":debugger") // Debugger
 include(":navigation") // Navigation API
 include(":gif-component") // GIF support
 include(":video-component") // Video support
