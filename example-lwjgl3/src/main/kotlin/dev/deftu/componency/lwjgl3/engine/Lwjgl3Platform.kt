@@ -2,7 +2,7 @@ package dev.deftu.componency.lwjgl3.engine
 
 import dev.deftu.componency.platform.Platform
 
-class Lwjgl3Platform(private val handle: Long) : Platform {
+class Lwjgl3Platform(handle: Long) : Platform {
 
     override var viewportWidth: Float = 0f
 

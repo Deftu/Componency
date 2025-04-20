@@ -1,16 +1,17 @@
+@file:Suppress("SameParameterValue")
+
 package dev.deftu.componency.lwjgl3
 
 import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.events.KeyboardModifiers
 import dev.deftu.componency.components.impl.Frame
+import dev.deftu.componency.components.impl.Gif
 import dev.deftu.componency.components.impl.Rectangle
 import dev.deftu.componency.components.traits.focusable
 import dev.deftu.componency.dsl.*
 import dev.deftu.componency.easings.Easings
+import dev.deftu.componency.gif.GifAnimation
 import dev.deftu.componency.lwjgl3.engine.Lwjgl3Platform
-import dev.deftu.componency.platform.audio.AudioPlayer
-import dev.deftu.componency.platform.audio.StreamingAudioSource
-import dev.deftu.componency.platform.audio.WavAudioSource
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
@@ -26,9 +27,9 @@ object Main {
             throw IllegalStateException("Unable to initialize GLFW")
         }
 
-        val width = 800
-        val height = 600
-        val handle = createWindow("Hello World!", width, height)
+        var windowWidth = 800
+        var windowHeight = 600
+        val handle = createWindow("Hello World!", windowWidth, windowHeight)
         centerWindow(handle)
 
         GLFW.glfwShowWindow(handle)
@@ -37,8 +38,14 @@ object Main {
         // Engine
         val platform = Lwjgl3Platform(handle)
         platform.audioEngine.initialize()
-        platform.viewportWidth = width.toFloat()
-        platform.viewportHeight = height.toFloat()
+
+        // Set up platform framebuffer size
+        val framebufferWidth = IntArray(1)
+        val framebufferHeight = IntArray(1)
+        GLFW.glfwGetFramebufferSize(handle, framebufferWidth, framebufferHeight)
+        platform.viewportWidth = framebufferWidth[0].toFloat()
+        platform.viewportHeight = framebufferHeight[0].toFloat()
+        platform.pixelRatio = platform.viewportWidth / windowWidth.toFloat()
 
         // Create UI
         val frame = Frame("window") {
@@ -47,36 +54,102 @@ object Main {
             size(100.percent, 100.percent)
 
             Rectangle("button") {
-                size(25.percent, 25.percent)
-                position(25.percent, 25.percent)
+                size(50.percent, 50.percent)
+                position(centered, 25.percent)
                 fill = Color.GREEN.asProperty
 
                 onPointerClick {
                     println("Button clicked @ $x, $y")
+
+                    component.requestFocus()
+                    cancel()
                 }
 
                 onFocus {
                     println("Button focused!")
 
-                    val targetWidth = 50.percent
+                    val targetWidth = 75.percent
                     this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
-
-                    platform.audioEngine.createPlayer(WavAudioSource(
-                        path = Path("D:\\Projects\\Personal\\Componency\\shutter.wav"),
-                        sampleRate = 44_100,
-                        channelCount = 2
-                    )).also {
-                        it.volume = 0.5f
-                        it.play()
-                    }
                 }
 
                 onUnfocus {
                     println("Button unfocused!")
-                    val targetWidth = 25.percent
+                    val targetWidth = 50.percent
                     this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
                 }
+
+                Gif("animation1") {
+                    size(25.percent, 25.percent)
+                    position(centered, 10.px)
+                    fill = Color.WHITE.asProperty
+                    animation = GifAnimation.from(Path("D:\\Downloads\\test.gif"))
+
+                    onPointerClick {
+                        println("Gif clicked @ $x, $y")
+
+                        component.requestFocus()
+                        cancel()
+                    }
+
+                    onFocus {
+                        println("Gif focused!")
+
+                        val targetWidth = 50.percent
+                        this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
+                    }
+
+                    onUnfocus {
+                        println("Gif unfocused!")
+                        val targetWidth = 25.percent
+                        this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
+                    }
+                }.focusable()
+
+                Gif("animation2") {
+                    size(25.percent, 25.percent)
+                    position(centered, 10.px(isInverse = true))
+                    fill = Color.WHITE.asProperty
+                    animation = GifAnimation.from(Path("D:\\Downloads\\test.gif"))
+
+                    onPointerClick {
+                        println("Gif clicked @ $x, $y")
+
+                        component.requestFocus()
+                        cancel()
+                    }
+
+                    onFocus {
+                        println("Gif focused!")
+
+                        val targetWidth = 50.percent
+                        this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
+                    }
+
+                    onUnfocus {
+                        println("Gif unfocused!")
+                        val targetWidth = 25.percent
+                        this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
+                    }
+                }.focusable()
             }.focusable()
+        }
+
+        // Window state
+        GLFW.glfwSetWindowSizeCallback(handle) { _, width, height ->
+            windowWidth = width
+            windowHeight = height
+        }
+
+        GLFW.glfwSetFramebufferSizeCallback(handle) { _, width, height ->
+            println("Framebuffer size changed: $width x $height")
+            platform.viewportWidth = width.toFloat()
+            platform.viewportHeight = height.toFloat()
+
+            val newWindowWidth = IntArray(1)
+            GLFW.glfwGetWindowSize(handle, newWindowWidth, null)
+            platform.pixelRatio = width.toFloat() / newWindowWidth[0].toFloat()
+
+            frame.recalculate() // Force a recalculation of the layout
         }
 
         // Inputs
@@ -87,7 +160,7 @@ object Main {
             mouseY = y.toFloat()
         }
 
-        GLFW.glfwSetMouseButtonCallback(handle) { handle, button, action, mods ->
+        GLFW.glfwSetMouseButtonCallback(handle) { _, button, action, _ ->
             val x = platform.inputHandler.pointerInput.mouseX
             val y = platform.inputHandler.pointerInput.mouseY
             val mouseButton = platform.inputHandler.pointerInput.getMouseButton(button)
@@ -98,11 +171,11 @@ object Main {
             }
         }
 
-        GLFW.glfwSetScrollCallback(handle) { handle, xOff, yOff ->
+        GLFW.glfwSetScrollCallback(handle) { _, xOff, _ ->
             frame.handleMouseScroll(xOff)
         }
 
-        GLFW.glfwSetKeyCallback(handle) { handle, keyCode, scancode, action, mods ->
+        GLFW.glfwSetKeyCallback(handle) { _, keyCode, _, action, mods ->
             val key = platform.inputHandler.keyboardInput.getKey(keyCode)
             val modifiers = KeyboardModifiers(
                 isShift = GLFW.GLFW_MOD_SHIFT and mods != 0,
@@ -120,7 +193,7 @@ object Main {
             }
         }
 
-        GLFW.glfwSetCharModsCallback(handle) { handle, codepoint, mods ->
+        GLFW.glfwSetCharModsCallback(handle) { _, codepoint, mods ->
             val modifiers = KeyboardModifiers(
                 isShift = GLFW.GLFW_MOD_SHIFT and mods != 0,
                 isCtrl = GLFW.GLFW_MOD_CONTROL and mods != 0,
@@ -147,6 +220,7 @@ object Main {
         GL11.glClearColor(0f, 0f, 0f, 0f)
         while (!GLFW.glfwWindowShouldClose(handle)) {
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
+            GL11.glViewport(0, 0, windowWidth, windowHeight)
 
             platform.inputHandler.pointerInput.updatePositions(mouseX, mouseY)
             frame.handleRender()
