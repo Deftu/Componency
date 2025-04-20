@@ -11,11 +11,24 @@ public class FocusManager {
     public val isFocused: Boolean
         get() = currentlyFocused != null
 
-    public fun handleRequests() {
+    public fun handleClickRequests() {
         if (requestingFocus != currentlyFocused) {
             forceFocus(requestingFocus)
         } else if (requestingFocus == null) {
             releaseFocus()
+        }
+
+        requestingFocus = null
+    }
+
+    public fun handleAnimationRequests() {
+        if (requestingFocus != null && requestingFocus != currentlyFocused) {
+            if (currentlyFocused != null) {
+                currentlyFocused!!.fireUnfocusEvent()
+            }
+
+            currentlyFocused = requestingFocus
+            requestingFocus?.fireFocusEvent()
         }
 
         requestingFocus = null

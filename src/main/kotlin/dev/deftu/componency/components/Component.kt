@@ -155,6 +155,8 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
             handleMouseDrag(x, y)
         }
 
+        focusManager.handleAnimationRequests()
+
         this.properties.animationFrame(deltaTime)
         this.children.forEach { child ->
             child.animationFrame(deltaTime)
@@ -718,7 +720,7 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
         pointerTracker.handlePointerClick(x, y, button)
         clickedChild.firePointerClickEvent(PointerClickEvent(clickedChild, x, y, button, pointerTracker.currentClickCount))
         if (isRoot) {
-            focusManager.handleRequests()
+            focusManager.handleClickRequests()
         }
     }
 
