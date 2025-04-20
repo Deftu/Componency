@@ -40,7 +40,7 @@ public class ParentRelativeProperty(
         return if (component.hasParent) {
             component.parent!!.width * value
         } else {
-            Component.findPlatform(component).viewportWidth
+            Component.findPlatform(component).viewportWidth * value
         }
     }
 
@@ -48,7 +48,7 @@ public class ParentRelativeProperty(
         return if (component.hasParent) {
             component.parent!!.height * value
         } else {
-            Component.findPlatform(component).viewportHeight
+            Component.findPlatform(component).viewportHeight * value
         }
     }
 
