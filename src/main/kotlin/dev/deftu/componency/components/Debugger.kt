@@ -1,6 +1,7 @@
 package dev.deftu.componency.components
 
 import dev.deftu.componency.color.Color
+import dev.deftu.componency.components.traits.Focusable
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.font.FontWeight
 import dev.deftu.componency.platform.Platform
@@ -36,6 +37,19 @@ public class Debugger(private val component: Component<*, *>) {
             "Frame Time: ${String.format("%.2f", frameTime)} ms",
             "Delta Time: ${String.format("%.2f", deltaTime)} ms"
         )
+
+    private val Component<*, *>.subTreeText: String
+        get() {
+            val componentName = this::class.simpleName ?: "Unknown"
+            return buildString {
+                append(componentName)
+                append(" (").append(properties.name).append(")")
+
+                if (hasTrait(Focusable::class) && isFocused) {
+                    append(" [Focused]")
+                }
+            }
+        }
 
     public var isEnabled: Boolean = false
         set(value) {
@@ -158,15 +172,12 @@ public class Debugger(private val component: Component<*, *>) {
     ): Int {
         val font = this.font ?: return line
 
-        val componentName = component::class.simpleName ?: "Unknown"
-        val text = "$componentName (${component.properties.name})"
-
         val xOffset = x + depth * 20f
         val yOffset = y + paddingBetweenItems + debugReadingHeight + line * lineHeight
 
         platform.renderer.textRenderer.text(
             font = font,
-            text = text,
+            text = component.subTreeText,
             x = xOffset,
             y = yOffset,
             color = Color.WHITE,
@@ -196,8 +207,7 @@ public class Debugger(private val component: Component<*, *>) {
         fontSize: Float,
         depth: Int
     ): Float {
-        val componentName = component::class.simpleName ?: "Unknown"
-        val text = "$componentName (${component.properties.name})"
+        val text = component.subTreeText
         val textWidth = platform.renderer.textRenderer.textSize(font, text, fontSize).width + depth * 20f
 
         var maxWidth = textWidth
