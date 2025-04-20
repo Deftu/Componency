@@ -24,7 +24,7 @@ public open class ComponentProperties<T : Component<T, C>, C : ComponentProperti
 
     }
 
-    private val animatingProperties: MutableSet<Pair<(Property<*>) -> Unit, Property<*>>> = mutableSetOf()
+    private val animatingProperties: MutableSet<Pair<(Property<*>) -> Unit, () -> Property<*>>> = mutableSetOf()
 
     @field:Pattern(NAME_REGEX)
     public var name: String? = null
@@ -80,17 +80,17 @@ public open class ComponentProperties<T : Component<T, C>, C : ComponentProperti
     init {
         component.parent?.properties?.let(::inheritFrom)
 
-        defineAnimatingProperty(::x, x)
-        defineAnimatingProperty(::y, y)
-        defineAnimatingProperty(::width, width)
-        defineAnimatingProperty(::height, height)
-        defineAnimatingProperty(::fill, fill)
-        defineAnimatingProperty(::stroke, stroke)
-        defineAnimatingProperty(::topLeftRadius, topLeftRadius)
-        defineAnimatingProperty(::topRightRadius, topRightRadius)
-        defineAnimatingProperty(::bottomLeftRadius, bottomLeftRadius)
-        defineAnimatingProperty(::bottomRightRadius, bottomRightRadius)
-        defineAnimatingProperty(::angle, angle)
+        defineAnimatingProperty(::x)
+        defineAnimatingProperty(::y)
+        defineAnimatingProperty(::width)
+        defineAnimatingProperty(::height)
+        defineAnimatingProperty(::fill)
+        defineAnimatingProperty(::stroke)
+        defineAnimatingProperty(::topLeftRadius)
+        defineAnimatingProperty(::topRightRadius)
+        defineAnimatingProperty(::bottomLeftRadius)
+        defineAnimatingProperty(::bottomRightRadius)
+        defineAnimatingProperty(::angle)
     }
 
     public open fun animationFrame(deltaTime: Float) {
@@ -107,13 +107,14 @@ public open class ComponentProperties<T : Component<T, C>, C : ComponentProperti
         angle.animationFrame(deltaTime)
 
         var isStillAnimating = false
-        for ((setter, property) in animatingProperties) {
-            if (property !is AnimatingProperty<*, *>) {
+        for ((setter, getter) in animatingProperties) {
+            val value = getter.invoke()
+            if (value !is AnimatingProperty<*, *>) {
                 continue
             }
 
-            if (property.isFinished) {
-                setter.invoke(property.to)
+            if (value.isFinished) {
+                setter.invoke(value.to)
             } else {
                 isStillAnimating = true
             }
@@ -380,20 +381,21 @@ public open class ComponentProperties<T : Component<T, C>, C : ComponentProperti
         block(this)
     }
 
-    protected fun defineAnimatingProperty(field: Field, property: Property<*>) {
+    protected fun defineAnimatingProperty(field: Field) {
         field.isAccessible = true
         animatingProperties.add({ newValue: Property<*> ->
             field.set(this, newValue)
-        } to property)
+        } to {
+            field.get(this) as Property<*>
+        })
     }
 
-    protected fun defineAnimatingProperty(
-        property: KMutableProperty<*>,
-        value: Property<*>
-    ) {
+    protected fun defineAnimatingProperty(property: KMutableProperty<*>) {
         animatingProperties.add({ newValue: Property<*> ->
-            property.setter.call(this, newValue)
-        } to value)
+            property.setter.call(newValue)
+        } to {
+            property.getter.call() as Property<*>
+        })
     }
 
     private fun calculateFrameTime(duration: AnimationTime): Double {
