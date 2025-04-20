@@ -639,19 +639,11 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
         for (listener in eventBus.focusListeners) {
             listener.run()
         }
-
-        if (hasParent && parent != this) {
-            parent!!.fireFocusEvent()
-        }
     }
     
     override fun fireUnfocusEvent() {
         for (listener in eventBus.unfocusListeners) {
             listener.run()
-        }
-
-        if (hasParent && parent != this) {
-            parent!!.fireUnfocusEvent()
         }
     }
 
