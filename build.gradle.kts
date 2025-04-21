@@ -18,6 +18,6 @@ dependencies {
     implementation(project(":primitives"))
     implementation(project(":platform"))
 
-    api("dev.deftu:stateful:0.3.0")
-    api("dev.deftu:textile:0.11.1")
+    api("dev.deftu:stateful:0.4.0")
+    api("dev.deftu:textile:0.14.1")
 }
