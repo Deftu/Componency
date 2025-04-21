@@ -1,12 +1,11 @@
 package dev.deftu.componency.platform.audio
 
-import java.io.InputStream
-
 public open class StreamingAudioSource(
-    private val stream: InputStream,
+    private val stream: AudioByteStream,
     override val sampleRate: Int,
     override val channelCount: Int,
 ) : AudioSource, AutoCloseable {
+
     override var isEndOfStream: Boolean = false
         protected set
 

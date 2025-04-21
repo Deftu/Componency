@@ -1,64 +1,48 @@
 package dev.deftu.componency.platform.audio
 
-import java.io.DataInputStream
-import java.io.File
-import java.io.InputStream
-import java.nio.file.Path
-
 public class WavAudioSource(
-    stream: InputStream,
+    stream: AudioByteStream,
     sampleRate: Int,
     channelCount: Int,
-) : StreamingAudioSource(
-    identifyWavStream(stream),
-    sampleRate,
-    channelCount
-) {
+) : StreamingAudioSource(identifyWavStream(stream), sampleRate, channelCount) {
 
-    private companion object {
+    public companion object {
 
-        private fun identifyWavStream(stream: InputStream): InputStream {
-            val header = DataInputStream(stream.buffered())
+        @JvmStatic
+        public fun identifyWavStream(stream: AudioByteStream): AudioByteStream {
+            val header = stream
 
-            // Read the RIFF header
-            val riff = ByteArray(4).apply(header::readFully)
-            if (String(riff) != "RIFF") {
+            val riff = ByteArray(4).also(header::readFully)
+            if (!riff.contentEquals("RIFF".toByteArray())) {
                 throw IllegalArgumentException("Not a valid WAV file")
             }
 
-            header.skipBytes(4)
+            header.skip(4)
 
-            // Read the WAVE header
-            val wave = ByteArray(4).apply(header::readFully)
-            if (String(wave) != "WAVE") {
+            val wave = ByteArray(4).also(header::readFully)
+            if (!wave.contentEquals("WAVE".toByteArray())) {
                 throw IllegalArgumentException("Not a valid WAV file")
             }
 
-            // Scan until we find the data chunk
             while (true) {
-                val chunkId = ByteArray(4).apply(header::readFully)
-                val chunkSize = Integer.reverseBytes(header.readInt())
+                val chunkId = ByteArray(4).also(header::readFully)
+                val chunkSize = ByteArray(4).also(header::readFully).toIntLE()
 
                 if (String(chunkId) == "data") {
                     return header
                 } else {
-                    header.skipBytes(chunkSize)
+                    header.skip(chunkSize)
                 }
             }
         }
 
+        private fun ByteArray.toIntLE(): Int {
+            return (this[0].toInt() and 0xFF) or
+                    ((this[1].toInt() and 0xFF) shl 8) or
+                    ((this[2].toInt() and 0xFF) shl 16) or
+                    ((this[3].toInt() and 0xFF) shl 24)
+        }
+
     }
-
-    public constructor(
-        file: File,
-        sampleRate: Int,
-        channelCount: Int,
-    ) : this(file.inputStream(), sampleRate, channelCount)
-
-    public constructor(
-        path: Path,
-        sampleRate: Int,
-        channelCount: Int,
-    ) : this(path.toFile(), sampleRate, channelCount)
 
 }
