@@ -15,4 +15,6 @@ dependencies {
     api(project(":primitives"))
     api(project(":platform"))
     api(project(":"))
+
+    api("org.bytedeco:javacv-platform:1.5.11")
 }
