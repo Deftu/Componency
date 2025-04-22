@@ -1,18 +1,15 @@
-plugins {
-    java
-    kotlin("jvm")
-    id("dev.deftu.gradle.tools")
-    id("dev.deftu.gradle.tools.publishing.maven")
-}
-
-kotlin.explicitApi()
-
 toolkitMavenPublishing {
     artifactName.set("componency-navigation")
 }
 
-dependencies {
-    api(project(":primitives"))
-    api(project(":platform"))
-    api(project(":"))
+kotlin {
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(project(":primitives"))
+                implementation(project(":platform"))
+                implementation(project(":"))
+            }
+        }
+    }
 }

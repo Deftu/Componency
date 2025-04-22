@@ -7,7 +7,6 @@ import dev.deftu.componency.components.Debugger
 import dev.deftu.componency.components.Nav
 import dev.deftu.componency.components.events.KeyboardModifiers
 import dev.deftu.componency.components.impl.Frame
-import dev.deftu.componency.components.impl.Gif
 import dev.deftu.componency.components.impl.Rectangle
 import dev.deftu.componency.components.impl.Text
 import dev.deftu.componency.components.traits.focusable
@@ -15,16 +14,15 @@ import dev.deftu.componency.dsl.*
 import dev.deftu.componency.easings.Easings
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.font.FontWeight
-import dev.deftu.componency.gif.GifAnimation
 import dev.deftu.componency.lwjgl3.engine.Lwjgl3Platform
 import dev.deftu.componency.nav.NavController
+import dev.deftu.componency.platform.Platform
 import dev.deftu.textile.SimpleTextHolder
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
-import kotlin.io.path.Path
 
 object Main {
 
@@ -34,10 +32,9 @@ object Main {
             throw IllegalStateException("Unable to initialize GLFW")
         }
 
-        val interFont = loadFont() // Preload the font
         // Preload animations
-        val gif1 = GifAnimation.from(Path("D:\\Downloads\\test.gif"))
-        val gif2 = GifAnimation.from(Path("D:\\Downloads\\test2.gif"))
+        // val gif1 = GifAnimation.from(Path("D:\\Downloads\\test.gif"))
+        // val gif2 = GifAnimation.from(Path("D:\\Downloads\\test2.gif"))
 
         var windowWidth = 1280
         var windowHeight = 720
@@ -50,6 +47,7 @@ object Main {
         // Engine
         val platform = Lwjgl3Platform(handle)
         platform.audioEngine.initialize()
+        val interFont = loadFont(platform) // Preload the font
 
         // Set up platform framebuffer size
         val framebufferWidth = IntArray(1)
@@ -62,28 +60,26 @@ object Main {
         // Create UI
         val navController = NavController()
         navController.register("/first") {
-            Gif("animation1") {
+            Rectangle("rectangle1") {
                 size(50.percent, 50.percent)
                 position(centered, 10.px)
-                fill = Color.WHITE.asProperty
-                animation = gif1
+                fill = Color.RED.asProperty
 
                 onPointerClick {
-                    println("Gif clicked @ $x, $y")
+                    println("Rectangle 1 clicked @ $x, $y")
 
                     component.requestFocus()
                     cancel()
                 }
 
                 onFocus {
-                    println("Gif focused!")
-
+                    println("Rectangle 1 focused!")
                     val targetWidth = 75.percent
                     this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
                 }
 
                 onUnfocus {
-                    println("Gif unfocused!")
+                    println("Rectangle 1 unfocused!")
                     val targetWidth = 50.percent
                     this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
                 }
@@ -91,28 +87,26 @@ object Main {
         }
 
         navController.register("/second") {
-            Gif("animation2") {
+            Rectangle("rectangle2") {
                 size(50.percent, 50.percent)
                 position(centered, 10.px(isInverse = true))
-                fill = Color.WHITE.asProperty
-                animation = gif2
+                fill = Color.BLUE.asProperty
 
                 onPointerClick {
-                    println("Gif clicked @ $x, $y")
+                    println("Rectangle 2 clicked @ $x, $y")
 
                     component.requestFocus()
                     cancel()
                 }
 
                 onFocus {
-                    println("Gif focused!")
-
+                    println("Rectangle 2 focused!")
                     val targetWidth = 75.percent
                     this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
                 }
 
                 onUnfocus {
-                    println("Gif unfocused!")
+                    println("Rectangle 2 unfocused!")
                     val targetWidth = 50.percent
                     this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
                 }
@@ -279,18 +273,16 @@ object Main {
         }
     }
 
-    private fun loadFont(): Font {
+    private fun loadFont(platform: Platform): Font {
         val path = "/fonts/Inter-Regular.ttf"
-        val stream = Debugger::class.java.getResourceAsStream(path)
-            ?: throw IllegalArgumentException("Font $path does not exist.")
-        return Font(
-            name = "Inter",
-            inputStream = stream,
+        return platform.fontLoader.loadFontEmbedded(
+            "Inter",
+            path = path,
             letterSpacing = 0f,
             lineSpacing = 0f,
             isItalic = false,
             weight = FontWeight.REGULAR
-        )
+        ) ?: throw IllegalStateException("Font '$path' not available")
     }
 
 }

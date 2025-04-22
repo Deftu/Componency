@@ -1,12 +1,13 @@
-plugins {
-    java
-    kotlin("jvm")
-    id("dev.deftu.gradle.tools")
-    id("dev.deftu.gradle.tools.publishing.maven")
-}
-
-kotlin.explicitApi()
-
 toolkitMavenPublishing {
     artifactName.set("componency-primitives")
+}
+
+kotlin {
+    sourceSets {
+        val nativeMain by creating {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.2")
+            }
+        }
+    }
 }

@@ -20,10 +20,6 @@ pluginManagement {
         maven("https://s01.oss.sonatype.org/content/groups/public/")
         mavenLocal()
     }
-
-    plugins {
-        kotlin("jvm") version("2.0.0")
-    }
 }
 
 plugins {

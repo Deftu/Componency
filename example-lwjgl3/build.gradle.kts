@@ -38,8 +38,11 @@ dependencies {
     api(project(":primitives"))
     api(project(":platform"))
     api(project(":"))
-    api(project(":gif-component"))
+//    api(project(":gif-component"))
     api(project(":navigation"))
+
+    implementation("dev.deftu:stateful:0.4.0")
+    implementation("dev.deftu:textile:0.14.1")
 
     implementation(platform("org.lwjgl:lwjgl-bom:3.3.4-SNAPSHOT"))
     implementation("org.lwjgl", "lwjgl")

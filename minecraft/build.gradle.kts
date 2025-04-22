@@ -52,6 +52,7 @@ toolkitReleases {
 
 repositories {
     maven("https://repo.polyfrost.org/releases")
+    mavenCentral()
 }
 
 dependencies {
@@ -69,6 +70,7 @@ dependencies {
 
     // Minecraft
     modApi("dev.deftu:omnicore-$mcData:0.25.0")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks {
@@ -78,4 +80,7 @@ tasks {
         exclude("Log4j-events.dtd")
         exclude("Log4j-events.xsd")
     }
+}
+kotlin {
+    jvmToolchain(8)
 }
