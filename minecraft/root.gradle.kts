@@ -2,7 +2,7 @@ import dev.deftu.gradle.utils.ModData
 import dev.deftu.gradle.utils.ProjectData
 
 plugins {
-    id("dev.deftu.gradle.multiversion-root")
+    id(libs.plugins.dgt.multiversion.root.get().pluginId)
 }
 
 subprojects {

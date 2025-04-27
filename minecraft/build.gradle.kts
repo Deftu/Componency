@@ -6,14 +6,14 @@ import dev.deftu.gradle.utils.includeOrShade
 
 plugins {
     java
-    kotlin("jvm")
-    id("dev.deftu.gradle.multiversion")
-    id("dev.deftu.gradle.tools")
-    id("dev.deftu.gradle.tools.resources")
-    id("dev.deftu.gradle.tools.publishing.maven")
-    id("dev.deftu.gradle.tools.minecraft.loom")
-    id("dev.deftu.gradle.tools.shadow")
-    id("dev.deftu.gradle.tools.minecraft.releases")
+    id(libs.plugins.kotlin.jvm.get().pluginId)
+    id(libs.plugins.dgt.multiversion.versioned.get().pluginId)
+    id(libs.plugins.dgt.tools.get().pluginId)
+    id(libs.plugins.dgt.resources.get().pluginId)
+    id(libs.plugins.dgt.publishing.maven.get().pluginId)
+    id(libs.plugins.dgt.minecraft.loom.get().pluginId)
+    id(libs.plugins.dgt.shadow.get().pluginId)
+    id(libs.plugins.dgt.minecraft.releases.get().pluginId)
 }
 
 kotlin.explicitApi()
@@ -56,7 +56,7 @@ repositories {
 }
 
 dependencies {
-    api(includeOrShade(project(":"))!!)
+    api(includeOrShade(project(":modules:core"))!!)
 
     // LWJGL
     val lwjglVersion = "3.3.3"

@@ -22,6 +22,16 @@ pluginManagement {
     }
 }
 
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        google()
+        maven("https://maven.deftu.dev/releases")
+        maven("https://maven.deftu.dev/snapshots")
+        mavenLocal()
+    }
+}
+
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version ("0.8.+")
 }
@@ -30,20 +40,51 @@ val projectName: String = extra["project.name"]?.toString()
     ?: throw MissingPropertyException("project.name has not been set.")
 rootProject.name = projectName
 
-// Platform
-include(":primitives") // Primitive values such as colors, vectors, etc.
-include(":platform") // Platform API
+// Core modules
 
-// Utilities
-include(":navigation") // Navigation API
-include(":gif-component") // GIF support
-include(":video-component") // Video support
-include(":text-input") // Text input components
+include(":modules")
+listOf(
+    // Platform
+    "primitives", "platform",
 
-// Defign
-include(":defign") // Implementation of Deftu's design system
+    // Core
+    "core",
 
-// Minecraft implementation
+    // Utilities
+    "navigation", "gifs", "videos", "text-input",
+
+    // Design
+    "defign",
+).map { ":modules:$it" }.forEach { name ->
+    include(name)
+    logger.lifecycle("Including core module project '$name' at ${project(name).projectDir}")
+}
+
+// Examples
+
+include(":examples")
+listOf(
+    "basic", // No platform
+
+    "lwjgl3", // Provides LWJGL3 platform
+).map { ":examples:$it" }.forEach { name ->
+    include(name)
+    logger.lifecycle("Including example project '$name' at ${project(name).projectDir}")
+}
+
+// Platforms
+
+include(":platforms")
+listOf(
+    "swing", "android", "ios",
+    "web-js", "web-wasm", "desktop",
+).map { ":platforms:$it" }.forEach { name ->
+    include(name)
+    project(name).buildFileName = "root.gradle.kts"
+    logger.lifecycle("Including platform project '$name' at ${project(name).projectDir}")
+}
+
+// Minecraft platform
 include(":minecraft")
 project(":minecraft").buildFileName = "root.gradle.kts"
 listOf(
@@ -90,7 +131,3 @@ listOf(
         buildFileName = "../../build.gradle.kts"
     }
 }
-
-// Usage examples
-include(":example-basic")
-include(":example-lwjgl3")
