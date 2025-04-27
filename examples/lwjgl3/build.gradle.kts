@@ -37,9 +37,6 @@ repositories {
 dependencies {
     implementation(project(":platforms:lwjgl3-nanovg"))
 
-    implementation(libs.stateful)
-    implementation(libs.textile)
-
     implementation(platform("org.lwjgl:lwjgl-bom:3.3.4-SNAPSHOT"))
     implementation("org.lwjgl", "lwjgl")
     implementation("org.lwjgl", "lwjgl-assimp")
