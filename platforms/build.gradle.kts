@@ -1,0 +1,112 @@
+import dev.deftu.gradle.tools.publishing.MavenPublishingExtension
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+
+subprojects {
+    apply(plugin = rootProject.libs.plugins.dgt.tools.get().pluginId)
+    apply(plugin = rootProject.libs.plugins.dgt.publishing.maven.get().pluginId)
+
+    extensions.configure<MavenPublishingExtension>("toolkitMavenPublishing") {
+        artifactName.set("componency-platform-${project.name}")
+    }
+
+    pluginManager.withPlugin(rootProject.libs.plugins.kotlin.multiplatform.get().pluginId) {
+        extensions.configure<KotlinMultiplatformExtension> {
+            explicitApi()
+
+            // --- JVM (Desktop, Android, Server) ---
+            jvm()
+
+            // --- JavaScript (Browser, Node.js) ---
+            js(IR) {
+                generateTypeScriptDefinitions()
+                binaries.executable()
+                browser()
+                nodejs()
+            }
+
+            // --- WebAssembly (Experimental) ---
+            @OptIn(ExperimentalWasmDsl::class)
+            wasmJs {
+                generateTypeScriptDefinitions()
+                binaries.executable()
+                browser {
+                    commonWebpackConfig {
+                        devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                            static = (static ?: mutableListOf()).apply {
+                                add(rootProject.path)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- Native (Commonly Used Platforms) ---
+            linuxX64()       // Desktop Linux
+            mingwX64()       // Windows native
+            macosX64()       // macOS Intel
+            macosArm64()     // macOS Apple Silicon
+
+            iosArm64()       // iOS devices
+            iosSimulatorArm64() // iOS simulator for Apple Silicon
+
+            sourceSets {
+                val commonMain by getting {
+                    dependencies {
+                        implementation(project(":modules:primitives"))
+                        implementation(project(":modules:platform"))
+                        implementation(project(":modules:core"))
+
+                        implementation(rootProject.libs.stateful)
+                        implementation(rootProject.libs.textile)
+                    }
+                }
+
+                val commonTest by getting {
+                    dependencies {
+                        implementation(kotlin("test"))
+                    }
+                }
+
+                val jvmMain by getting {
+                    dependencies {
+                        implementation(kotlin("reflect"))
+                    }
+                }
+
+                val jvmTest by getting {
+                    dependencies {
+                        implementation(kotlin("test-junit"))
+                    }
+                }
+
+                val jsTest by getting {
+                    dependencies {
+                        implementation(kotlin("test-js"))
+                    }
+                }
+            }
+        }
+    }
+
+    fun Project.applyNonKmpDependencies() {
+        dependencies {
+            "implementation"(project(":modules:primitives"))
+            "implementation"(project(":modules:platform"))
+            "implementation"(project(":modules:core"))
+
+            "implementation"(rootProject.libs.stateful)
+            "implementation"(rootProject.libs.textile)
+        }
+    }
+
+    pluginManager.withPlugin(rootProject.libs.plugins.kotlin.jvm.get().pluginId) {
+        applyNonKmpDependencies()
+    }
+
+    pluginManager.withPlugin("java") {
+        applyNonKmpDependencies()
+    }
+}
+
