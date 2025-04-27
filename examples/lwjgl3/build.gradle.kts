@@ -35,8 +35,6 @@ repositories {
 }
 
 dependencies {
-    api(project(":modules:navigation"))
-
     implementation(libs.stateful)
     implementation(libs.textile)
 

@@ -3,7 +3,6 @@
 package dev.deftu.componency.lwjgl3
 
 import dev.deftu.componency.color.Color
-import dev.deftu.componency.components.Nav
 import dev.deftu.componency.components.events.KeyboardModifiers
 import dev.deftu.componency.components.impl.Frame
 import dev.deftu.componency.components.impl.FrameComponent
@@ -11,11 +10,9 @@ import dev.deftu.componency.components.impl.Rectangle
 import dev.deftu.componency.components.impl.Text
 import dev.deftu.componency.components.traits.focusable
 import dev.deftu.componency.dsl.*
-import dev.deftu.componency.easings.Easings
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.font.FontWeight
 import dev.deftu.componency.lwjgl3.engine.Lwjgl3Platform
-import dev.deftu.componency.nav.NavController
 import dev.deftu.componency.platform.Platform
 import dev.deftu.textile.SimpleTextHolder
 import org.lwjgl.glfw.GLFW
@@ -30,61 +27,6 @@ object Main {
         platform: Platform,
         interFont: Font
     ): FrameComponent {
-        val navController = NavController()
-        navController.register("/first") {
-            Rectangle("rectangle1") {
-                size(50.percent, 50.percent)
-                position(centered, 10.px)
-                fill = Color.RED.asProperty
-
-                onPointerClick {
-                    println("Rectangle 1 clicked @ $x, $y")
-
-                    component.requestFocus()
-                    cancel()
-                }
-
-                onFocus {
-                    println("Rectangle 1 focused!")
-                    val targetWidth = 75.percent
-                    this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
-                }
-
-                onUnfocus {
-                    println("Rectangle 1 unfocused!")
-                    val targetWidth = 50.percent
-                    this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
-                }
-            }.focusable()
-        }
-
-        navController.register("/second") {
-            Rectangle("rectangle2") {
-                size(50.percent, 50.percent)
-                position(centered, 10.px(isInverse = true))
-                fill = Color.BLUE.asProperty
-
-                onPointerClick {
-                    println("Rectangle 2 clicked @ $x, $y")
-
-                    component.requestFocus()
-                    cancel()
-                }
-
-                onFocus {
-                    println("Rectangle 2 focused!")
-                    val targetWidth = 75.percent
-                    this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
-                }
-
-                onUnfocus {
-                    println("Rectangle 2 unfocused!")
-                    val targetWidth = 50.percent
-                    this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
-                }
-            }.focusable()
-        }
-
         return Frame("window") {
             root(platform)
             debugger()
@@ -97,13 +39,6 @@ object Main {
 
                 onPointerClick {
                     println("Button clicked @ $x, $y")
-
-                    when (navController.currentRoute) {
-                        "/first" -> navController.navigate("/second")
-                        "/second" -> navController.navigate("/first")
-                        null -> navController.navigate("/first")
-                        else -> println("Unknown route: ${navController.currentRoute}")
-                    }
                 }
 
                 Text("button_text") {
@@ -114,12 +49,6 @@ object Main {
                     fill = Color.BLACK.asProperty
                 }
             }.focusable()
-
-            Nav {
-                size(50.percent, 50.percent)
-                position(centered, centered)
-                controller = navController
-            }
         }
     }
 
