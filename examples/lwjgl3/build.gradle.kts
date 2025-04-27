@@ -35,6 +35,8 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":platforms:lwjgl3-nanovg"))
+
     implementation(libs.stateful)
     implementation(libs.textile)
 
