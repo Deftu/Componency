@@ -1,5 +1,7 @@
 import dev.deftu.gradle.tools.publishing.MavenPublishingExtension
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 subprojects {
     apply(plugin = rootProject.libs.plugins.kotlin.multiplatform.get().pluginId)
@@ -25,13 +27,13 @@ subprojects {
         }
 
         // --- WebAssembly (Experimental) ---
-        @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+        @OptIn(ExperimentalWasmDsl::class)
         wasmJs {
             generateTypeScriptDefinitions()
             binaries.executable()
             browser {
                 commonWebpackConfig {
-                    devServer = (devServer ?: org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.DevServer()).apply {
+                    devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
                         static = (static ?: mutableListOf()).apply {
                             add(rootProject.path)
                         }
