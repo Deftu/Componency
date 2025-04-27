@@ -78,6 +78,7 @@ include(":platforms")
 listOf(
     "swing", "android", "ios",
     "web-js", "web-wasm", "desktop",
+    "lwjgl3", "lwjgl3-nanovg",
 ).map { ":platforms:$it" }.forEach { name ->
     include(name)
     project(name).buildFileName = "root.gradle.kts"
