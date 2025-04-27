@@ -99,7 +99,6 @@ public data class Focusable(public val isDisabled: MutableState<Boolean> = mutab
 }
 
 public fun <T : Component<T, C>, C : ComponentProperties<T, C>> T.focusable(isDisabled: Boolean = false): T {
-    println("Focusable trait added to $this")
     return Focusable.focusable(this, isDisabled)
 }
 
