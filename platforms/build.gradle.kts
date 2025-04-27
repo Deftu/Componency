@@ -16,7 +16,10 @@ subprojects {
             explicitApi()
 
             // --- JVM (Desktop, Android, Server) ---
-            jvm()
+            jvm {
+                withJava()
+                withSourcesJar()
+            }
 
             // --- JavaScript (Browser, Node.js) ---
             js(IR) {
