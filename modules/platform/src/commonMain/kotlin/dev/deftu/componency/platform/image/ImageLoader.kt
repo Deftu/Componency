@@ -6,8 +6,12 @@ public interface ImageLoader {
 
     public fun loadFromData(data: ByteArray): Image?
 
-    public fun loadFromPlatform(image: PlatformImage): Image?
+    public fun loadEncodedFromPlatform(image: PlatformImage): Image?
 
-    public fun convertToPlatform(image: Image): PlatformImage?
+    public fun convertEncodedToPlatform(image: Image): PlatformImage?
+
+    public fun loadRawFromPlatform(image: PlatformImage): Image?
+
+    public fun convertRawToPlatform(image: Image): PlatformImage?
 
 }

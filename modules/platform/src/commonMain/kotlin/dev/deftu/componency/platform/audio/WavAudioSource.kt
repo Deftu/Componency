@@ -1,9 +1,10 @@
 package dev.deftu.componency.platform.audio
 
+import dev.deftu.componency.ByteStream
 import kotlin.jvm.JvmStatic
 
 public class WavAudioSource(
-    stream: AudioByteStream,
+    stream: ByteStream,
     sampleRate: Int,
     channelCount: Int,
 ) : StreamingAudioSource(identifyWavStream(stream), sampleRate, channelCount) {
@@ -11,29 +12,27 @@ public class WavAudioSource(
     public companion object {
 
         @JvmStatic
-        public fun identifyWavStream(stream: AudioByteStream): AudioByteStream {
-            val header = stream
-
-            val riff = ByteArray(4).also(header::readFully)
+        public fun identifyWavStream(stream: ByteStream): ByteStream {
+            val riff = ByteArray(4).also(stream::readFully)
             if (!riff.contentEquals("RIFF".encodeToByteArray())) {
                 throw IllegalArgumentException("Not a valid WAV file")
             }
 
-            header.skip(4)
+            stream.skip(4)
 
-            val wave = ByteArray(4).also(header::readFully)
+            val wave = ByteArray(4).also(stream::readFully)
             if (!wave.contentEquals("WAVE".encodeToByteArray())) {
                 throw IllegalArgumentException("Not a valid WAV file")
             }
 
             while (true) {
-                val chunkId = ByteArray(4).also(header::readFully)
-                val chunkSize = ByteArray(4).also(header::readFully).toIntLE()
+                val chunkId = ByteArray(4).also(stream::readFully)
+                val chunkSize = ByteArray(4).also(stream::readFully).toIntLE()
 
                 if (chunkId.decodeToString() == "data") {
-                    return header
+                    return stream
                 } else {
-                    header.skip(chunkSize)
+                    stream.skip(chunkSize)
                 }
             }
         }

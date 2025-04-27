@@ -62,28 +62,47 @@ class Lwjgl3ImageRenderer(
 
             when (image.type) {
                 ImageType.RASTER -> {
-                    val buffer = run {
-                        val buffer = ByteBuffer.allocateDirect(bytes.size)
-                            .order(ByteOrder.nativeOrder())
-                            .put(bytes)
-                            .flip() as ByteBuffer
-                        val widthOutput = IntArray(1)
-                        val heightOutput = IntArray(1)
-                        val result = STBImage.stbi_load_from_memory(buffer, widthOutput, heightOutput, IntArray(1), 4)
-                            ?: throw IllegalStateException("Failed to load image from memory")
-                        image.width = widthOutput[0].toFloat()
-                        image.height = heightOutput[0].toFloat()
+                    try {
+                        val buffer = run {
+                            val buffer = ByteBuffer.allocateDirect(bytes.size)
+                                .order(ByteOrder.nativeOrder())
+                                .put(bytes)
+                                .flip() as ByteBuffer
+                            val widthOutput = IntArray(1)
+                            val heightOutput = IntArray(1)
+                            val result = STBImage.stbi_load_from_memory(buffer, widthOutput, heightOutput, IntArray(1), 4)
+                                ?: throw IllegalStateException("Failed to load image from memory")
+                            image.width = widthOutput[0].toFloat()
+                            image.height = heightOutput[0].toFloat()
 
-                        result
+                            result
+                        }
+
+                        NanoVG.nvgCreateImageRGBA(
+                            nvg,
+                            image.width.toInt(),
+                            image.height.toInt(),
+                            NanoVG.NVG_IMAGE_GENERATE_MIPMAPS,
+                            buffer
+                        )
+                    } catch (first: Throwable) {
+                        try {
+                            NanoVG.nvgCreateImageRGBA(
+                                nvg,
+                                image.width.toInt(),
+                                image.height.toInt(),
+                                NanoVG.NVG_IMAGE_GENERATE_MIPMAPS,
+                                ByteBuffer.allocateDirect(bytes.size)
+                                    .order(ByteOrder.nativeOrder())
+                                    .put(bytes)
+                                    .flip() as ByteBuffer
+                            )
+                        } catch (second: Throwable) {
+                            first.printStackTrace()
+                            second.printStackTrace()
+                            throw IllegalStateException("Failed to load image from memory")
+                        }
                     }
-
-                    NanoVG.nvgCreateImageRGBA(
-                        nvg,
-                        image.width.toInt(),
-                        image.height.toInt(),
-                        NanoVG.NVG_IMAGE_GENERATE_MIPMAPS,
-                        buffer
-                    )
                 }
 
                 ImageType.VECTOR -> {

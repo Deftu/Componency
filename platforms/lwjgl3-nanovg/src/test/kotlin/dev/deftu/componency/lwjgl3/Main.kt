@@ -5,53 +5,83 @@ package dev.deftu.componency.lwjgl3
 import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Nav
 import dev.deftu.componency.components.events.KeyboardModifiers
-import dev.deftu.componency.components.impl.Frame
-import dev.deftu.componency.components.impl.FrameComponent
-import dev.deftu.componency.components.impl.Rectangle
-import dev.deftu.componency.components.impl.Text
+import dev.deftu.componency.components.impl.*
 import dev.deftu.componency.components.traits.focusable
 import dev.deftu.componency.dsl.*
 import dev.deftu.componency.easings.Easings
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.font.FontWeight
+import dev.deftu.componency.gif.GifAnimation
 import dev.deftu.componency.lwjgl3.engine.Lwjgl3Platform
 import dev.deftu.componency.nav.NavController
 import dev.deftu.componency.platform.Platform
+import dev.deftu.componency.platform.image.JVMPlatformImage
+import dev.deftu.componency.toByteStream
 import dev.deftu.textile.SimpleTextHolder
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
+import javax.imageio.ImageIO
+import kotlin.io.path.Path
 
 object Main {
 
     private fun ui(
         platform: Platform,
-        interFont: Font
+        interFont: Font,
+        gif1: GifAnimation,
+        gif2: GifAnimation
     ): FrameComponent {
         val navController = NavController()
         navController.register("/first") {
-            Rectangle("rectangle1") {
+//            Rectangle("rectangle1") {
+//                size(50.percent, 50.percent)
+//                position(centered, 10.px)
+//                fill = Color.RED.asProperty
+//
+//                onPointerClick {
+//                    println("Rectangle 1 clicked @ $x, $y")
+//
+//                    component.requestFocus()
+//                    cancel()
+//                }
+//
+//                onFocus {
+//                    println("Rectangle 1 focused!")
+//                    val targetWidth = 75.percent
+//                    this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
+//                }
+//
+//                onUnfocus {
+//                    println("Rectangle 1 unfocused!")
+//                    val targetWidth = 50.percent
+//                    this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
+//                }
+//            }.focusable()
+
+            Gif("gif1") {
                 size(50.percent, 50.percent)
                 position(centered, 10.px)
-                fill = Color.RED.asProperty
+                fill = Color.WHITE.asProperty
+                animation = gif1
 
                 onPointerClick {
-                    println("Rectangle 1 clicked @ $x, $y")
+                    println("Gif 1 clicked @ $x, $y")
 
                     component.requestFocus()
                     cancel()
                 }
 
                 onFocus {
-                    println("Rectangle 1 focused!")
+                    println("Gif 1 focused!")
                     val targetWidth = 75.percent
                     this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
                 }
 
                 onUnfocus {
-                    println("Rectangle 1 unfocused!")
+                    println("Gif 1 unfocused!")
                     val targetWidth = 50.percent
                     this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
                 }
@@ -59,28 +89,22 @@ object Main {
         }
 
         navController.register("/second") {
-            Rectangle("rectangle2") {
+            Gif("gif2") {
                 size(50.percent, 50.percent)
                 position(centered, 10.px(isInverse = true))
-                fill = Color.BLUE.asProperty
+                fill = Color.WHITE.asProperty
+                animation = gif2
 
                 onPointerClick {
-                    println("Rectangle 2 clicked @ $x, $y")
+                    println("Gif 2 clicked @ $x, $y")
 
-                    component.requestFocus()
+                    if (gif2.isPaused) {
+                        gif2.resume()
+                    } else {
+                        gif2.pause()
+                    }
+
                     cancel()
-                }
-
-                onFocus {
-                    println("Rectangle 2 focused!")
-                    val targetWidth = 75.percent
-                    this.width.animateTo(Easings.LINEAR, 1.5.seconds, targetWidth)
-                }
-
-                onUnfocus {
-                    println("Rectangle 2 unfocused!")
-                    val targetWidth = 50.percent
-                    this.width.animateTo(Easings.IN_OUT_QUAD, 3.seconds, targetWidth)
                 }
             }.focusable()
         }
@@ -130,8 +154,8 @@ object Main {
         }
 
         // Preload animations
-        // val gif1 = GifAnimation.from(Path("D:\\Downloads\\test.gif"))
-        // val gif2 = GifAnimation.from(Path("D:\\Downloads\\test2.gif"))
+         val gif1 = GifAnimation.decode(Path("D:\\Downloads\\test.gif").toByteStream())
+         val gif2 = GifAnimation.decode(Path("D:\\Downloads\\test2.gif").toByteStream()).apply { playbackSpeed = 5f }
 
         var windowWidth = 1280
         var windowHeight = 720
@@ -155,7 +179,7 @@ object Main {
         platform.pixelRatio = platform.viewportWidth / windowWidth.toFloat()
 
         // Create UI
-        val frame = ui(platform, interFont)
+        val frame = ui(platform, interFont, gif1, gif2)
 
         // Window state
         GLFW.glfwSetWindowSizeCallback(handle) { _, width, height ->

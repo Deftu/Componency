@@ -1,5 +1,7 @@
 import dev.deftu.gradle.tools.publishing.MavenPublishingExtension
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
@@ -17,6 +19,11 @@ subprojects {
 
             // --- JVM (Desktop, Android, Server) ---
             jvm {
+                @OptIn(ExperimentalKotlinGradlePluginApi::class)
+                compilerOptions {
+                    jvmTarget.set(JvmTarget.JVM_1_8)
+                }
+
                 withJava()
                 withSourcesJar()
             }
@@ -89,6 +96,12 @@ subprojects {
                         implementation(kotlin("test-js"))
                     }
                 }
+            }
+        }
+
+        extensions.configure<JavaPluginExtension> {
+            toolchain {
+                languageVersion.set(JavaLanguageVersion.of(8))
             }
         }
     }

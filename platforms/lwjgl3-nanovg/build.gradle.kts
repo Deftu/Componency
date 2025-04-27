@@ -37,6 +37,7 @@ repositories {
 }
 
 dependencies {
+    api(project(":modules:gifs"))
     api(project(":modules:navigation"))
 
     implementation(libs.stateful)

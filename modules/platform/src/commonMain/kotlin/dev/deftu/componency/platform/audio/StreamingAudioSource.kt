@@ -1,7 +1,9 @@
 package dev.deftu.componency.platform.audio
 
+import dev.deftu.componency.ByteStream
+
 public open class StreamingAudioSource(
-    private val stream: AudioByteStream,
+    private val stream: ByteStream,
     override val sampleRate: Int,
     override val channelCount: Int,
 ) : AudioSource, AutoCloseable {
