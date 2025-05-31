@@ -1,12 +1,13 @@
 package dev.deftu.componency.components
 
-import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.debugging.DebugOverlayBuilder
 import dev.deftu.componency.components.debugging.renderDebuggerOverlay
 import dev.deftu.componency.components.traits.Focusable
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.font.FontWeight
 import dev.deftu.componency.input.MouseButton
+import dev.deftu.componency.platform.Platform
+import dev.deftu.kolor.NamedColors
 import kotlin.math.roundToInt
 
 public class Debugger(private val component: Component<*, *>) {
@@ -15,17 +16,17 @@ public class Debugger(private val component: Component<*, *>) {
     private var lastDeltaTime = 0.0
     private var deltaTime = 0.0
     private var frameCount = 0
-    private var font: Font? = null
+    internal var font: Font? = null
 
     private var fps = 0
     private var frameTime = 0.0
 
     private val padding = 5f
-    private val fontSize = 16f
+    internal var fontSize = 16f
     private val x = 15f
     private val y = 15f
     private val radius = 5f
-    private val color = Color.GREEN.withAlphaPercentage(0.25f)
+    private val color = NamedColors.GREEN.withAlphaPercentage(0.25f)
 
     private var isHovered = false
     private var currentlyHoveredComponent: Component<*, *>? = null
@@ -48,18 +49,40 @@ public class Debugger(private val component: Component<*, *>) {
             this.lastDeltaTime = component.clock.nowSeconds()
         }
 
-        this.font = loadFont()
+        if (this.font == null) {
+            this.font = loadFont()
+        }
+
+        println("Debugger initialized for component: ${component::class.simpleName}. Font loaded: ${font != null} ($font)")
         this.isInitialized = true
     }
 
     public fun render() {
-        if (!isEnabled || font == null) {
+        if (!isEnabled) {
             return
         }
 
         update()
 
         val platform = Component.findPlatform(component)
+        renderOverlay(platform)
+        renderComponentOutlines(platform)
+    }
+
+    public fun handlePointerClick(button: MouseButton) {
+        if (!isEnabled || !isHovered || this.currentlyHoveredComponent == null || button != MouseButton.LEFT) {
+            return
+        }
+
+        this.currentlySelectedComponent = if (this.currentlySelectedComponent == this.currentlyHoveredComponent) null else this.currentlyHoveredComponent
+        this.currentlyHoveredComponent = null
+    }
+
+    private fun renderOverlay(platform: Platform) {
+        if (this.font == null) {
+            return
+        }
+
         val overlay = DebugOverlayBuilder {
             section("Performance") {
                 property("FPS", fps)
@@ -72,9 +95,16 @@ public class Debugger(private val component: Component<*, *>) {
                     val name = item::class.simpleName ?: "Unknown"
                     buildString {
                         append(name)
+
                         item.properties.name?.let { append(" ($it)") }
+
                         if (item.hasTrait(Focusable::class) && item.isFocused) {
                             append(" [Focused]")
+                        }
+
+                        val lastRenderTime = item.lastRenderTime
+                        if (lastRenderTime > 100_000L) { // 0.1ms threshold
+                            append(" (${lastRenderTime}ns)")
                         }
                     }
                 }
@@ -109,13 +139,65 @@ public class Debugger(private val component: Component<*, *>) {
         )
     }
 
-    public fun handlePointerClick(button: MouseButton) {
-        if (!isEnabled || !isHovered || this.currentlyHoveredComponent == null || button != MouseButton.LEFT) {
+    /**
+     * Draws a box around every component in the tree to visualize their bounds.
+     */
+    private fun renderComponentOutlines(platform: Platform) {
+        if (!isEnabled) {
             return
         }
 
-        this.currentlySelectedComponent = if (this.currentlySelectedComponent == this.currentlyHoveredComponent) null else this.currentlyHoveredComponent
-        this.currentlyHoveredComponent = null
+        val lineWidth = 1f
+
+        fun renderOutline(component: Component<*, *>) {
+            val x = component.x
+            val y = component.y
+            val w = component.width
+            val h = component.height
+            val color = NamedColors.DIMGRAY.withAlphaPercentage(0.95f)
+
+            // Top edge
+            platform.renderer.fill(
+                x1 = x - lineWidth,
+                y1 = y - lineWidth,
+                x2 = x + w + lineWidth,
+                y2 = y,
+                color = color
+            )
+
+            // Bottom edge
+            platform.renderer.fill(
+                x1 = x - lineWidth,
+                y1 = y + h,
+                x2 = x + w + lineWidth,
+                y2 = y + h + lineWidth,
+                color = color
+            )
+
+            // Left edge
+            platform.renderer.fill(
+                x1 = x - lineWidth,
+                y1 = y,
+                x2 = x,
+                y2 = y + h,
+                color = color
+            )
+
+            // Right edge
+            platform.renderer.fill(
+                x1 = x + w,
+                y1 = y,
+                x2 = x + w + lineWidth,
+                y2 = y + h,
+                color = color
+            )
+
+            for (child in component.getChildren()) {
+                renderOutline(child)
+            }
+        }
+
+        renderOutline(component)
     }
 
     private fun update() {
@@ -131,16 +213,16 @@ public class Debugger(private val component: Component<*, *>) {
         }
     }
 
-    private fun loadFont(): Font {
-        val path = "/fonts/Inter-Regular.ttf"
+    private fun loadFont(): Font? {
+        val path = "/font/inter_regular.ttf"
         return component.platform?.fontLoader?.loadFontEmbedded(
             name = "Inter",
             path = path,
-            letterSpacing = 0f,
-            lineSpacing = 0f,
+            letterSpacing = 0.2f,
+            lineSpacing = 1.4f,
             isItalic = false,
             weight = FontWeight.REGULAR
-        ) ?: throw IllegalStateException("Font loader not available")
+        )
     }
 
     private fun Double.asFormattedMillis(): String {

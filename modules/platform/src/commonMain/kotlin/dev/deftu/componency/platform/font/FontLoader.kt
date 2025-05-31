@@ -3,7 +3,6 @@ package dev.deftu.componency.platform.font
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.font.FontFamily
 import dev.deftu.componency.font.FontWeight
-import dev.deftu.componency.font.StaticFontFamily
 
 public interface FontLoader {
 
@@ -36,11 +35,11 @@ public interface FontLoader {
     public fun loadFontFamilyEmbedded(
         name: String,
         path: String,
-    ): StaticFontFamily?
+    ): FontFamily?
 
     public fun loadFontFamily(
         name: String,
         path: String
-    ): StaticFontFamily?
+    ): FontFamily?
 
 }

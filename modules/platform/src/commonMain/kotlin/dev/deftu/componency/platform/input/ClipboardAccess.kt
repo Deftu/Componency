@@ -24,6 +24,18 @@ public interface ClipboardAccess {
 
     public fun clearClipboard()
 
+    public suspend fun getClipboardStringAsynchronously(): String? {
+        return clipboardString
+    }
+
+    public suspend fun getClipboardImageAsynchronously(): Image? {
+        return clipboardImage
+    }
+
+    public suspend fun getClipboardAsynchronously(): ClipboardContent? {
+        return clipboard
+    }
+
     public sealed interface ClipboardContent {
         public data class StringContent(val content: String) : ClipboardContent
         public data class ImageContent(val content: Image) : ClipboardContent

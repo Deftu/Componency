@@ -1,9 +1,10 @@
 package dev.deftu.componency.dsl
 
-import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.stroke.Stroke
 import dev.deftu.componency.properties.*
+import dev.deftu.kolor.Color
+import dev.deftu.kolor.NamedColors
 
 public fun simpleXProperty(block: (component: Component<*, *>) -> Float): XProperty {
     return object : SimpleProperty<Float>(0f), XProperty {
@@ -46,7 +47,7 @@ public fun simpleHeightProperty(block: (component: Component<*, *>) -> Float): H
 }
 
 public fun simpleColorProperty(block: (component: Component<*, *>) -> Color): ColorProperty {
-    return object : SimpleProperty<Color>(Color.WHITE), ColorProperty {
+    return object : SimpleProperty<Color>(NamedColors.WHITE), ColorProperty {
 
         override fun calculateColor(component: Component<*, *>): Color {
             return block(component)

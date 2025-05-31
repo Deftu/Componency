@@ -52,49 +52,42 @@ subprojects {
                 }
             }
 
-            // --- Native (Commonly Used Platforms) ---
-            linuxX64()       // Desktop Linux
-            mingwX64()       // Windows native
-            macosX64()       // macOS Intel
-            macosArm64()     // macOS Apple Silicon
+            if (project.findProperty("componency.skipNative")?.toString()?.toBoolean() != true) {
+                // --- Native (Commonly Used Platforms) ---
+                linuxX64()       // Desktop Linux
+                mingwX64()       // Windows native
+                macosX64()       // macOS Intel
+                macosArm64()     // macOS Apple Silicon
 
-            iosArm64()       // iOS devices
-            iosSimulatorArm64() // iOS simulator for Apple Silicon
+                iosArm64()       // iOS devices
+                iosSimulatorArm64() // iOS simulator for Apple Silicon
+            }
 
             sourceSets {
-                val commonMain by getting {
-                    dependencies {
-                        implementation(project(":modules:primitives"))
-                        implementation(project(":modules:platform"))
-                        implementation(project(":modules:core"))
+                commonMain.dependencies {
+                    implementation(project(":modules:primitives"))
+                    implementation(project(":modules:platform"))
+                    implementation(project(":modules:core"))
 
-                        implementation(rootProject.libs.stateful)
-                        implementation(rootProject.libs.textile)
-                    }
+                    implementation(rootProject.libs.kolor)
+                    implementation(rootProject.libs.stateful)
+                    implementation(rootProject.libs.textile)
                 }
 
-                val commonTest by getting {
-                    dependencies {
-                        implementation(kotlin("test"))
-                    }
+                commonTest.dependencies {
+                    implementation(kotlin("test"))
                 }
 
-                val jvmMain by getting {
-                    dependencies {
-                        implementation(kotlin("reflect"))
-                    }
+                jvmMain.dependencies {
+                    implementation(kotlin("reflect"))
                 }
 
-                val jvmTest by getting {
-                    dependencies {
-                        implementation(kotlin("test-junit"))
-                    }
+                jvmTest.dependencies {
+                    implementation(kotlin("test-junit"))
                 }
 
-                val jsTest by getting {
-                    dependencies {
-                        implementation(kotlin("test-js"))
-                    }
+                jsTest.dependencies {
+                    implementation(kotlin("test-js"))
                 }
             }
         }
@@ -112,12 +105,21 @@ subprojects {
             "implementation"(project(":modules:platform"))
             "implementation"(project(":modules:core"))
 
+            "implementation"(rootProject.libs.kolor)
             "implementation"(rootProject.libs.stateful)
             "implementation"(rootProject.libs.textile)
         }
     }
 
     pluginManager.withPlugin(rootProject.libs.plugins.kotlin.jvm.get().pluginId) {
+        applyNonKmpDependencies()
+    }
+
+    pluginManager.withPlugin(rootProject.libs.plugins.kotlin.js.get().pluginId) {
+        applyNonKmpDependencies()
+    }
+
+    pluginManager.withPlugin(rootProject.libs.plugins.kotlin.android.get().pluginId) {
         applyNonKmpDependencies()
     }
 

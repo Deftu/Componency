@@ -1,7 +1,7 @@
 package dev.deftu.componency.platform.rendering
 
-import dev.deftu.componency.color.Color
 import dev.deftu.componency.font.Font
+import dev.deftu.kolor.Color
 
 public interface TextRenderer {
 

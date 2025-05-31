@@ -8,8 +8,14 @@ public interface Clock {
 
     public fun nowMillis(): Long
 
+    public fun nowNanos(): Long
+
 }
 
 public expect object DefaultClock : Clock {
+
     override fun nowMillis(): Long
+
+    override fun nowNanos(): Long
+
 }

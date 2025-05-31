@@ -31,3 +31,4 @@ kotlin-js-store
 **/run
 .DS_Store
 Thumbs.db
+local.properties

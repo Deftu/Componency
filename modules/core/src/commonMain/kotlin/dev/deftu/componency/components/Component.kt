@@ -8,6 +8,7 @@ import dev.deftu.componency.dsl.px
 import dev.deftu.componency.effects.Effect
 import dev.deftu.componency.exceptions.EnginePresentException
 import dev.deftu.componency.exceptions.InvalidHierarchyException
+import dev.deftu.componency.font.Font
 import dev.deftu.componency.input.Key
 import dev.deftu.componency.input.MouseButton
 import dev.deftu.componency.platform.Platform
@@ -96,6 +97,8 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
 
     override var isRoot: Boolean = false
     private var systemTime = -1L
+
+    internal var lastRenderTime = 0.0
     private var debugger: Debugger? = null
 
     private val children = mutableListOf<Component<*, *>>()
@@ -182,9 +185,15 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
         properties.recalculate()
     } as T
 
-    public fun enableDebugger(): T = apply {
+    @JvmOverloads
+    public fun enableDebugger(
+        font: Font? = null,
+        fontSize: Float = 16f
+    ): T = apply {
         if (this.isRoot) {
             this.debugger?.isEnabled = true
+            this.debugger?.font = font
+            this.debugger?.fontSize = fontSize
         } else {
             throw IllegalStateException("Debugger can only be enabled on root components")
         }
@@ -646,6 +655,7 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
      * @author Deftu
      */
     public fun handleRender() {
+
         // Tell our platform that we're starting a new frame
         if (isRoot) {
             platform!!.renderer.startFrame()
@@ -656,6 +666,8 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
             initialize()
             initialized = true
         }
+
+        val startTime = clock.nowNanos()
 
         // Begin our render operations!
         preRender()
@@ -670,6 +682,8 @@ public abstract class Component<T : Component<T, C>, C : ComponentProperties<T, 
         postRender()
         debugger?.render() // Render after everything else to ensure that it doesn't interfere with the rendering process
         effects.postRender()
+
+        this.lastRenderTime = (clock.nowNanos() - startTime) / 1_000_000.0
 
         // Tell our engine that we're ending the frame
         if (isRoot) {

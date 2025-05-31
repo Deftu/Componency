@@ -1,6 +1,5 @@
 package dev.deftu.componency.properties.impl
 
-import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.easings.Easing
 import dev.deftu.componency.properties.*
@@ -8,6 +7,9 @@ import dev.deftu.componency.stroke.Stroke
 import dev.deftu.componency.utils.interpolateColor
 import dev.deftu.componency.utils.interpolateFloat
 import dev.deftu.componency.utils.interpolateStroke
+import dev.deftu.kolor.Color
+import dev.deftu.kolor.NamedColors
+import dev.deftu.kolor.StaticColor
 import kotlin.math.max
 
 public abstract class AnimatingProperty<T, P : Property<T>>(
@@ -124,7 +126,7 @@ public class AnimatingColorProperty(
     to: ColorProperty,
 ) : ColorProperty, AnimatingProperty<Color, ColorProperty>(easing, totalFrames, from, to) {
 
-    override var cachedValue: Color = Color.TRANSPARENT
+    override var cachedValue: Color = StaticColor(0, 0, 0, 0)
     override var needsRecalculate: Boolean = true
 
     override fun calculateColor(component: Component<*, *>): Color {

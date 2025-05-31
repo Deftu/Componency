@@ -24,8 +24,6 @@ public interface Platform {
 
     public val renderer: Renderer
 
-    // Optional
-
     public val fontLoader: FontLoader
 
     public val imageLoader: ImageLoader

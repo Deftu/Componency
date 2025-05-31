@@ -1,6 +1,5 @@
 package dev.deftu.componency.components
 
-import dev.deftu.componency.color.Color
 import dev.deftu.componency.dsl.asProperty
 import dev.deftu.componency.dsl.deg
 import dev.deftu.componency.dsl.px
@@ -10,10 +9,10 @@ import dev.deftu.componency.properties.*
 import dev.deftu.componency.properties.impl.*
 import dev.deftu.componency.stroke.Stroke
 import dev.deftu.componency.time.AnimationTime
+import dev.deftu.kolor.Color
+import dev.deftu.kolor.NamedColors
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KMutableProperty0
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty0
 
 public open class ComponentProperties<T : Component<T, C>, C : ComponentProperties<T, C>>(
     public val component: Component<T, C>
@@ -45,7 +44,7 @@ public open class ComponentProperties<T : Component<T, C>, C : ComponentProperti
 
     public var height: HeightProperty = 0.px
 
-    public var fill: ColorProperty = Color.WHITE.asProperty
+    public var fill: ColorProperty = NamedColors.WHITE.asProperty
 
     public var stroke: StrokeProperty = Stroke.NONE.asProperty
 

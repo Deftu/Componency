@@ -2,7 +2,6 @@
 
 package dev.deftu.componency.lwjgl3
 
-import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Nav
 import dev.deftu.componency.components.events.KeyboardModifiers
 import dev.deftu.componency.components.impl.*
@@ -12,18 +11,17 @@ import dev.deftu.componency.easings.Easings
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.font.FontWeight
 import dev.deftu.componency.gif.GifAnimation
-import dev.deftu.componency.lwjgl3.engine.Lwjgl3Platform
+import dev.deftu.componency.lwjgl3.platform.Lwjgl3Platform
 import dev.deftu.componency.nav.NavController
 import dev.deftu.componency.platform.Platform
-import dev.deftu.componency.platform.image.JVMPlatformImage
 import dev.deftu.componency.toByteStream
+import dev.deftu.kolor.NamedColors
 import dev.deftu.textile.SimpleTextHolder
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
-import javax.imageio.ImageIO
 import kotlin.io.path.Path
 
 object Main {
@@ -64,7 +62,7 @@ object Main {
             Gif("gif1") {
                 size(50.percent, 50.percent)
                 position(centered, 10.px)
-                fill = Color.WHITE.asProperty
+                fill = NamedColors.WHITE.asProperty
                 animation = gif1
 
                 onPointerClick {
@@ -92,7 +90,7 @@ object Main {
             Gif("gif2") {
                 size(50.percent, 50.percent)
                 position(centered, 10.px(isInverse = true))
-                fill = Color.WHITE.asProperty
+                fill = NamedColors.WHITE.asProperty
                 animation = gif2
 
                 onPointerClick {
@@ -111,13 +109,13 @@ object Main {
 
         return Frame("window") {
             root(platform)
-            debugger()
+            debugger(interFont)
             size(100.percent, 100.percent)
 
             Rectangle("button") {
-                size(100.px, 20.px)
+                size(200.px, 50.px)
                 position(centered, 10.px)
-                fill = Color.GREEN.asProperty
+                fill = NamedColors.GREEN.asProperty
 
                 onPointerClick {
                     println("Button clicked @ $x, $y")
@@ -134,8 +132,8 @@ object Main {
                     position(centered, centered)
                     font = interFont
                     text = SimpleTextHolder("Click me!")
-                    fontSize = 20.px
-                    fill = Color.BLACK.asProperty
+                    fontSize = 34.px
+                    fill = NamedColors.BLACK.asProperty
                 }
             }.focusable()
 
@@ -154,8 +152,23 @@ object Main {
         }
 
         // Preload animations
-         val gif1 = GifAnimation.decode(Path("D:\\Downloads\\test.gif").toByteStream())
-         val gif2 = GifAnimation.decode(Path("D:\\Downloads\\test2.gif").toByteStream()).apply { playbackSpeed = 5f }
+         val gif1 = run {
+             val startTime = System.currentTimeMillis()
+             val result = GifAnimation.decode(Path("D:\\Downloads\\test3.gif").toByteStream())
+             val endTime = System.currentTimeMillis()
+             val duration = endTime - startTime
+             println("gif1 decoding took $duration ms")
+             result
+         }
+
+         val gif2 = run {
+             val startTime = System.currentTimeMillis()
+             val result = GifAnimation.decode(Path("D:\\Downloads\\test4.gif").toByteStream()).apply { playbackSpeed = 5f }
+             val endTime = System.currentTimeMillis()
+             val duration = endTime - startTime
+             println("gif2 decoding took $duration ms")
+             result
+         }
 
         var windowWidth = 1280
         var windowHeight = 720
@@ -305,7 +318,7 @@ object Main {
     }
 
     private fun loadFont(platform: Platform): Font {
-        val path = "/fonts/Inter-Regular.ttf"
+        val path = "/fonts/inter_regular.ttf"
         return platform.fontLoader.loadFontEmbedded(
             "Inter",
             path = path,

@@ -1,4 +1,3 @@
-import dev.deftu.componency.color.Color;
 import dev.deftu.componency.components.Component;
 import dev.deftu.componency.components.SimpleComponentProperties;
 import dev.deftu.componency.components.impl.FrameComponent;
@@ -25,7 +24,7 @@ public class JavaExampleUI {
         properties.setY(new PixelProperty(25));
         properties.setWidth(new PixelProperty(25));
         properties.setHeight(new LinkedProperty((VectorProperty) properties.getHeight()));
-        properties.setFill(new StaticColorProperty(Color.RED));
+        properties.setFill(new StaticColorProperty(NamedColors.RED));
     }).onPointerClick(event -> {
         System.out.println("Box clicked at " + event.getX() + ", " + event.getY());
     }).attachTo(frame);
@@ -59,7 +58,7 @@ public class JavaExampleUI {
         private final RectangleComponent background = new RectangleComponent().configure(properties -> {
             properties.setWidth(new ParentRelativeProperty(100f));
             properties.setHeight(new ParentRelativeProperty(100f));
-            properties.setFill(new StaticColorProperty(Color.BLACK.withAlphaPercentage(50)));
+            properties.setFill(new StaticColorProperty(NamedColors.BLACK.withAlphaPercentage(50)));
         }).attachTo(this);
 
         private TextComponent text = new TextComponent().configure(properties -> {

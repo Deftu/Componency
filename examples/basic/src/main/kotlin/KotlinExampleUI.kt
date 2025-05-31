@@ -1,6 +1,5 @@
 @file:Suppress("FunctionName")
 
-import dev.deftu.componency.color.Color
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.components.ComponentProperties
 import dev.deftu.componency.components.impl.*
@@ -49,11 +48,11 @@ fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.Footer(
     Rectangle(name) {
         size(100.percent, 50.px)
         y = 0.px(isInverse = true)
-        fill = Color.BLACK.withAlphaPercentage(50f).asProperty
+        fill = NamedColors.BLACK.withAlphaPercentage(50f).asProperty
 
         Text("text") {
             position(centered, centered)
-            fill = Color.WHITE.asProperty
+            fill = NamedColors.WHITE.asProperty
             text = SimpleTextHolder("Hello, world!")
         }
 

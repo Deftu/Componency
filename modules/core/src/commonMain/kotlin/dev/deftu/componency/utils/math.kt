@@ -1,7 +1,8 @@
 package dev.deftu.componency.utils
 
-import dev.deftu.componency.color.Color
 import dev.deftu.componency.stroke.Stroke
+import dev.deftu.kolor.Color
+import dev.deftu.kolor.Kolor
 import kotlin.math.roundToInt
 
 public fun interpolateInt(start: Int, end: Int, progress: Float): Int {
@@ -17,7 +18,7 @@ public fun interpolateColor(start: Color, end: Color, progress: Float): Color {
     val green = interpolateInt(start.green, end.green, progress)
     val blue = interpolateInt(start.blue, end.blue, progress)
     val alpha = interpolateInt(start.alpha, end.alpha, progress)
-    return Color.rgba(red, green, blue, alpha)
+    return Kolor.rgba(red, green, blue, alpha)
 }
 
 public fun interpolateStroke(start: Stroke, end: Stroke, progress: Float): Stroke {

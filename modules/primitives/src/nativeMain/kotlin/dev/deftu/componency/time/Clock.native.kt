@@ -6,4 +6,8 @@ public actual object DefaultClock : Clock {
         return kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
     }
 
+    actual override fun nowNanos(): Long {
+        return kotlinx.datetime.Clock.System.now().toEpochMilliseconds() * 1_000_000
+    }
+
 }

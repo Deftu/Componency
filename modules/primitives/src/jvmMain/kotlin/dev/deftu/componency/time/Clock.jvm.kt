@@ -6,4 +6,8 @@ public actual object DefaultClock : Clock {
         return System.currentTimeMillis()
     }
 
+    actual override fun nowNanos(): Long {
+        return System.nanoTime()
+    }
+
 }

@@ -1,6 +1,7 @@
 package dev.deftu.componency.stroke
 
-import dev.deftu.componency.color.Color
+import dev.deftu.kolor.Color
+import dev.deftu.kolor.StaticColor
 import kotlin.jvm.JvmField
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
@@ -14,11 +15,11 @@ public data class Stroke @JvmOverloads constructor(
     public companion object {
 
         @JvmField
-        public val NONE: Stroke = Stroke(Color.TRANSPARENT, 0f)
+        public val NONE: Stroke = Stroke(StaticColor(0, 0, 0, 0), 0f)
 
         @JvmStatic
         public fun isNone(stroke: Stroke): Boolean {
-            return stroke == NONE || (stroke.color == Color.TRANSPARENT && stroke.width == 0f)
+            return stroke == NONE || (stroke.color == StaticColor(0, 0, 0, 0) && stroke.width == 0f)
         }
 
     }

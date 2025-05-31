@@ -2,6 +2,7 @@ package dev.deftu.componency.dsl
 
 import dev.deftu.componency.components.Component
 import dev.deftu.componency.components.ComponentProperties
+import dev.deftu.componency.font.Font
 import dev.deftu.componency.platform.Platform
 import dev.deftu.componency.properties.*
 
@@ -9,8 +10,11 @@ public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.root(platform:
     this.component.makeRoot(platform)
 }
 
-public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.debugger(): C = apply {
-    this.component.enableDebugger()
+public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.debugger(
+    font: Font? = null,
+    fontSize: Float = 16f,
+): C = apply {
+    this.component.enableDebugger(font, fontSize)
 }
 
 public fun <T : Component<T, C>, C : ComponentProperties<T, C>> C.position(x: XProperty, y: YProperty): C = apply {

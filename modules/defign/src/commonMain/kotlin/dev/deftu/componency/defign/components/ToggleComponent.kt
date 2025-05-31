@@ -74,8 +74,8 @@ public open class ToggleComponent() : Component<ToggleComponent, ToggleComponent
 
     init {
         focusable()
-        onPointerClick { event ->
-            if (event.button != MouseButton.LEFT) {
+        onPointerClick {
+            if (button != MouseButton.LEFT) {
                 return@onPointerClick
             }
 

@@ -12,7 +12,7 @@ import dev.deftu.componency.components.traits.focusable
 import dev.deftu.componency.dsl.*
 import dev.deftu.componency.font.Font
 import dev.deftu.componency.font.FontWeight
-import dev.deftu.componency.lwjgl3.engine.Lwjgl3Platform
+import dev.deftu.componency.lwjgl3.platform.Lwjgl3Platform
 import dev.deftu.componency.platform.Platform
 import dev.deftu.textile.SimpleTextHolder
 import org.lwjgl.glfw.GLFW

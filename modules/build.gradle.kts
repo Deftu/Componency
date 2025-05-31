@@ -62,44 +62,36 @@ subprojects {
         iosSimulatorArm64() // iOS simulator for Apple Silicon
 
         sourceSets {
-            val commonMain by getting {
-                dependencies {
-                    if (project.name != "primitives" && project.name != "platform") {
-                        if (project.name != "core") {
-                            implementation(project(":modules:core"))
-                        }
-
-                        implementation(project(":modules:primitives"))
-                        implementation(project(":modules:platform"))
+            commonMain.dependencies {
+                if (project.name != "primitives" && project.name != "platform") {
+                    if (project.name != "core") {
+                        implementation(project(":modules:core"))
                     }
 
-                    implementation(rootProject.libs.stateful)
-                    implementation(rootProject.libs.textile)
+                    implementation(project(":modules:primitives"))
+                    implementation(project(":modules:platform"))
                 }
+
+                implementation(rootProject.libs.kotlinx.datetime)
+                implementation(rootProject.libs.kolor)
+                implementation(rootProject.libs.stateful)
+                implementation(rootProject.libs.textile)
             }
 
-            val commonTest by getting {
-                dependencies {
-                    implementation(kotlin("test"))
-                }
+            commonTest.dependencies {
+                implementation(kotlin("test"))
             }
 
-            val jvmMain by getting {
-                dependencies {
-                    implementation(kotlin("reflect"))
-                }
+            jvmMain.dependencies {
+                implementation(kotlin("reflect"))
             }
 
-            val jvmTest by getting {
-                dependencies {
-                    implementation(kotlin("test-junit"))
-                }
+            jvmTest.dependencies {
+                implementation(kotlin("test-junit"))
             }
 
-            val jsTest by getting {
-                dependencies {
-                    implementation(kotlin("test-js"))
-                }
+            jsTest.dependencies {
+                implementation(kotlin("test-js"))
             }
         }
     }

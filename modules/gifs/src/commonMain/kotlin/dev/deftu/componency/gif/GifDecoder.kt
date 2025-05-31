@@ -249,4 +249,5 @@ public class GifDecoder(private val byteStream: ByteStream) {
 
         return output
     }
+
 }
