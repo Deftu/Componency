@@ -7,17 +7,23 @@ kolor = "0.2.0"
 stateful = "0.5.0"
 textile = "0.16.0"
 
-kotlinxCoroutinesCore = "1.8.1"
+kotlinx-coroutines-core = "1.8.1"
+kotlinx-atomicfu = "0.26.0"
 kotlinxDatetime = "0.6.2"
 
 skiko = "0.8.9"
 
 [libraries]
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "android" }
+
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
+kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "kotlinx-atomicfu" }
+
 kolor = { group = "dev.deftu", name = "kolor", version.ref = "kolor" }
 stateful = { group = "dev.deftu", name = "stateful", version.ref = "stateful" }
 textile = { group = "dev.deftu", name = "textile", version.ref = "textile" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 skiko-core = { group = "org.jetbrains.skiko", name = "skiko", version.ref = "skiko" }
 skiko-awt = { group = "org.jetbrains.skiko", name = "skiko-awt-runtime", version.ref = "skiko" }
 skiko-js = { group = "org.jetbrains.skiko", name = "skiko-js-wasm-runtime", version.ref = "skiko" }

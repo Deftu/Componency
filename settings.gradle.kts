@@ -21,6 +21,8 @@ pluginManagement {
         maven("https://s01.oss.sonatype.org/content/groups/public/")
         mavenLocal()
     }
+
+    includeBuild("build-logic")
 }
 
 dependencyResolutionManagement {
@@ -37,124 +39,100 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version ("0.8.+")
 }
 
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 val projectName: String = extra["project.name"]?.toString()
     ?: throw MissingPropertyException("project.name has not been set.")
 rootProject.name = projectName
 
-// Core modules
-":modules".let { baseProjectPath ->
-    val basePath = baseProjectPath.removePrefix(":")
-    file(basePath).takeIf { !it.exists() }?.mkdirs()
-    include(baseProjectPath)
-    logger.lifecycle("Including core modules at $basePath")
+// Base modules
+setOf(
+    "common",
+    "layout",
+    "canvas",
+    "tree",
+    "input",
+    "animation",
+    "a11y",
+    "platform",
+    "navigation",
+    "media",
+    "assets",
+).forEach { moduleName ->
+    val modulePath = ":$moduleName"
+    include(modulePath)
+    file(moduleName).takeIf { !it.exists() }?.mkdirs()
+}
 
+":text".let { projectPath ->
     setOf(
-        // Platform
-        "primitives", "platform",
-
-        // Core
-        "core",
-
-        // Utilities
-        "navigation", "gifs", "videos",
-        // "text-input", // TODO: Re-enable when text input is ready
-
-        // Design
-        // "defign", // TODO: Re-enable when design system is ready
-    ).map { "$baseProjectPath:$it" }.forEach { moduleProjectPath ->
-        val moduleName = moduleProjectPath.removePrefix(":").replace(":", "/")
-        file(moduleName).takeIf { !it.exists() }?.mkdirs()
-        include(moduleProjectPath)
-        logger.lifecycle("Including core module project '$moduleName' at ${project(moduleProjectPath).projectDir}")
+        "common",
+        "cache",
+        "shaper",
+        "shaper-harfbuzz",
+        "shaper-platform",
+    ).forEach { moduleName ->
+        val modulePath = "$projectPath-$moduleName"
+        include(modulePath)
+        file(modulePath.removePrefix(":")).takeIf { !it.exists() }?.mkdirs()
     }
 }
 
-// Examples
-":examples".let { baseProjectPath ->
-    val basePath = baseProjectPath.removePrefix(":")
-    file(basePath).takeIf { !it.exists() }?.mkdirs()
-    logger.lifecycle("Including example projects at $basePath")
-
-    include(baseProjectPath)
-
+":renderer".let { projectPath ->
     setOf(
-        // Basic example
+        "api",
+        "skia",
+        "opengl",
+        "nanovg",
+        "vulkan",
+        "webcanvas",
+        "webgpu",
+    ).forEach { moduleName ->
+        val modulePath = "$projectPath-$moduleName"
+        include(modulePath)
+        file(modulePath.removePrefix(":")).takeIf { !it.exists() }?.mkdirs()
+    }
+}
+
+":platforms".let { projectPath ->
+    setOf(
+        "android",
+        "ios",
+        "desktop",
+        "swing",
+        "web",
+        // TODO: "minecraft"
+    ).forEach { moduleName ->
+        val modulePath = "$projectPath-$moduleName"
+        include(modulePath)
+        file(modulePath.removePrefix(":")).takeIf { !it.exists() }?.mkdirs()
+    }
+}
+
+":devtools".let { projectPath ->
+    setOf(
+        "inspector",
+        "profiler",
+        "snapshot",
+        "conformance",
+    ).forEach { moduleName ->
+        val modulePath = "$projectPath-$moduleName"
+        include(modulePath)
+        file(modulePath.removePrefix(":")).takeIf { !it.exists() }?.mkdirs()
+    }
+}
+
+":examples".let { projectPath ->
+    setOf(
         "basic",
-
-        // LWJGL3 example
-        "lwjgl3",
-    ).map { "$baseProjectPath:$it" }.forEach { exampleProjectPath ->
-        val exampleName = exampleProjectPath.removePrefix(":").replace(":", "/")
-        file(exampleName).takeIf { !it.exists() }?.mkdirs()
-        include(exampleProjectPath)
-        logger.lifecycle("Including example project '$exampleName' at ${project(exampleProjectPath).projectDir}")
+        "glfw-opengl",
+        "glfw-nanovg",
+        "web-canvas",
+        "android",
+        // TODO: "minecraft"
+    ).forEach { moduleName ->
+        val modulePath = "$projectPath-$moduleName"
+        include(modulePath)
+        file(modulePath.removePrefix(":")).takeIf { !it.exists() }?.mkdirs()
     }
 }
-
-// Platforms
-":platforms".let { baseProjectPath ->
-    val basePath = baseProjectPath.removePrefix(":")
-    file(basePath).takeIf { !it.exists() }?.mkdirs()
-    logger.lifecycle("Including platform projects at $basePath")
-
-    include(baseProjectPath)
-
-    setOf(
-        "swing", "android", "ios",
-        "desktop", "lwjgl3-nanovg", "skiko",
-        "web-canvas", "web-webgpu", "web-compat",
-    ).map { "$baseProjectPath:$it" }.forEach { platformProjectPath ->
-        val platformName = platformProjectPath.removePrefix(":").replace(":", "/")
-        file(platformName).takeIf { !it.exists() }?.mkdirs()
-        include(platformProjectPath)
-        logger.lifecycle("Including platform project '$platformName' at ${project(platformProjectPath).projectDir}")
-    }
-}
-
-// Minecraft platform
-//include(":minecraft")
-//project(":minecraft").buildFileName = "root.gradle.kts"
-//listOf(
-//    "1.8.9-fabric",
-//    "1.8.9-forge",
-//
-//    "1.12.2-fabric",
-//    "1.12.2-forge",
-//
-//    "1.16.5-forge",
-//    "1.16.5-fabric",
-//
-//    "1.17.1-forge",
-//    "1.17.1-fabric",
-//
-//    "1.18.2-forge",
-//    "1.18.2-fabric",
-//
-//    "1.19.2-forge",
-//    "1.19.2-fabric",
-//
-//    "1.19.4-forge",
-//    "1.19.4-fabric",
-//
-//    "1.20.1-forge",
-//    "1.20.1-fabric",
-//
-//    "1.20.4-forge",
-//    "1.20.4-neoforge",
-//    "1.20.4-fabric",
-//
-//    "1.20.6-neoforge",
-//    "1.20.6-fabric",
-//
-//    "1.21.1-neoforge",
-//    "1.21.1-fabric",
-//
-//    "1.21.4-neoforge",
-//    "1.21.4-fabric"
-//).forEach { version ->
-//    include(":minecraft:$version")
-//    project(":minecraft:$version").apply {
-//        projectDir = file("minecraft/versions/$version")
-//        buildFileName = "../../build.gradle.kts"
-//    }
-//}
