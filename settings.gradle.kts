@@ -61,7 +61,7 @@ setOf(
 ).forEach { moduleName ->
     val modulePath = ":$moduleName"
     include(modulePath)
-    file(moduleName).takeIf { !it.exists() }?.mkdirs()
+    file(moduleName).prepare()
 }
 
 ":text".let { projectPath ->
@@ -74,7 +74,7 @@ setOf(
     ).forEach { moduleName ->
         val modulePath = "$projectPath-$moduleName"
         include(modulePath)
-        file(modulePath.removePrefix(":")).takeIf { !it.exists() }?.mkdirs()
+        file(modulePath.removePrefix(":")).prepare()
     }
 }
 
@@ -90,7 +90,7 @@ setOf(
     ).forEach { moduleName ->
         val modulePath = "$projectPath-$moduleName"
         include(modulePath)
-        file(modulePath.removePrefix(":")).takeIf { !it.exists() }?.mkdirs()
+        file(modulePath.removePrefix(":")).prepare()
     }
 }
 
@@ -105,7 +105,7 @@ setOf(
     ).forEach { moduleName ->
         val modulePath = "$projectPath-$moduleName"
         include(modulePath)
-        file(modulePath.removePrefix(":")).takeIf { !it.exists() }?.mkdirs()
+        file(modulePath.removePrefix(":")).prepare()
     }
 }
 
@@ -118,7 +118,7 @@ setOf(
     ).forEach { moduleName ->
         val modulePath = "$projectPath-$moduleName"
         include(modulePath)
-        file(modulePath.removePrefix(":")).takeIf { !it.exists() }?.mkdirs()
+        file(modulePath.removePrefix(":")).prepare()
     }
 }
 
@@ -133,6 +133,18 @@ setOf(
     ).forEach { moduleName ->
         val modulePath = "$projectPath-$moduleName"
         include(modulePath)
-        file(modulePath.removePrefix(":")).takeIf { !it.exists() }?.mkdirs()
+        file(modulePath.removePrefix(":")).prepare()
+    }
+}
+
+fun File?.prepare() {
+    this ?: return
+    if (!exists()) {
+        mkdirs()
+    }
+
+    val gitkeep = resolve(".gitkeep")
+    if (!gitkeep.exists()) {
+        gitkeep.createNewFile()
     }
 }
